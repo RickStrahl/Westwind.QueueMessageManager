@@ -108,6 +108,36 @@ namespace Westwind.MessageQueueing.Tests
             Assert.IsTrue(manager.Save(), manager.ErrorMessage);
         }
 
+        [TestMethod]
+        public void SubmitRequestTest()
+        {
+            var manager = new QueueMessageManager();
+
+            string imageId = "10";
+           
+            // Create a message object
+            // item contains many properties for pushing
+            // values back and forth as well as a  few message fields
+            var item = manager.NewEntity();
+            item.Action = "PRINTIMAGE";
+            item.TextInput = imageId;
+            item.Message = "Print Image operation started at " + DateTime.Now.ToString();
+            item.PercentComplete = 10;
+
+            // *** you can also serialize objects directly into the Xml property
+            // manager.Serialization.SerializeToXml(SomeObjectToSerialize);
+
+            // add an arbitrary custom properties - serialized to Xml
+            manager.Properties.Add("Time", DateTime.Now);
+            manager.Properties.Add("User", "ricks");
+
+            // Set the message status and timestamps as submitted             
+            manager.SubmitRequest(item);
+
+            // actually save the queue message to disk
+            Assert.IsTrue(manager.Save(), manager.ErrorMessage);
+        }
+
 
         [TestMethod]
         public void SubmitRequestWithPropertiesTest()
@@ -136,6 +166,8 @@ namespace Westwind.MessageQueueing.Tests
                 return;
             }
 
+            
+
             string reqId = item.Id;
 
             // clear out item
@@ -147,8 +179,8 @@ namespace Westwind.MessageQueueing.Tests
             Assert.IsNotNull(item, manager.ErrorMessage);
 
             item.Message = "Updated @ " + DateTime.Now.ToString("t");
-            item.PercentComplete = 10;
-
+            item.PercentComplete = 10;            
+            
             Assert.IsTrue(manager.Save(), manager.ErrorMessage);            
         }
 
