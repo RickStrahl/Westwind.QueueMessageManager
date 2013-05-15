@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Westwind.QueueMessageManager.QueueMessageItem">
+    <Position X="5.5" Y="0.5" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AQACCAAEAAACAAIEAAAQACAAAAIAAAABAQAAKgQAEAQ=</HashCode>
+      <FileName>QueueMessageItem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Westwind.QueueMessageManager.QueueController">
+    <Position X="10.5" Y="0.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAEgAQAAECAEABBAAAAaAAAAAAgABQAgQCAAIIgIAAA=</HashCode>
+      <FileName>QueueController.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Westwind.QueueMessageManager.QueueMessageManager">
+    <Position X="1" Y="0.5" Width="3" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <AssociationLine Name="Entity" Type="Westwind.QueueMessageManager.QueueMessageItem">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.787" Y="0.06" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>cQBAjqIAICASABAAEAAAAIAAAAQCEAAEoCVAAAACAIA=</HashCode>
+      <FileName>QueueMessageManager.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Entity" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Font Name="Tahoma" Size="8.25" />
+</ClassDiagram>

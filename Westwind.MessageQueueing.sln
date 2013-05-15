@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{677C6049-14C0-497C-89FA-5207CFC4DAE6}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Westwind.MessageQueueing", "Westwind.MessageQueueing\Westwind.MessageQueueing.csproj", "{3AEBD7C2-CC6E-416B-A45B-B7A04C173D0F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Westwind.MessageQueueing.Tests", "Westwind.MessageQueueing.Tests\Westwind.MessageQueueing.Tests.csproj", "{5017118B-A8EE-471F-94F4-232C24BDB4CE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Westwind.MessageQueueing.Service", "Westwind.MessageQueueing.Service\Westwind.MessageQueueing.Service.csproj", "{949BC4ED-7DA7-4C68-BCFB-724C1F8BDD7B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3AEBD7C2-CC6E-416B-A45B-B7A04C173D0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AEBD7C2-CC6E-416B-A45B-B7A04C173D0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AEBD7C2-CC6E-416B-A45B-B7A04C173D0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AEBD7C2-CC6E-416B-A45B-B7A04C173D0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5017118B-A8EE-471F-94F4-232C24BDB4CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5017118B-A8EE-471F-94F4-232C24BDB4CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5017118B-A8EE-471F-94F4-232C24BDB4CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5017118B-A8EE-471F-94F4-232C24BDB4CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{949BC4ED-7DA7-4C68-BCFB-724C1F8BDD7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{949BC4ED-7DA7-4C68-BCFB-724C1F8BDD7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{949BC4ED-7DA7-4C68-BCFB-724C1F8BDD7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{949BC4ED-7DA7-4C68-BCFB-724C1F8BDD7B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
