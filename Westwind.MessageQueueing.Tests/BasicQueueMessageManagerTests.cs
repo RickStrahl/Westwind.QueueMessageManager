@@ -13,12 +13,6 @@ namespace Westwind.MessageQueueing.Tests
     [TestClass]
     public class BasicQueueMessageManagerTests
     {
-        public BasicQueueMessageManagerTests()
-        {            
-        }
-
- 
-
         /// <summary>
         /// Checks to see whether connection strings are set
         /// on the configuration
@@ -96,17 +90,7 @@ namespace Westwind.MessageQueueing.Tests
             }          
         }
 
-        [TestMethod]
-        public void SubmitRequestTest()
-        {
-            var manager = new QueueMessageManager();
-            manager.SubmitRequest(messageText: "New Entry with Properties");
 
-            // add a custom property
-            manager.Properties.Add("Time", DateTime.Now);
-
-            Assert.IsTrue(manager.Save(), manager.ErrorMessage);
-        }
 
         [TestMethod]
         public void SubmitRequestTest()

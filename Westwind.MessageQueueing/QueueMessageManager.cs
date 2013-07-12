@@ -230,8 +230,27 @@ namespace Westwind.MessageQueueing
             return result;
         }
 
+        /// <summary>
+        ///  Determines if anqueue has been completed
+        /// successfully or failed.
+        /// 
+        /// Note this method returns true if the request
+        /// has completed or cancelled/failed. It just
+        /// checks completion.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public bool IsCompleted(string id = null)
+        {
+            if (string.IsNullOrEmpty(id))
+                id = Entity.Id;
 
+            object res = Db.ExecuteScalar("select id from QueueMessageItems where id=@0 and completed is not null",id);
+            if (res == null)
+                return false;
 
+            return true;
+        }
 
         /// <summary>
         /// Sets the message properties for starting a new message request operation.
@@ -771,4 +790,11 @@ GO
     }
 
 
+    public enum QueueMessageStatus
+    {
+        None,
+        Submitted,
+        Completed,
+        Canceled      
+    }
 }
