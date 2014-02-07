@@ -13,6 +13,8 @@ namespace Westwind.MessageQueueing.Tests
     [TestClass]
     public class BasicQueueMessageManagerTests
     {
+        public const string CONNECTION_STRING = "TestContext";
+
         /// <summary>
         /// Checks to see whether connection strings are set
         /// on the configuration
@@ -21,17 +23,17 @@ namespace Westwind.MessageQueueing.Tests
         public void ConstructorOverrideTest()
         {
 
-            var manager = new QueueMessageManager("TestContext");
+            var manager = new QueueMessageManager(CONNECTION_STRING);
             Console.WriteLine(manager.ConnectionString);
-            Assert.IsTrue(manager.ConnectionString == "TestContext");
+            Assert.IsTrue(manager.ConnectionString == CONNECTION_STRING);
 
             var config = new QueueMessageManagerConfiguration()
             {                 
-                ConnectionString = "TestContext2"
+                ConnectionString = "MyApplicationConnectionString"
             };
             manager = new QueueMessageManager(config);
             Console.WriteLine(manager.ConnectionString);
-            Assert.IsTrue(manager.ConnectionString == "TestContext2");
+            Assert.IsTrue(manager.ConnectionString == "MyApplicationConnectionString");
         }
 
         [TestMethod]
@@ -378,6 +380,5 @@ namespace Westwind.MessageQueueing.Tests
             var manager = new QueueMessageManager();            
             Assert.IsTrue(manager.CreateDatabaseTable(),manager.ErrorMessage);            
         }
-
     }
 }

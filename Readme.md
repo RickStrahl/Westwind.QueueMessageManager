@@ -25,7 +25,7 @@ A typical process goes like this:
   from the Queue table
 * Client picks out or deserializes completion data from queue record
 
-How it works
+##How it works
 ------------
 The client application typically interacts with the QueueMessageManager class.
 This class provides methods for creating new queue entries, submitting them
@@ -116,4 +116,55 @@ to notify of new incoming messages to process. The customized code can then exam
 the QueueMessageItem for its properties to determine how to process the message.
 Typically an Action can be set on the QueueMessageItem to route processing.
 
+##Configuration
+The QueueMessageManager works with Sql Server to handle queue messaging. By
+default the QueueMessageManager uses configuration settings that are stored in the
+configuration file where you specify relevant settings:
+
+```xml
+<QueueManagerConfiguration>
+	<add key="ConnectionString" value="ApplicationConfigurationString" />
+	<add key="WaitInterval" value="1000" />
+	<add key="QueueName" value="DefaultQueue" />
+	<add key="ControllerThreads" value="2" />
+</QueueManagerConfiguration>
+ ```
+
+ By default settings are read out of the config file, but you can also 
+ explicitly set these values by passing a 
+
+ ```c#
+var config = new QueueMessageManagerConfiguration()
+{                 
+    ConnectionString = "MyApplicationConnectionString",
+    ControllerThreads = 10
+};
+manager = new QueueMessageManager(config);
+Console.WriteLine(manager.ConnectionString);
+Assert.IsTrue(manager.ConnectionString == "MyApplicationConnectionString");
+```
+
+Here's what values are available on the configuration:
+
+*ConnectionString*
+The only required value for these settings is the connection string that 
+points at the SQL Server instance to hold the data. This value can be
+a raw SQL connection string, or - as used above - a ConnectionString
+entry in the config <connectionStrings> section.
+
+*QueueName*
+Optional name of the queue that is to be checked for requests to be
+processed. The default name is an empty string which checks all queues.
+Note that you can have multiple queues and each queue operation can 
+be performed on a specific queue.
+
+*WaitInterval*
+The interval in milliseconds to wait between checking for new queue items
+if no items are found. If the queue is not empty, a check for the next
+item is immediately performed following de-queing of the previous item.
+
+*ControllerThreads*
+The number of threads that the controller uses to process requests.
+The number of threads determines how many concurrent queue monitors
+ping the queue for new requests. The default is 2.
 

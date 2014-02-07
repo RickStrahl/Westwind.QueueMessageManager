@@ -513,6 +513,30 @@ namespace Westwind.MessageQueueing
 
         }
 
+        /// <summary>
+        /// Returns all messages in a queue that are cancelled
+        /// </summary>
+        /// <param name="queueName"></param>
+        /// <param name="maxCount"></param>
+        /// <returns></returns>
+        public IEnumerable<QueueMessageItem> GetCancelledMessages(string queueName = null, int maxCount = 0)
+        {
+            if (queueName == null)
+                queueName = string.Empty;
+            if (maxCount == 0)
+                maxCount = INT_maxCount;
+            
+            IEnumerable<QueueMessageItem> items;
+            items = Db.Query<QueueMessageItem>("select TOP " + maxCount + " * from QueueMessageItems " +
+                    "WHERE type=@0 AND iscancelled = 1 " +
+                    "ORDER BY started DESC", queueName);
+            
+            if (items == null)
+                SetError(Db.ErrorMessage);
+
+            return items;
+        }
+
 
         /// <summary>
         /// Generic routine to load up the data access layer.
@@ -527,7 +551,6 @@ namespace Westwind.MessageQueueing
             var db = new SqlDataAccess(connectionString);
             return db;
         }
-
 
 
         /// <summary>
