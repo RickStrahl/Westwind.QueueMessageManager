@@ -258,7 +258,6 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void CompleteMessageTest()
         {
-
             this.SubmitRequestWithPropertiesTest();
 
             var manager = new QueueMessageManager();
@@ -358,7 +357,6 @@ namespace Westwind.MessageQueueing.Tests
                 Console.WriteLine(item.Submitted + " - " + item.Id + " - " + item.Message);
             }
         }
-
 
         [TestMethod]
         public void ClearTimedoutMessages()

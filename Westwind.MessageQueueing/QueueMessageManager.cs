@@ -136,13 +136,12 @@ namespace Westwind.MessageQueueing
         {
             if (queueName == null)
                 queueName = DefaultQueue;
-
-            var db = LoadDal();
-            var enumItems = db.ExecuteStoredProcedureReader<QueueMessageItem>("qmm_GetNextQueueMessageItem",
-                                                                              db.CreateParameter("@type", queueName));
+            
+            var enumItems = Db.ExecuteStoredProcedureReader<QueueMessageItem>("qmm_GetNextQueueMessageItem",
+                                                                              Db.CreateParameter("@type", queueName));
             if (enumItems == null)
             {
-                SetError(db.ErrorMessage);
+                SetError(Db.ErrorMessage);
                 return null;
             }
 

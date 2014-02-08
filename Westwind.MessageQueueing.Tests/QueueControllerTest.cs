@@ -25,7 +25,7 @@ namespace Westwind.MessageQueueing.Tests
 
                 // sets appropriate settings for submit on item
                 manager.SubmitRequest(item);
-                
+
                 // item has to be saved
                 Assert.IsTrue(manager.Save(), manager.ErrorMessage);
                 Console.WriteLine("added " + manager.Entity.Id);
@@ -39,8 +39,8 @@ namespace Westwind.MessageQueueing.Tests
             {
                 ThreadCount = 2
             };
-            
-            
+
+
             // ExecuteStart Event is where your processing logic goes
             controller.ExecuteStart += controller_ExecuteStart;
 
@@ -50,7 +50,7 @@ namespace Westwind.MessageQueueing.Tests
 
             // actually start the queue
             controller.StartProcessingAsync();
-            
+
             // For test we have to keep the threads alive 
             // to allow the 3 requests to process
             Thread.Sleep(2000);
@@ -58,7 +58,7 @@ namespace Westwind.MessageQueueing.Tests
             // shut down
             controller.StopProcessing();
 
-            Thread.Sleep(1000);
+            Thread.Sleep(200);
 
             Console.WriteLine("Stopping... Async Manager Processing");
             Assert.IsTrue(true);
@@ -84,8 +84,8 @@ namespace Westwind.MessageQueueing.Tests
             else if (item.Action == "RESIZETHUMBNAIL")
                 //ResizeThumbnail(manager);
 
-            // just for kicks
-            Interlocked.Increment(ref RequestCount);
+                // just for kicks
+                Interlocked.Increment(ref RequestCount);
 
             // third request should throw exception, trigger ExecuteFailed            
             if (RequestCount > 2)
@@ -96,18 +96,18 @@ namespace Westwind.MessageQueueing.Tests
             }
 
             // Complete request 
-            manager.CompleteRequest(messageText: "Completed request " + DateTime.Now, 
+            manager.CompleteRequest(messageText: "Completed request " + DateTime.Now,
                                     autoSave: true);
 
             Console.WriteLine(manager.Entity.Id + " - Item Completed");
-        }        
+        }
         private void controller_ExecuteComplete(QueueMessageManager manager)
         {
             // grab the active queue item
             var item = manager.Entity;
 
             // Log or otherwise complete request
-        }                
+        }
         private void controller_ExecuteFailed(QueueMessageManager manager, Exception ex)
         {
             Console.WriteLine("Failed (on purpose): " + manager.Entity.Id + " - " + ex.Message);

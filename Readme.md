@@ -140,6 +140,14 @@ then pings the queue table for new messages. When new messages arrive it
 fires ExecuteStart, ExecuteComplete and ExecuteFailed events that you
 can hook your application logic to.
 
+The QueueController can be plugged into any kind of application as long
+as the application has a lifetime to keep the controller alive. This can
+be as part of an ASP.NET application (loaded from Application_Start then
+runnning in the background) or from a service that loads the component on
+startup. Note that you're responsible for keeping the Controller instance
+alive by attaching it to a global or static property that persists until the
+application is ready to terminate.
+
 Here's what this looks like:
 
 ```C#

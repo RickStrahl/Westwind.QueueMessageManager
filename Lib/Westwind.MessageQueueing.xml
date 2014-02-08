@@ -1,0 +1,696 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Westwind.MessageQueueing</name>
+    </assembly>
+    <members>
+        <member name="T:Westwind.MessageQueueing.QueueMessageManager">
+            <summary>
+            An implementation of a SQL based multi-access Queue
+            that provides random acccess to requests so they can be retrived
+            for long running tasks where both client and server can interact
+            with each message for processing.
+            
+            Great for long running tasks or even light workflow scenarios.
+            </summary>    
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManager.Load(System.String)">
+            <summary>
+            Loads a Queue Item
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManager.GetNextQueueMessage(System.String)">
+            <summary>
+            Retrieves the next pending Message from the Queue based on a provided type
+            </summary>
+            <param name="queueName"></param>
+            <returns>item or null. Null can be returned when there are no items or when there is an error</returns>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManager.NewEntity(Westwind.MessageQueueing.QueueMessageItem)">
+            <summary>
+            Creates a new entity instance and properly
+            initializes the instance's values.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManager.Save(Westwind.MessageQueueing.QueueMessageItem)">
+            <summary>
+            Saves the passed entity or the attached entity
+            to the database. Call this after updating properties
+            or individual values.
+            </summary>
+            <param name="entity"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManager.IsCompleted(System.String)">
+            <summary>
+             Determines if anqueue has been completed
+            successfully or failed.
+            
+            Note this method returns true if the request
+            has completed or cancelled/failed. It just
+            checks completion.
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManager.SubmitRequest(Westwind.MessageQueueing.QueueMessageItem,System.String,System.Boolean)">
+            <summary>
+            Sets the message properties for starting a new message request operation.
+            Note the record is not written to the database use Save explicitly
+            </summary>
+            <param name="entity">An existing entity instance</param>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManager.CompleteRequest(Westwind.MessageQueueing.QueueMessageItem,System.String,System.Boolean)">
+            <summary>
+            Sets the Entity record with the required settings
+            to complete a request. Note record is not written
+            to database - Call Save explicitly.
+            </summary>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManager.CancelRequest(Westwind.MessageQueueing.QueueMessageItem,System.String,System.Boolean)">
+            <summary>
+            Sets the Entity record with the required settings
+            to complete and cancel a request. Not saved to database
+            call Save() explicitly.
+            </summary>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManager.UpdateQueueMessageStatus(Westwind.MessageQueueing.QueueMessageItem,System.String,System.String,System.Int32,System.Boolean)">
+            <summary>
+            Updates the QueueMessageStatus and or messages
+            </summary>
+            <param name="manager"></param>
+            <param name="status"></param>
+            <param name="messageText"></param>
+            <param name="percentComplete"></param>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManager.GetRecentQueueItems(System.String,System.Int32)">
+            <summary>
+            Returns a list of recent queue items
+            </summary>
+            <param name="type"></param>
+            <param name="itemCount"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManager.GetPendingQueueMessages(System.String,System.Int32)">
+            <summary>
+            Retrieves all messages that are pending, that have started
+            but not completed yet. 
+            </summary>
+            <param name="queueName">Name of the queue to return items for</param>
+            <param name="maxCount">Optional - max number of items to return</param>
+            <returns></returns>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManager.GetWaitingQueueMessageCount(System.String)">
+            <summary>
+            Returns a count of messages that are waiting
+            to be processed - this is the queue backup.
+            </summary>
+            <param name="queueName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManager.GetWaitingQueueMessages(System.String,System.Int32)">
+            <summary>
+            Returns a count of messages that are waiting
+            to be processed - this is the queue backup.
+            </summary>
+            <param name="queueName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManager.GetCompleteQueueMessages(System.String,System.Int32)">
+            <summary>
+            Result Cursor: TCompleteMessages
+            </summary>
+            <param name="maxCount"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManager.GetTimedOutQueueMessages(System.String,System.Int32)">
+            <summary>
+            Returns a list of queue items that have timed out during processing.
+            Not completed where started time is greater than the MessageTimeout.
+            </summary>
+            <param name="maxCount"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManager.GetCancelledMessages(System.String,System.Int32)">
+            <summary>
+            Returns all messages in a queue that are cancelled
+            </summary>
+            <param name="queueName"></param>
+            <param name="maxCount"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManager.LoadDal(System.String)">
+            <summary>
+            Generic routine to load up the data access layer.
+            </summary>
+            <param name="connectionString"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManager.ClearMessages(System.Nullable{System.TimeSpan})">
+            <summary>
+            Method used to clear out 'old' messages to keep database size down
+            Removes messages that have been started but not completed in the
+            specified timeout period.
+            </summary>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManager.CreateDatabaseTable">
+            <summary>
+            Creates the DatabaseTable and stored procedure for the queue. Note this routine
+            requires that a database exists already and uses the same connection string
+            that is used for the main application.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManager.GetProperty(System.String)">
+            <summary>
+            Retrieves a value from the Properties collection safely.
+            If the value doesn't exist null is returned.
+            </summary>
+            <param name="key"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManager.GetProperties(System.String,System.Object)">
+            <summary>
+            Loads the Properties dictionary with values from a Properties property of 
+            an entity object. Once loaded you can access the dictionary to read and write
+            values from it arbitrarily and use SetProperties to write the values back
+            in serialized form to the underlying property for database storage.
+            </summary>
+            <param name="stringFieldNameToLoadFrom">The name of the field to load the XML properties from.</param>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManager.SetProperties(System.String,System.Object)">
+            <summary>
+            Saves the Properties Dictionary - in serialized string form - to a specified entity field which 
+            in turn allows writing the data back to the database.
+            </summary>
+            <param name="stringFieldToSaveTo"></param>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManager.Dispose">
+            <summary>
+            Clear data access component
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.QueueMessageManager.MessageTimeout">
+            <summary>
+            Message Timeout. Messages are cleared
+            with ClearMessages()
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.QueueMessageManager.DefaultQueue">
+            <summary>
+             The name of the default queue that is accessed if
+             no queue name is specified
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.QueueMessageManager.Entity">
+            <summary>
+            Holds the actual entity data for a message
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.QueueMessageManager.Serialization">
+            <summary>
+            Serialization Helper Methods to help serialize data to Xml and back
+            easily
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.QueueMessageManager.Configuration">
+            <summary>
+            Instance of the configuration object for queuemessage manager
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.QueueMessageManager.ErrorMessage">
+            <summary>
+            Error information about the last error that occurred
+            when a method returns false
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.QueueMessageManager.Db">
+            <summary>
+            Data Access component to SQL Server database
+            Configured via configuration settings or explicit
+            QueueManagerConfiguration object passed in
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.QueueMessageManager.ConnectionString">
+            <summary>
+            Connection string used for this component
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "P:Westwind.MessageQueueing.QueueMessageManager.Properties" -->
+        <member name="T:Westwind.MessageQueueing.Properties.Resources">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.Properties.Resources.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.Properties.Resources.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.Properties.Resources.CouldntAccessQueueDatabase">
+            <summary>
+              Looks up a localized string similar to Couldn&apos;t access Queue database. Please check your connection string..
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.Properties.Resources.CouldntConnectToDatabase">
+            <summary>
+              Looks up a localized string similar to Couldn&apos;t connect to the database..
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.Properties.Resources.DeserializationFailed">
+            <summary>
+              Looks up a localized string similar to Deserialization failed: .
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.Properties.Resources.NoEntityAvailable">
+            <summary>
+              Looks up a localized string similar to No entity available..
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.Properties.Resources.NoEntityIsLoaded">
+            <summary>
+              Looks up a localized string similar to No entity is loaded..
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.Properties.Resources.NoEntityPassed">
+            <summary>
+              Looks up a localized string similar to No entity passed..
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.Properties.Resources.NoQueueMessagesPending">
+            <summary>
+              Looks up a localized string similar to No queue messages pending..
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.Properties.Resources.SerializationFailed">
+            <summary>
+              Looks up a localized string similar to Serialization failed: .
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.QueueMessageManagerConfiguration.ConnectionString">
+            <summary>
+            The connection string or connection string name
+            that is used for database access from the 
+            Queue Manager
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.QueueMessageManagerConfiguration.WaitInterval">
+            <summary>
+            Poll interval for the controller in milliseconds
+            when no requests are pending
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.QueueMessageManagerConfiguration.QueueName">
+            <summary>
+            Specifies the default queue to look for
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.QueueMessageManagerConfiguration.ControllerThreads">
+            <summary>
+            The number of threads that the Queue controller
+            uses to process incoming queue requests
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.QueueMessageManagerConfiguration.MonitorHostUrl">
+            <summary>
+            When hosting as a Service you can optionnally 
+            host the SignalR Service to feed the Monitor Web
+            interface from the service
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.QueueMessageManagerConfiguration.Current">
+            <summary>
+            Singleton instance of a Configuration Manager.
+            Can be used globally to access a single 
+            Queue Configuration.
+            </summary>
+        </member>
+        <member name="T:Westwind.MessageQueueing.QueueController">
+            <summary>
+            This class is a Server Controller that can be run by 
+            a Host process to handle processing of message requests
+            in Windows Forms/Service applications. It provides
+            a multi-threaded server process that fires events
+            when messages arrive in the queue and are completed.
+            
+            A client application can simply drop this component
+            into the app and attach to the events provdided here.
+            </summary>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueController.StartProcessing">
+            <summary>
+            Synchronous Message Processing routine - will process one message after
+            another
+            </summary>        
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueController.StopProcessing">
+            <summary>
+            Shuts down the Message Processing loop
+            </summary>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueController.StartProcessingAsync(System.Int32)">
+            <summary>
+            Starts queue processing asynchronously on the specified number of threads.
+            This is a common scenario for Windows Forms interfaces so the UI
+            stays active while the application monitors and processes the
+            queue on a separate non-ui thread
+            </summary>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueController.ExecuteSteps(Westwind.MessageQueueing.QueueMessageManager)">
+            <summary>
+            This is the 'handler' code that actually does processing work 
+            It merely calls into any events that are hooked up to the controller
+            for these events:
+            
+            ExecuteStart
+            ExecuteComplete
+            ExecuteFailed
+            </summary>
+            <param name="manager">Instance of QueueMessageManager and it's Entity property</param>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueController.OnExecuteStart(Westwind.MessageQueueing.QueueMessageManager)">
+            <summary>
+            Override this method to process your async  operation. Required for
+            anything to happen when the message is processed. If the operation 
+            succeeds (no exception), OnExecuteComplete will
+            be called. This method should throw an exception if the operation fails,
+            so that OnExecuteFailed will be fired. 
+            </summary>
+            <param name="manager">
+            QueueManager instance. Use its Entity property to get access to the current method
+            </param>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueController.OnExecuteComplete(Westwind.MessageQueueing.QueueMessageManager)">
+            <summary>
+            Override this method to do any post processing that needs to happen
+            after each async operation has successfully completed. Optional - use
+            for things like logging or reporting on status.
+            </summary>
+            <param name="manager">
+            QueueManager instance. Use its Entity property to get access to the current method
+            </param>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueController.OnExecuteFailed(Westwind.MessageQueueing.QueueMessageManager,System.Exception)">
+            <summary>
+            Override this method to handle any errors that occured during processing
+            of the async task. Optional - implement for logging or notifications.
+            </summary>
+            <param name="manager">
+            QueueManager instance. Use its Entity property to get access to the current method
+            </param>
+            <param name="ex">
+            Exeception that caused the operation to fail
+            </param>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueController.OnNextMessageFailed(Westwind.MessageQueueing.QueueMessageManager,System.Exception)">
+            <summary>
+            Override this method to handle any errors that occured trying to receive 
+            the next message from the SQL table.
+            
+            Allows for error handling or logging in your own applications.
+            </summary>
+            <param name="manager">
+            QueueManager instance. Use its Entity property to get access to the current method
+            </param>
+            <param name="ex">
+            Exeception that caused the operation to fail
+            </param>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueController.OnStopProcessing">
+            <summary>
+            Method that is called just before the controller stops
+            processing requests. Use to send messages.
+            If you return false from this method the queue is not stoped.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueController.OnStartProcessing">
+            <summary>
+            Method that is called just before the the controller
+            starts up processing for the queue. If you return
+            false from this method the controller queue is not
+            started.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:Westwind.MessageQueueing.QueueController.ConnectionString">
+            <summary>
+            Connection String for the database
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.QueueController.Active">
+            <summary>
+            Determines whether the controller is processing messages
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.QueueController.Paused">
+            <summary>
+            determines if the service is paused
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.QueueController.WaitInterval">
+            <summary>
+            Determines how often the control checks for new messages
+            Set in milliseconds.
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.QueueController.ThreadCount">
+            <summary>
+            Number of threads processing the queue
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.QueueController.MessagesProcessed">
+            <summary>
+            Counter that keeps track of how many messages have been processed 
+            since the server started.
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.QueueController.QueueName">
+            <summary>
+            Sets the types of messages that this controller is looking for
+            </summary>
+        </member>
+        <member name="E:Westwind.MessageQueueing.QueueController.ExecuteStart">
+            <summary>
+            Event called when an individual request starts processing
+            Your user code can attach to this event and start processing
+            with the message information.
+            </summary>        
+        </member>
+        <member name="E:Westwind.MessageQueueing.QueueController.ExecuteComplete">
+            <summary>
+            Event fired when the asynch operation has successfully completed
+            </summary>
+        </member>
+        <member name="E:Westwind.MessageQueueing.QueueController.ExecuteFailed">
+            <summary>
+            Event fired when the asynch operation has failed to complete (an exception
+            was thrown during processing). Implement for logging or notifications.
+            </summary>
+        </member>
+        <member name="E:Westwind.MessageQueueing.QueueController.NextMessageFailed">
+            <summary>
+            Event fired when the read operation to retrieve the next message from
+            the database has failed. Allows for error handling or logging.
+            </summary>
+        </member>
+        <member name="T:Westwind.MessageQueueing.QueueMessageManagerSerializationHelper">
+            <summary>
+            Provides easy to use serialization helpers to read values 
+            from the XML and Binary fields of the queue
+            </summary>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManagerSerializationHelper.SerializeToBinResult(System.Object,Westwind.MessageQueueing.QueueMessageItem)">
+            <summary>
+            Serializes an object into the BinResult field
+            </summary>
+            <param name="objectInstance"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManagerSerializationHelper.DeSerializeFromBinResult``1(Westwind.MessageQueueing.QueueMessageItem)">
+            <summary>
+            Deserializes an object out of the 
+            </summary>        
+            <returns></returns>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManagerSerializationHelper.SerializeToXml(System.Object,Westwind.MessageQueueing.QueueMessageItem)">
+            <summary>
+            Serializes an object to the current or passed queue item's XML property
+            </summary>
+            <param name="value">The value to serialize to XML</param>
+            <param name="item">optional queue item. If not passed the current Entity instance is used</param>
+            <returns></returns>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManagerSerializationHelper.DeSerializeFromXml``1(System.String,Westwind.MessageQueueing.QueueMessageItem)">
+            <summary>
+            Deserializes the XML field of the current or passed entity back into 
+            a value
+            </summary>
+            <typeparam name="T">The type of the expected item</typeparam>
+            <param name="xml"></param>
+            <param name="item"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManagerSerializationHelper.DeSerializeFromXml(System.String,System.Type,Westwind.MessageQueueing.QueueMessageItem)">
+            <summary>
+            Deserializes the XML field of the current or passed entity back into 
+            a value
+            </summary>        
+            <param name="xml">The XML to parse into an object</param>
+            <param name="item">the QueueMessageItem to parse into or the current entity</param>
+            <returns>object or null on failure</returns>
+        </member>
+        <member name="T:Westwind.MessageQueueing.Scheduler">
+            <summary>
+            A generic scheduling service that runs on a background
+            thread and fires events in a given check frequency
+            </summary>
+        </member>
+        <member name="F:Westwind.MessageQueueing.Scheduler._SyncLock">
+            <summary>
+             Internal property used for cross thread locking
+            </summary>
+        </member>
+        <member name="M:Westwind.MessageQueueing.Scheduler.Start(System.Int32)">
+            <summary>
+            Starts the background thread processing       
+            </summary>
+            <param name="checkFrequency">Frequency that checks are performed in seconds</param>
+        </member>
+        <member name="M:Westwind.MessageQueueing.Scheduler.Start">
+            <summary>
+            Starts the background Thread processing
+            </summary>
+        </member>
+        <member name="M:Westwind.MessageQueueing.Scheduler.Stop">
+            <summary>
+            Causes the processing to stop. If the operation is still
+            active it will stop after the current message processing
+            completes
+            </summary>
+        </member>
+        <member name="M:Westwind.MessageQueueing.Scheduler.Run">
+            <summary>
+            Runs the actual processing loop by checking the mail box
+            </summary>
+        </member>
+        <member name="M:Westwind.MessageQueueing.Scheduler.OnExecuteScheduledEvent">
+            <summary>
+            Handles a scheduled operation. Checks to see if an event handler
+            is set up and if so calls it. 
+            
+            This method can also be overrriden in a subclass to implemnent
+            custom functionality.
+            </summary>
+        </member>
+        <member name="M:Westwind.MessageQueueing.Scheduler.OnError(System.Exception)">
+            <summary>
+            This method is called if an error occurs during processing
+            of the request.
+            
+            Override this method in your own implementation to provide
+            for error logging or other handling of an error that occurred
+            in processing.
+            
+            Ideally this shouldn't be necessary - your OnexecuteScheduledEvent
+            code should handle any errors internally and provide for its own 
+            logging mechanism but this is here as an additional point of
+            control.
+            </summary>
+            <param name="ex">Exception occurred during item execution</param>
+        </member>
+        <member name="M:Westwind.MessageQueueing.Scheduler.AddItem(System.Object)">
+            <summary>
+            Adds an item to the queue.
+            </summary>
+            <param name="item"></param>
+        </member>
+        <member name="M:Westwind.MessageQueueing.Scheduler.GetNextItem">
+            <summary>
+            Returns the next queued item or null on failure.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Westwind.MessageQueueing.Scheduler.PingServer">
+            <summary>
+            Optional routine that pings a Url on the server
+            to keep the server alive. 
+            
+            Use this to avoid IIS shutting down your AppPools
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.Scheduler.Cancelled">
+            <summary>
+            Determines the status  the Scheduler
+            </summary>        
+        </member>
+        <member name="P:Westwind.MessageQueueing.Scheduler.CheckFrequency">
+            <summary>
+            The frequency in how often the main method is executed.
+            Given in seconds.
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.Scheduler.WebServerPingUrl">
+            <summary>
+            Optional URL that is pinged occasionally to
+            ensure the server stays alive.
+            
+            If empty hits root web page (~/yourapp/)
+            </summary>
+        </member>
+        <member name="E:Westwind.MessageQueueing.Scheduler.ExecuteScheduledEvent">
+            <summary>
+            Event that is fired when
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.Scheduler.Items">
+            <summary>
+            Memory based queue that contains items and allows
+            retrieval of items.
+            
+            Note memory based! This means if app crashses
+            or is shut down messages might get lost.
+            
+            If message persistence is important your scheduling store
+            should be a database. You can use the QueueMessageManager
+            object for example.
+            </summary>    
+        </member>
+        <member name="T:Westwind.MessageQueueing.SchedulerItem">
+            <summary>
+            A simple item wrapper that allows separating items
+            by type.
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.SchedulerItem.Type">
+            <summary>
+            Allows identifying items by type
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.SchedulerItem.TextData">
+            <summary>
+            Any text data you want to submit
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.SchedulerItem.Data">
+            <summary>
+            Any binary data you want to submit
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.SchedulerItem.Entered">
+            <summary>
+            The initial date when the item was
+            created or submitted.
+            </summary>
+        </member>
+    </members>
+</doc>
