@@ -1,5 +1,5 @@
 #Westwind.QueueMessageManager
-###A .NET library for two-way messaging using SQL Server for long running and asynchronous tasks or simple workflows###
+####A .NET library for two-way messaging using SQL Server for long running and asynchronous tasks or simple workflows####
 This .NET library allows for messaging across application or thread boundaries,
 using a SQL Server table. Unlike traditional Message Queues, this implementation
 allows for popping off of Queue messages, but also for further direct access messaging, 
@@ -9,7 +9,6 @@ communication while a process is running without requiring additional queues.
 
 A typical process goes like this:
 * Client submits a message into the MessageQueue
-
 * Server polls for queue messages and pops off any pending queue items
 * Server picks up the message by 'popping off' the next Queue message
 * Server routes the message for processing to a QueueController class
@@ -25,15 +24,30 @@ A typical process goes like this:
   from the Queue table
 * Client picks out or deserializes completion data from queue record
 
-##How it works
-------------
-The client application typically interacts with the QueueMessageManager class.
-This class provides methods for creating new queue entries, submitting them
-to the queue, updating them and then cancelling or completing messages.
+###How it works###
+The client application interacts with the *QueueMessageManager* class to create, 
+update and manage messages submitted to the queue. Clients typically create
+a message for processing, then check back occasionally for status updates
+and completion or cancellation.
+
+The server application runs in the background as a service, daemon or simply
+on a separate thread either on the local or remote machine. The server picks up 
+messages and processes them, which allows for asynchronous offloading of 
+processing to a separate process or machine. The *QueueController* is a 
+base class that provides for message polling, firing events when messages arrive. 
+The implementation subclasses QueueController and overrides the various messaging 
+handler methods like OnExecuteStart(),  OnExecuteComplete() or OnExecuteFailed()
+to hook up custom processing. Operations running can also interact with the 
+manager to provide progress and status information to the client.
+
+###Creating and interacting with Messages via QueueMessageManager###
+The QueueMessageManager class provides methods for creating new queue entries and
+submitting them to the queue, for updating them and then cancelling or 
+completing messages.
 
 Typical client submission code looks like this:
 
-```C#    
+```C#
 var manager = new QueueMessageManager();
 
 string imageId = "10";
@@ -64,13 +78,18 @@ Assert.IsTrue(manager.Save(), manager.ErrorMessage);
 // to load messages later
 var queueId = item.Id;
 ```
-Once messages have been submitted, a running QueueController will pick them
-up and start processing them. If you captures the queueId you can use it to 
-load an existing message and access in process properties like PercentComplete
-or Message or even some of the data fields to retrieve progress information or
-potentially in progress update data.
+
+Once messages have been submitted, a running QueueController can pick them
+up and start processing them.
+
+If you capture the queueId you can use it to load an existing message and 
+access in process properties like PercentComplete or Message or even some 
+of the data fields to retrieve progress information or potentially in 
+progress update data.
 
 ```C#
+var manager = new QueueMessageManager();
+
 // assume you have a queueId
 string queueId = ...;
 
@@ -90,7 +109,6 @@ if (item.Completed)
     
 	return;
 }
-
 
 // Otherwise update the message any way you like
 item.Message = "Updated @ " + DateTime.Now.ToString("t");
@@ -116,7 +134,151 @@ to notify of new incoming messages to process. The customized code can then exam
 the QueueMessageItem for its properties to determine how to process the message.
 Typically an Action can be set on the QueueMessageItem to route processing.
 
-##Configuration
+###Implementing a QueueController to process Queued Requests###
+The QueueController is a background task that spins up several threads and
+then pings the queue table for new messages. When new messages arrive it
+fires ExecuteStart, ExecuteComplete and ExecuteFailed events that you
+can hook your application logic to.
+
+Here's what this looks like:
+
+```C#
+[TestMethod]
+public void QueueControllerTest()
+{
+    // for testing - submit 3 client messages
+    var manager = new QueueMessageManager();
+    for (int i = 0; i < 3; i++)
+    {
+        var item = new QueueMessageItem()
+        {
+            Message = "Print Image",
+            Action = "PRINTIMAGE",
+            TextInput = "4334333" // image Id
+        };
+
+        // sets appropriate settings for submit on item
+        manager.SubmitRequest(item);
+                
+        // item has to be saved
+        Assert.IsTrue(manager.Save(), manager.ErrorMessage);
+        Console.WriteLine("added " + manager.Entity.Id);
+    }
+
+    Console.WriteLine("Starting... Async Manager Processing");
+
+    // create the new Controller to process in the background    
+    var controller = new QueueController()
+    {
+        ThreadCount = 2
+    };            
+            
+    // ExecuteStart Event is where your processing logic goes
+    controller.ExecuteStart += controller_ExecuteStart;
+
+    // ExecuteFailed and ExecuteComplete let you take actions on completion
+    controller.ExecuteComplete += controller_ExecuteComplete;
+    controller.ExecuteFailed += controller_ExecuteFailed;
+    
+    controller.StartProcessingAsync();
+            
+    // For test we have to keep the threads alive 
+    // to allow the 3 requests to process
+    Thread.Sleep(2000);
+
+    // shut down
+    controller.StopProcessing();
+    Thread.Sleep(1000);  // let threads shut down
+
+    Console.WriteLine("Stopping... Async Manager Processing");    
+}
+
+public int RequestCount = 0; // for testing
+
+/// This is where your processing happens
+private void controller_ExecuteStart(QueueMessageManager manager)
+{
+    // get active queue item
+    var item = manager.Entity;
+
+    // Typically perform tasks based on some Action/request
+    if (item.Action == "PRINTIMAGE")
+    {
+        // recommend you offload processing
+        //PrintImage(manager);
+    }
+    else if (item.Action == "RESIZETHUMBNAIL")
+        //ResizeThumbnail(manager);
+
+    // just for kicks
+    Interlocked.Increment(ref RequestCount);
+
+    // third request should throw exception, trigger ExecuteFailed            
+    if (RequestCount > 2)
+    {
+        // throw an Execption through code failure
+        object obj = null;
+        obj.ToString();
+    }
+
+    // Complete request 
+    manager.CompleteRequest(messageText: "Completed request " + DateTime.Now, 
+                            autoSave: true);
+
+    Console.WriteLine(manager.Entity.Id + " - Item Completed");
+}        
+private void controller_ExecuteComplete(QueueMessageManager manager)
+{
+    // Log or otherwise complete request
+    Console.WriteLine("Success: " + manager.Entity.Id)
+}                
+private void controller_ExecuteFailed(QueueMessageManager manager, Exception ex)
+{
+    Console.WriteLine("Failed (on purpose): " + manager.Entity.Id + " - " + ex.Message);
+}
+```
+
+Another approach is to subclass the QueueController and add your processing logic into
+this class. You can override the OnExecuteStart, OnExecuteFailed, OnExecuteComplete
+handlers the same as above and then add all your processing logic in methods of
+this class. This is the recommended approach.
+
+```C#
+public class MyController : QueueController
+{
+    protected override OnExecuteStart(QueueMessageManager manager)
+    {
+          string action = manager.Entity.Action;
+          if (action == "PrintImage")
+              PrintImage(manager);
+          else if (action == "CreateThumbnail")
+              //CreateThumbnail(manager);
+    }
+    protected override OnExecuteComplete(QueueMessageManager manager)
+    {
+          ...
+    }
+    protected override OnExecuteFailed(QueueMessageManager manager)
+    {
+         ...
+    }
+    
+    private void PrintImage(QueueMessageManager manager)
+    {
+        var item = manager.Entity;
+        // do your processing
+    }    
+}
+```
+
+You can then just instantiate and call this custom controller instead.
+
+```C#
+var controller = new MyQueueController();
+controller.StartProcessingAsync();
+```
+
+###Configuration###
 The QueueMessageManager works with Sql Server to handle queue messaging. By
 default the QueueMessageManager uses configuration settings that are stored in the
 configuration file where you specify relevant settings:

@@ -13,47 +13,81 @@ namespace Westwind.MessageQueueing.Tests
         {
             var manager = new QueueMessageManager();
 
+            // sample - create 3 message
             for (int i = 0; i < 3; i++)
-            {                
-                manager.SubmitRequest(messageText: "New Entry");
+            {
+                var item = new QueueMessageItem()
+                {
+                    Message = "Print Image",
+                    Action = "PRINTIMAGE",
+                    TextInput = "4334333" // image Id
+                };
+
+                // sets appropriate settings for submit on item
+                manager.SubmitRequest(item);
+                
+                // item has to be saved
                 Assert.IsTrue(manager.Save(), manager.ErrorMessage);
                 Console.WriteLine("added " + manager.Entity.Id);
             }
 
             Console.WriteLine("Starting... Async Manager Processing");
 
+            // create a new Controller to process in the background
+            // on separate threads
             var controller = new QueueController()
             {
-                ThreadCount = 3
+                ThreadCount = 2
             };
             
+            
+            // ExecuteStart Event is where your processing logic goes
             controller.ExecuteStart += controller_ExecuteStart;
+
+            // ExecuteFailed and ExecuteComplete let you take actions on completion
+            controller.ExecuteComplete += controller_ExecuteComplete;
             controller.ExecuteFailed += controller_ExecuteFailed;
 
+            // actually start the queue
             controller.StartProcessingAsync();
             
-            // keep it alive for short processing burst
+            // For test we have to keep the threads alive 
+            // to allow the 3 requests to process
             Thread.Sleep(2000);
 
             // shut down
             controller.StopProcessing();
 
-            Console.WriteLine("Stopping... Async Manager Processing");
+            Thread.Sleep(1000);
 
+            Console.WriteLine("Stopping... Async Manager Processing");
+            Assert.IsTrue(true);
         }
 
         public int RequestCount = 0;
 
-        
-        private void controller_ExecuteFailed(QueueMessageManager manager, Exception ex)
+        /// <summary>
+        /// This is where your processing happens
+        /// </summary>
+        /// <param name="manager"></param>
+        private void controller_ExecuteStart(QueueMessageManager manager)
         {
-            Console.WriteLine("Failed (on purpose): " + manager.Entity.Id + " - " + ex.Message);
-        }
-        void controller_ExecuteStart(QueueMessageManager manager)
-        {
+            // get active queue item
+            var item = manager.Entity;
+
+            // Typically perform tasks based on some Action/request
+            if (item.Action == "PRINTIMAGE")
+            {
+                // recommend you offload processing
+                //PrintImage(manager);
+            }
+            else if (item.Action == "RESIZETHUMBNAIL")
+                //ResizeThumbnail(manager);
+
+            // just for kicks
             Interlocked.Increment(ref RequestCount);
 
-            // last one should throw exception
+            // third request should throw exception, trigger ExecuteFailed            
             if (RequestCount > 2)
             {
                 // Execption:
@@ -61,10 +95,22 @@ namespace Westwind.MessageQueueing.Tests
                 obj.ToString();
             }
 
-            manager.CompleteRequest(messageText: "Completed request " + DateTime.Now.ToString(), autoSave: true);
+            // Complete request 
+            manager.CompleteRequest(messageText: "Completed request " + DateTime.Now, 
+                                    autoSave: true);
 
             Console.WriteLine(manager.Entity.Id + " - Item Completed");
+        }        
+        private void controller_ExecuteComplete(QueueMessageManager manager)
+        {
+            // grab the active queue item
+            var item = manager.Entity;
 
+            // Log or otherwise complete request
+        }                
+        private void controller_ExecuteFailed(QueueMessageManager manager, Exception ex)
+        {
+            Console.WriteLine("Failed (on purpose): " + manager.Entity.Id + " - " + ex.Message);
         }
     }
 }

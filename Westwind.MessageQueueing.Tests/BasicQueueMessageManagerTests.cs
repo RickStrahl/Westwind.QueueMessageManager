@@ -93,7 +93,6 @@ namespace Westwind.MessageQueueing.Tests
         }
 
 
-
         [TestMethod]
         public void SubmitRequestTest()
         {
@@ -151,8 +150,6 @@ namespace Westwind.MessageQueueing.Tests
                 Console.WriteLine("No pending items... nothing to do.");
                 return;
             }
-
-            
 
             string reqId = item.Id;
 

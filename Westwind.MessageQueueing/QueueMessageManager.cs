@@ -69,6 +69,9 @@ namespace Westwind.MessageQueueing
             {
                 if (_Db == null)
                     _Db = LoadDal();
+
+                if (_Db == null)
+                    throw new ArgumentException(Resources.CouldntConnectToDatabase);
                 return _Db;
             }
             private set { }
@@ -549,6 +552,21 @@ namespace Westwind.MessageQueueing
                 connectionString = Configuration.ConnectionString;            
 
             var db = new SqlDataAccess(connectionString);
+
+            var result = db.ExecuteNonQuery("select id from QueueMessageItems");
+            
+            //// table doesn't exist - try to create
+            //if (db.ErrorNumber == -2146232060)
+            //{
+            //    // hack - avoid recursion here because 
+            //    // _Db is not set yet when in constructor
+            //    _Db = db; 
+            //    if (!CreateDatabaseTable())
+            //        throw new ArgumentException(Resources.CouldntAccessQueueDatabase);
+            //}
+            //else if (db.ErrorNumber != 0)
+            //    throw new ArgumentException(Resources.CouldntAccessQueueDatabase);
+
             return db;
         }
 
@@ -585,7 +603,7 @@ namespace Westwind.MessageQueueing
         public bool CreateDatabaseTable()
         {
             SetError();
-
+            
             if (!Db.RunSqlScript(CREATE_SQL_OBJECTS, false, false))
             {
                 SetError(Db.ErrorMessage);

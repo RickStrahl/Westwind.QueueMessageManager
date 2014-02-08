@@ -121,4 +121,10 @@
     <value>No entity passed.</value>
     <comment>NoEntityPassed description</comment>
   </data>
+  <data name="CouldntConnectToDatabase" xml:space="preserve">
+    <value>Couldn't connect to the database.</value>
+  </data>
+  <data name="CouldntAccessQueueDatabase" xml:space="preserve">
+    <value>Couldn't access Queue database. Please check your connection string.</value>
+  </data>
 </root>
