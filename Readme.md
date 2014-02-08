@@ -1,25 +1,47 @@
 #Westwind.QueueMessageManager
-####A .NET library for two-way messaging using SQL Server for long running and asynchronous tasks or simple workflows####
-This .NET library allows for messaging across application or thread boundaries,
-using a SQL Server table. Unlike traditional Message Queues, this implementation
-allows for popping off of Queue messages, but also for further direct access messaging, 
-to queue messages for cross process communication purposes. In effect this allows
-for things like progress information for long running processes and two-way 
-communication while a process is running without requiring additional queues.
+####.NET Library to provide a simple, two-way messaging queue for enabling offloading of long running operations to other processes/machines####
+This .NET library provides a simple and easy to implement mechanism for  offloading 
+async processing for long running or CPU intensive tasks. It also provides two-way status
+and progress messaging. The library uses a SQL Server table to hold the 'message' 
+information and processing instructions that can be accessed repeatedly by both the 
+client and server to provide two way communication during processing of a message.
 
-A typical process goes like this:
-* Client submits a message into the MessageQueue
-* Server polls for queue messages and pops off any pending queue items
-* Server picks up the message by 'popping off' the next Queue message
-* Server routes the message for processing to a QueueController class
-* QueueController class implements logic to handle incoming messages
+The message data is generic so, you can pass any kind of string or string serializable 
+data as input or receive it as result output. The message structure also supports 
+generic progress messages and completion status.
+
+The purpose of this library is to simplify async processing where long running processes
+need to be offloaded either to background threads (say in an ASP.NET application), or 
+to remote machines for async processing. The client can then check back for completion
+and/or progress information if the server provides it.
+
+Both client (QueueMessageManager) and server (QueueController )are provided by this 
+library, and the server can be hosted in any kind of application and run in the background.
+
+Because the queue is running in SQL Server it's easy to scale to any machine that can
+access the SQL Server that hosts the messaging table. You can add additional
+threads, or additional machines to handle the remote processing as your load increases.
+ 
+Unlike traditional Message Queues, this implementation allows for read/write access to 
+message items so that progress information can be shared as well as having an easy mechanism
+for determining completion status which is non-trivial with pure Queue implementations.
+
+Currently only supports SQL Server and SQL Compact.
+
+A typical messaging process with the Queueing components goes like this:
+
+* Client submits a message with QueueMessageManager and SubmitRequest()
+* Server (QueueController) polls for queue messages and pops off any pending queue items
+* Server picks up the message by 'popping off' the next pending Queue message
+* Server routes the message for processing to ExecuteStart() method
+* QueueController class implements logic to handle processing of message requests
 * Messages are identified by a unique ID and an 'action' used for routing
 * Server starts processing the message asynchronously
-* Server optionally writes progress information into Queue record
+* You implement ExecuteStart handler that performs async or remote processing task
+* Server optionally writes progress information into Queue record as it processes
 * Client can optionally query the queue record for progress information
-* Server completes processing - updates and 'completes' Queue operation
-* Server writes out a result into the Queue table
-  (results can be simple values or serialized XML/JSON etc.)
+* Server completes request and optionally writes result data into record
+* Server fires ExecuteComplete or ExecuteFailed
 * Client checks and finds completed message and picks up results
   from the Queue table
 * Client picks out or deserializes completion data from queue record

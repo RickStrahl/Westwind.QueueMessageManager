@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("QueueMessageServer")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Westwind.MessageQueing")]
+[assembly: AssemblyDescription("A .NET library to provide two-way messaging using a database, between a client and server to run async operations and communicate status, progress and completion information.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("West Wind Technologies")]
 [assembly: AssemblyProduct("QueueMessageServer")]
-[assembly: AssemblyCopyright("Copyright © West Wind Technologies 2006")]
+[assembly: AssemblyCopyright("Copyright © West Wind Technologies 2006-2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

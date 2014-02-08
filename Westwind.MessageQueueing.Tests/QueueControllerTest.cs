@@ -58,7 +58,7 @@ namespace Westwind.MessageQueueing.Tests
             // shut down
             controller.StopProcessing();
 
-            Thread.Sleep(200);
+            Thread.Sleep(200);  
 
             Console.WriteLine("Stopping... Async Manager Processing");
             Assert.IsTrue(true);
