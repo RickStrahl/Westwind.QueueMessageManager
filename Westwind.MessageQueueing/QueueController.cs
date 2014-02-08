@@ -102,9 +102,9 @@ namespace Westwind.MessageQueueing
                 
                 // Fire events to execute the real operations
                 ExecuteSteps(manager);
-                
-                // Give up a tiny time slice to avoid CPU bloat
-                Thread.Sleep(1);
+                                
+                // let CPU breathe
+                Thread.Yield();
             } 
         }
 

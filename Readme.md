@@ -322,8 +322,10 @@ configuration file where you specify relevant settings:
 </QueueManagerConfiguration>
  ```
 
- By default settings are read out of the config file, but you can also 
- explicitly set these values by passing a 
+By default settings are read out of the config file and settings are auto-created
+if they don't exist (assuming the application has rights to write). But you can also 
+explicitly set these values by passing a QueueMessageManagerConfiguration()
+object with configuration settings preset into the constructor:  
 
  ```c#
 var config = new QueueMessageManagerConfiguration()
@@ -360,3 +362,4 @@ The number of threads that the controller uses to process requests.
 The number of threads determines how many concurrent queue monitors
 ping the queue for new requests. The default is 2.
 
+###License###
