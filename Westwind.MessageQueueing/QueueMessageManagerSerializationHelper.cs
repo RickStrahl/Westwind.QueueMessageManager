@@ -29,7 +29,7 @@ namespace Westwind.MessageQueueing
         public bool SerializeToBinResult(object objectInstance, QueueMessageItem item = null)
         {
             if (item == null)
-                item = Manager.Entity;
+                item = Manager.Item;
 
             if (item == null)
             {
@@ -63,7 +63,7 @@ namespace Westwind.MessageQueueing
         public T DeSerializeFromBinResult<T>(QueueMessageItem item = null)
         {
             if (item == null)
-                item = Manager.Entity;
+                item = Manager.Item;
 
             if (item == null)
             {
@@ -91,12 +91,12 @@ namespace Westwind.MessageQueueing
         /// Serializes an object to the current or passed queue item's XML property
         /// </summary>
         /// <param name="value">The value to serialize to XML</param>
-        /// <param name="item">optional queue item. If not passed the current Entity instance is used</param>
+        /// <param name="item">optional queue item. If not passed the current Item instance is used</param>
         /// <returns></returns>
         public bool SerializeToXml(object value, QueueMessageItem item = null)
         {
             if (item == null)
-                item = Manager.Entity;
+                item = Manager.Item;
 
             if (item == null)
                 return false;
@@ -137,7 +137,7 @@ namespace Westwind.MessageQueueing
         public object DeSerializeFromXml(string xml, Type type, QueueMessageItem item = null)
         {
             if (item == null)
-                item = Manager.Entity;
+                item = Manager.Item;
 
             if (item == null)
                 return null;

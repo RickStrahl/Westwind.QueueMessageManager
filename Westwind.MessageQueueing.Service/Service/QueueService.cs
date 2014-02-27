@@ -17,7 +17,7 @@ namespace Westwind.MessageQueueing.Service
     /// </summary>
     public class GlobalService
     {
-        public static QueueController Controller;       
+        public static QueueController<QueueMessageManagerSql> Controller;       
         public static IQueueService Service;        
     }
     

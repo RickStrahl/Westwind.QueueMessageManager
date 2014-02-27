@@ -21,6 +21,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{
 		Readme.md = Readme.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{8ABD0230-B92A-457B-8471-FC1F53AEDFAD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LongRunningSignalRWeb", "..\Samples\Westwind.QueueMessageManager\LongRunningSignalRWeb\LongRunningSignalRWeb.csproj", "{3ED33A01-53EE-4858-AA0F-6A1B02AB5F62}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,8 +57,19 @@ Global
 		{949BC4ED-7DA7-4C68-BCFB-724C1F8BDD7B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{949BC4ED-7DA7-4C68-BCFB-724C1F8BDD7B}.SandBox|Any CPU.ActiveCfg = Release|Any CPU
 		{949BC4ED-7DA7-4C68-BCFB-724C1F8BDD7B}.SandBox|Any CPU.Build.0 = Release|Any CPU
+		{3ED33A01-53EE-4858-AA0F-6A1B02AB5F62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3ED33A01-53EE-4858-AA0F-6A1B02AB5F62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3ED33A01-53EE-4858-AA0F-6A1B02AB5F62}.Deploy|Any CPU.ActiveCfg = Debug|Any CPU
+		{3ED33A01-53EE-4858-AA0F-6A1B02AB5F62}.Deploy|Any CPU.Build.0 = Debug|Any CPU
+		{3ED33A01-53EE-4858-AA0F-6A1B02AB5F62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3ED33A01-53EE-4858-AA0F-6A1B02AB5F62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3ED33A01-53EE-4858-AA0F-6A1B02AB5F62}.SandBox|Any CPU.ActiveCfg = Release|Any CPU
+		{3ED33A01-53EE-4858-AA0F-6A1B02AB5F62}.SandBox|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3ED33A01-53EE-4858-AA0F-6A1B02AB5F62} = {8ABD0230-B92A-457B-8471-FC1F53AEDFAD}
 	EndGlobalSection
 EndGlobal

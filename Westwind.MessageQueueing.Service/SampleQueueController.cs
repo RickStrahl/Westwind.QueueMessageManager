@@ -8,7 +8,7 @@ using Westwind.MessageQueueing;
 
 namespace Westwind.MessageQueueing.Service
 {
-    public class SampleQueueController : QueueController
+    public class SampleQueueController : QueueController<QueueMessageManagerSql>
     {
         private const string STR_STARTTIME_KEY = "_QMMC_StartTime";
         
@@ -21,7 +21,7 @@ namespace Westwind.MessageQueueing.Service
         {
             base.OnExecuteStart(manager);            
 
-            var queueItem = manager.Entity;
+            var queueItem = manager.Item;
 
             try
             {
@@ -92,7 +92,7 @@ namespace Westwind.MessageQueueing.Service
             LocalDataStoreSlot threadData = Thread.GetNamedDataSlot(STR_STARTTIME_KEY);
             Thread.SetData(threadData, watch);
             
-            QueueMonitorServiceHub.WriteMessage(manager.Entity);
+            QueueMonitorServiceHub.WriteMessage(manager.Item);
 
             base.ExecuteSteps(manager);
         }
@@ -116,12 +116,12 @@ namespace Westwind.MessageQueueing.Service
 
             int waitingMessages = manager.GetWaitingQueueMessageCount(QueueName);
             
-            WriteMessage(manager.Entity,elapsed,waitingMessages);
+            WriteMessage(manager.Item,elapsed,waitingMessages);
         }
 
         protected override void OnExecuteFailed(QueueMessageManager manager, Exception ex)
         {
-            var qm = manager.Entity;
+            var qm = manager.Item;
             WriteMessage(qm);
             base.OnExecuteFailed(manager, ex);
         }
@@ -167,13 +167,13 @@ namespace Westwind.MessageQueueing.Service
         //private void UpdateQueueMessageStatus(QueueMessageManager manager, string status = null, string messageText = null, int percentComplete = -1)
         //{
         //    if (!string.IsNullOrEmpty(status))
-        //        manager.Entity.Status = status;
+        //        manager.Item.Status = status;
 
         //    if (!string.IsNullOrEmpty(messageText))
-        //        manager.Entity.Message = messageText;
+        //        manager.Item.Message = messageText;
 
-        //    if (manager.Entity.PercentComplete > -1)
-        //        manager.Entity.PercentComplete = percentComplete;
+        //    if (manager.Item.PercentComplete > -1)
+        //        manager.Item.PercentComplete = percentComplete;
                      
         //    manager.Save();            
         //}

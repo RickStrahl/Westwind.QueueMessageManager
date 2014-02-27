@@ -11,7 +11,7 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void QueueControllerTest()
         {
-            var manager = new QueueMessageManager();
+            var manager = new QueueMessageManagerSql();
 
             // sample - create 3 message
             for (int i = 0; i < 3; i++)
@@ -28,14 +28,14 @@ namespace Westwind.MessageQueueing.Tests
 
                 // item has to be saved
                 Assert.IsTrue(manager.Save(), manager.ErrorMessage);
-                Console.WriteLine("added " + manager.Entity.Id);
+                Console.WriteLine("added " + manager.Item.Id);
             }
 
             Console.WriteLine("Starting... Async Manager Processing");
 
             // create a new Controller to process in the background
             // on separate threads
-            var controller = new QueueController()
+            var controller = new QueueController<QueueMessageManagerSql>()
             {
                 ThreadCount = 2
             };
@@ -73,7 +73,7 @@ namespace Westwind.MessageQueueing.Tests
         private void controller_ExecuteStart(QueueMessageManager manager)
         {
             // get active queue item
-            var item = manager.Entity;
+            var item = manager.Item;
 
             // Typically perform tasks based on some Action/request
             if (item.Action == "PRINTIMAGE")
@@ -99,18 +99,18 @@ namespace Westwind.MessageQueueing.Tests
             manager.CompleteRequest(messageText: "Completed request " + DateTime.Now,
                                     autoSave: true);
 
-            Console.WriteLine(manager.Entity.Id + " - Item Completed");
+            Console.WriteLine(manager.Item.Id + " - Item Completed");
         }
         private void controller_ExecuteComplete(QueueMessageManager manager)
         {
             // grab the active queue item
-            var item = manager.Entity;
+            var item = manager.Item;
 
             // Log or otherwise complete request
         }
         private void controller_ExecuteFailed(QueueMessageManager manager, Exception ex)
         {
-            Console.WriteLine("Failed (on purpose): " + manager.Entity.Id + " - " + ex.Message);
+            Console.WriteLine("Failed (on purpose): " + manager.Item.Id + " - " + ex.Message);
         }
     }
 }

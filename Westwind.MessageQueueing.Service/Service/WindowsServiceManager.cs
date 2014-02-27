@@ -42,7 +42,7 @@ namespace Westwind.Windows.Services
 		/// <param name="svcName">Name of the service.</param>
 		/// <param name="svcDispName">Display name of the service.</param>
 		/// <returns>True if the process went thro successfully. False if there was any error.</returns>
-		public bool InstallService(string svcPath, string svcName, string svcDispName)
+		public bool InstallService(string svcPath, string svcName, string svcDispName, bool autoStart = true)
 		{
 			#region Constants declaration.
 			int SC_MANAGER_CREATE_SERVICE = 0x0002;
@@ -73,15 +73,21 @@ namespace Westwind.Windows.Services
 				SERVICE_USER_DEFINED_CONTROL);
 
 			int SERVICE_AUTO_START = 0x00000002;
+            int SERVICE_DEMAND_START = 0x00000003;
+
 			#endregion Constants declaration.
  
 			try
 			{
 				IntPtr  sc_handle = OpenSCManager(null,null,SC_MANAGER_CREATE_SERVICE);
- 
+
+			    int start = SERVICE_AUTO_START;
+			    if (!autoStart)
+			        start = SERVICE_DEMAND_START;
+
 				if (sc_handle.ToInt32() != 0)
 				{
-					IntPtr sv_handle = CreateService(sc_handle,svcName,svcDispName,SERVICE_ALL_ACCESS,
+					IntPtr sv_handle = CreateService(sc_handle,svcName,svcDispName,start,
 						                             SERVICE_WIN32_OWN_PROCESS, SERVICE_AUTO_START,
 						                             SERVICE_ERROR_NORMAL,svcPath,null,0,null,null,null);
  
@@ -102,7 +108,6 @@ namespace Westwind.Windows.Services
 							//Console.WriteLine("Couldnt start service");
 							return false;
 						}
-						//Console.WriteLine("Success");
 						CloseServiceHandle(sc_handle);
 						return true;
 					}
@@ -205,8 +210,6 @@ namespace Westwind.Windows.Services
 			ServiceController[] Services = ServiceController.GetServices();
 			foreach (ServiceController Service in Services) 
 			{
-                
-
 				if (Service.ServiceName.ToLower() == serviceName || 
 					Service.DisplayName.ToLower() == serviceName) 
 				{
@@ -316,7 +319,5 @@ namespace Westwind.Windows.Services
 
             return false;
         }
-
-
 	}
 }

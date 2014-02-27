@@ -75,6 +75,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="QueueMessageManagerSql.cs" />
     <Compile Include="QueueMessageManager.cs" />
     <Compile Include="QueueMessageItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -23,7 +23,7 @@ namespace Westwind.MessageQueueing.Tests
         public void ConstructorOverrideTest()
         {
 
-            var manager = new QueueMessageManager(CONNECTION_STRING);
+            var manager = new QueueMessageManagerSql(CONNECTION_STRING);
             Console.WriteLine(manager.ConnectionString);
             Assert.IsTrue(manager.ConnectionString == CONNECTION_STRING);
 
@@ -31,7 +31,7 @@ namespace Westwind.MessageQueueing.Tests
             {                 
                 ConnectionString = "MyApplicationConnectionString"
             };
-            manager = new QueueMessageManager(config);
+            manager = new QueueMessageManagerSql(config);
             Console.WriteLine(manager.ConnectionString);
             Assert.IsTrue(manager.ConnectionString == "MyApplicationConnectionString");
         }
@@ -40,7 +40,7 @@ namespace Westwind.MessageQueueing.Tests
         public void SubmitRequestWithPresetObjectTest()
         {
             string xml = "<doc><value>Hello</value></doc>";
-            var manager = new QueueMessageManager();
+            var manager = new QueueMessageManagerSql();
 
                 var msg = new QueueMessageItem()
                 {
@@ -56,7 +56,7 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void MyTestMethod()
         {
-            var manager = new QueueMessageManager();
+            var manager = new QueueMessageManagerSql();
             int queueCount = 10;
 
             bool res = true;
@@ -82,7 +82,7 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void GetRecentMessagesTest()
         {
-            using (var manager = new QueueMessageManager())
+            using (var manager = new QueueMessageManagerSql())
             {
                 var items = manager.GetRecentQueueItems();
                 foreach (var item in items)
@@ -96,14 +96,14 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void SubmitRequestTest()
         {
-            var manager = new QueueMessageManager();
+            var manager = new QueueMessageManagerSql();
 
             string imageId = "10";
            
             // Create a message object
             // item contains many properties for pushing
             // values back and forth as well as a  few message fields
-            var item = manager.NewEntity();
+            var item = manager.CreateItem();
             item.Action = "PRINTIMAGE";
             item.TextInput = imageId;
             item.Message = "Print Image operation started at " + DateTime.Now.ToString();
@@ -127,7 +127,7 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void SubmitRequestWithPropertiesTest()
         {
-            var manager = new QueueMessageManager();
+            var manager = new QueueMessageManagerSql();
             manager.SubmitRequest(messageText: "New Entry with Properties");
 
             // add a custom property
@@ -139,7 +139,7 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void LoadRequestTest()
         {
-            var manager = new QueueMessageManager();
+            var manager = new QueueMessageManagerSql();
             var db = manager.Db;
 
             var item = db.Find<QueueMessageItem>("select TOP 1 * from queueMessageItems where IsComplete = 0");
@@ -170,7 +170,7 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void LoadRequestWithPropertiesTest()
         {
-            var manager = new QueueMessageManager();
+            var manager = new QueueMessageManagerSql();
             var db = manager.Db;
 
             var item = db.Find<QueueMessageItem>("select TOP 1 * from queueMessageItems where IsComplete = 0 and XmlProperties is not null");
@@ -209,7 +209,7 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void GetNextQueueMessageItemWithAddedItemTest()
         {
-            using (var manager = new QueueMessageManager())
+            using (var manager = new QueueMessageManagerSql())
             {
                 // delete all pending requests
                 int res = manager.Db.ExecuteNonQuery("delete from queuemessageItems where IsNull(started,'') = '' or started < '01/01/2000'");
@@ -219,7 +219,7 @@ namespace Westwind.MessageQueueing.Tests
                 Assert.IsTrue(manager.Save(), manager.ErrorMessage);
             }
 
-            using (var manager = new QueueMessageManager())
+            using (var manager = new QueueMessageManagerSql())
             {
                 var item = manager.GetNextQueueMessage();
                 Assert.IsNotNull(item, manager.ErrorMessage);
@@ -238,7 +238,7 @@ namespace Westwind.MessageQueueing.Tests
             // allow rolling back
             using (var scope = new TransactionScope())
             {
-                using (var manager = new QueueMessageManager())
+                using (var manager = new QueueMessageManagerSql())
                 {
                     // delete all pending requests
                     int res = manager.Db.ExecuteNonQuery("delete from queuemessageItems where IsNull(started,'') = '' or started < '01/01/2000'");
@@ -260,14 +260,14 @@ namespace Westwind.MessageQueueing.Tests
         {
             this.SubmitRequestWithPropertiesTest();
 
-            var manager = new QueueMessageManager();
+            var manager = new QueueMessageManagerSql();
 
             var item = new QueueMessageItem()
             {
                  TextInput = "My input",
                  Message = "Getting started."
             };
-            manager.NewEntity(item);
+            manager.CreateItem(item);
 
             manager.Properties["Time"] = DateTime.Now;
 
@@ -275,7 +275,7 @@ namespace Westwind.MessageQueueing.Tests
 
             string reqId = item.Id;
 
-            manager = new QueueMessageManager();            
+            manager = new QueueMessageManagerSql();            
             item = manager.GetNextQueueMessage();
 
             DateTime? time = manager.GetProperty("Time") as DateTime?;
@@ -289,7 +289,7 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void GetPendingMessagesTest()
         {
-            var manager = new QueueMessageManager();
+            var manager = new QueueMessageManagerSql();
             
             var items = manager.GetPendingQueueMessages();
 
@@ -304,7 +304,7 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void GetWaitingMessagesTest()
         {
-            var manager = new QueueMessageManager();
+            var manager = new QueueMessageManagerSql();
 
             var items = manager.GetWaitingQueueMessages();
 
@@ -319,7 +319,7 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void GetWaitingMessagesCountTest()
         {
-            var manager = new QueueMessageManager();
+            var manager = new QueueMessageManagerSql();
 
             int count = manager.GetWaitingQueueMessageCount();
 
@@ -331,7 +331,7 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void GetCompleteMessagesTest()
         {
-            var manager = new QueueMessageManager();
+            var manager = new QueueMessageManagerSql();
 
             var items = manager.GetCompleteQueueMessages();
 
@@ -346,7 +346,7 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void GetTimedoutMessagesTest()
         {
-            var manager = new QueueMessageManager();
+            var manager = new QueueMessageManagerSql();
 
             var items = manager.GetTimedOutQueueMessages();
 
@@ -361,7 +361,7 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void ClearTimedoutMessages()
         {
-            var manager = new QueueMessageManager();
+            var manager = new QueueMessageManagerSql();
             Assert.IsTrue(manager.ClearMessages(), manager.ErrorMessage);            
         }
 
@@ -372,8 +372,8 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void CreateDataBaseTest()
         {
-            var manager = new QueueMessageManager();            
-            Assert.IsTrue(manager.CreateDatabaseTable(),manager.ErrorMessage);            
+            var manager = new QueueMessageManagerSql();            
+            Assert.IsTrue(manager.CreateDatastore(),manager.ErrorMessage);            
         }
     }
 }

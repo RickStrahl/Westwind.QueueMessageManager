@@ -18,7 +18,8 @@ namespace Westwind.MessageQueueing
     /// A client application can simply drop this component
     /// into the app and attach to the events provdided here.
     /// </summary>
-    public class QueueController : IDisposable
+    public class QueueController<T> : IDisposable
+        where T : QueueMessageManager, new()
     {
         public QueueController()
         {
@@ -88,7 +89,7 @@ namespace Westwind.MessageQueueing
                 }
 
                 // Start by retrieving the next message if any
-                QueueMessageManager manager = new QueueMessageManager(ConnectionString);
+                QueueMessageManager manager = typeof(T).GetConstructor(new Type[1] { typeof(T) }).Invoke(new object[1] { ConnectionString }) as T;
                 
                 if (manager.GetNextQueueMessage(QueueName) == null)
                 {
@@ -156,7 +157,7 @@ namespace Westwind.MessageQueueing
         /// ExecuteComplete
         /// ExecuteFailed
         /// </summary>
-        /// <param name="manager">Instance of QueueMessageManager and it's Entity property</param>
+        /// <param name="manager">Instance of QueueMessageManager and it's Item property</param>
         protected virtual void ExecuteSteps(QueueMessageManager manager)
         {
             try
@@ -192,7 +193,7 @@ namespace Westwind.MessageQueueing
         /// so that OnExecuteFailed will be fired. 
         /// </summary>
         /// <param name="manager">
-        /// QueueManager instance. Use its Entity property to get access to the current method
+        /// QueueManager instance. Use its Item property to get access to the current method
         /// </param>
         protected virtual void OnExecuteStart(QueueMessageManager manager)
         {
@@ -211,7 +212,7 @@ namespace Westwind.MessageQueueing
         /// for things like logging or reporting on status.
         /// </summary>
         /// <param name="manager">
-        /// QueueManager instance. Use its Entity property to get access to the current method
+        /// QueueManager instance. Use its Item property to get access to the current method
         /// </param>
         protected virtual void OnExecuteComplete(QueueMessageManager Message)
         {
@@ -230,7 +231,7 @@ namespace Westwind.MessageQueueing
         /// of the async task. Optional - implement for logging or notifications.
         /// </summary>
         /// <param name="manager">
-        /// QueueManager instance. Use its Entity property to get access to the current method
+        /// QueueManager instance. Use its Item property to get access to the current method
         /// </param>
         /// <param name="ex">
         /// Exeception that caused the operation to fail
@@ -254,7 +255,7 @@ namespace Westwind.MessageQueueing
         /// Allows for error handling or logging in your own applications.
         /// </summary>
         /// <param name="manager">
-        /// QueueManager instance. Use its Entity property to get access to the current method
+        /// QueueManager instance. Use its Item property to get access to the current method
         /// </param>
         /// <param name="ex">
         /// Exeception that caused the operation to fail

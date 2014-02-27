@@ -58,17 +58,17 @@ namespace Westwind.MessageQueueing.Service
 
         void Controller_ExecuteFailed(QueueMessageManager Message, Exception ex)
         {
-            this.WriteEntry("Failed: " + Message.Entity.Completed + "->" + Message.Entity.Id +  " - "  + ex.Message);
+            this.WriteEntry("Failed: " + Message.Item.Completed + "->" + Message.Item.Id +  " - "  + ex.Message);
         }
 
         void Controller_ExecuteComplete(QueueMessageManager Message)
         {
-            this.WriteEntry("Complete: " + Message.Entity.Completed + "->" + Message.Entity.Id +  " - " + Message.Entity.Message);
+            this.WriteEntry("Complete: " + Message.Item.Completed + "->" + Message.Item.Id +  " - " + Message.Item.Message);
         }
 
         void Controller_ExecuteStart(QueueMessageManager Message)
         {
-            this.WriteEntry("Started: " + Message.Entity.Started + "->" + Message.Entity.Id);
+            this.WriteEntry("Started: " + Message.Item.Started + "->" + Message.Item.Id);
         }
 
         /// <summary>
@@ -133,7 +133,7 @@ namespace Westwind.MessageQueueing.Service
         {
             // Create database table and store procedure if it doesn't exist
             QueueMessageManager manager = new QueueMessageManager();
-            if (!manager.CreateDatabaseTable())
+            if (!manager.CreateDataStore())
                 MessageBox.Show(manager.ErrorMessage, "Error creating QueueTable", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             else
                 MessageBox.Show("QueueTable created","Queue Table Creation", MessageBoxButtons.OK, MessageBoxIcon.Information);
