@@ -107,7 +107,7 @@ namespace Westwind.MessageQueueing.Service
 
         public void GetWaitingQueueMessageCount()
         {
-            using (var manager = new QueueMessageManager())
+            using (var manager = new QueueMessageManagerSql())
             {
                 int count = manager.GetWaitingQueueMessageCount(GlobalService.Controller.QueueName);
                 // broadcast to all clients

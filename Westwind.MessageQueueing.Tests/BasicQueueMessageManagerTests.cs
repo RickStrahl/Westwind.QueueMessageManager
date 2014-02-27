@@ -25,7 +25,7 @@ namespace Westwind.MessageQueueing.Tests
 
             var manager = new QueueMessageManagerSql(CONNECTION_STRING);
             Console.WriteLine(manager.ConnectionString);
-            Assert.IsTrue(manager.ConnectionString == CONNECTION_STRING);
+            Assert.IsTrue(manager.ConnectionString == CONNECTION_STRING,"ConnectionString is not set");
 
             var config = new QueueMessageManagerConfiguration()
             {                 
@@ -54,7 +54,7 @@ namespace Westwind.MessageQueueing.Tests
         }
 
         [TestMethod]
-        public void MyTestMethod()
+        public void SubmitRequestsToQueueTest()
         {
             var manager = new QueueMessageManagerSql();
             int queueCount = 10;
@@ -71,7 +71,7 @@ namespace Westwind.MessageQueueing.Tests
 
                 manager.SubmitRequest(msg);
 
-                res = manager.Save();
+                res = manager.Save(msg);
                 if (!res)
                     break;
             }

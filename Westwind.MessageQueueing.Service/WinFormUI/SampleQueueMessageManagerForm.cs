@@ -132,8 +132,8 @@ namespace Westwind.MessageQueueing.Service
         private void btnCreateTable_Click(object sender, EventArgs e)
         {
             // Create database table and store procedure if it doesn't exist
-            QueueMessageManager manager = new QueueMessageManager();
-            if (!manager.CreateDataStore())
+            QueueMessageManager manager = new QueueMessageManagerSql();
+            if (!manager.CreateDatastore())
                 MessageBox.Show(manager.ErrorMessage, "Error creating QueueTable", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             else
                 MessageBox.Show("QueueTable created","Queue Table Creation", MessageBoxButtons.OK, MessageBoxIcon.Information);

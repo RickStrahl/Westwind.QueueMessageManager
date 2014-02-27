@@ -21,8 +21,8 @@ namespace Westwind.MessageQueueing
     /// </summary>    
     public abstract  class QueueMessageManager : IDisposable
     {
-        private const int INT_maxCount = 99999;
-        internal bool _IsNew = false;
+        protected const int INT_maxCount = 99999;
+        protected bool _IsNew = false;
 
         /// <summary>
         /// Message Timeout. Messages are cleared
@@ -63,8 +63,7 @@ namespace Westwind.MessageQueueing
         /// </summary>
         public string ConnectionString { get; set; }
 
-
-        public QueueMessageManager(QueueMessageManagerConfiguration configuration = null)
+        public QueueMessageManager()
         {
             DefaultQueue = string.Empty;
 
@@ -72,12 +71,14 @@ namespace Westwind.MessageQueueing
             MessageTimeout = new TimeSpan(2, 0, 0);
 
             Serialization = new QueueMessageManagerSerializationHelper(this);
+           
+            Configuration = QueueMessageManagerConfiguration.Current;
+            ConnectionString = Configuration.ConnectionString;
+        }
 
-            if (configuration == null)
-                Configuration = QueueMessageManagerConfiguration.Current;
-            else
-                Configuration = configuration;
-
+        public QueueMessageManager(QueueMessageManagerConfiguration configuration) : this()
+        {
+            Configuration = configuration;
             ConnectionString = Configuration.ConnectionString;
         }
 
@@ -155,7 +156,7 @@ namespace Westwind.MessageQueueing
         public bool SubmitRequest(QueueMessageItem entity = null, string messageText = null, bool autoSave = false)
         {
             if (entity == null)
-                entity = CreateItem();
+                entity = CreateItem();            
 
             entity.PercentComplete = 0;
             entity.Status = "Submitted";

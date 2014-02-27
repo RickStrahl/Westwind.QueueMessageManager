@@ -35,7 +35,7 @@ namespace Westwind.MessageQueueing.Tests
 
             // create a new Controller to process in the background
             // on separate threads
-            var controller = new QueueController<QueueMessageManagerSql>()
+            var controller = new QueueController()
             {
                 ThreadCount = 2
             };

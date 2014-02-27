@@ -18,20 +18,20 @@ namespace Westwind.MessageQueueing
     /// A client application can simply drop this component
     /// into the app and attach to the events provdided here.
     /// </summary>
-    public class QueueController<T> : IDisposable
-        where T : QueueMessageManager, new()
+    public class QueueController : IDisposable
     {
-        public QueueController()
+        public QueueController(QueueMessageManager manager = null, 
+                               string connectionString = null)
         {
             // Poll once a second
             WaitInterval = 1000;
             QueueName = string.Empty;
+            ConnectionString = connectionString;
+
+            if (manager == null)
+                manager = new QueueMessageManagerSql(connectionString);
         }
 
-        public QueueController(string connectionString) : this()
-        {
-            ConnectionString = connectionString;
-        }
         
         /// <summary>
         /// Connection String for the database
@@ -70,6 +70,10 @@ namespace Westwind.MessageQueueing
         /// </summary>
         public string QueueName {get; set; }
 
+        /// <summary>
+        /// Instance of the the QueueMessageManager
+        /// </summary>
+        public QueueMessageManager Manager { get; set; }
 
         /// <summary>
         /// Synchronous Message Processing routine - will process one message after
@@ -88,13 +92,11 @@ namespace Westwind.MessageQueueing
                     continue;
                 }
 
-                // Start by retrieving the next message if any
-                QueueMessageManager manager = typeof(T).GetConstructor(new Type[1] { typeof(T) }).Invoke(new object[1] { ConnectionString }) as T;
                 
-                if (manager.GetNextQueueMessage(QueueName) == null)
+                if (Manager.GetNextQueueMessage(QueueName) == null)
                 {
-                    if (!string.IsNullOrEmpty(manager.ErrorMessage))
-                        this.OnNextMessageFailed(manager, new ApplicationException(manager.ErrorMessage));                        
+                    if (!string.IsNullOrEmpty(Manager.ErrorMessage))
+                        this.OnNextMessageFailed(Manager, new ApplicationException(Manager.ErrorMessage));                        
 
                     // Nothing to do - wait for next poll interval
                     Thread.Sleep(WaitInterval);
@@ -102,7 +104,7 @@ namespace Westwind.MessageQueueing
                 }
                 
                 // Fire events to execute the real operations
-                ExecuteSteps(manager);
+                ExecuteSteps(Manager);
                                 
                 // let CPU breathe
                 Thread.Yield();

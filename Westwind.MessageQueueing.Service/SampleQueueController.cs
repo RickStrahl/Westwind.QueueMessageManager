@@ -8,7 +8,7 @@ using Westwind.MessageQueueing;
 
 namespace Westwind.MessageQueueing.Service
 {
-    public class SampleQueueController : QueueController<QueueMessageManagerSql>
+    public class SampleQueueController : QueueController
     {
         private const string STR_STARTTIME_KEY = "_QMMC_StartTime";
         

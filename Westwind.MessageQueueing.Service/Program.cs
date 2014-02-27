@@ -81,14 +81,14 @@ namespace Westwind.MessageQueueing.Service
 
         static void RunService()
         {                                        
-			var ServicesToRun = new ServiceBase[] { new QueueService<SampleQueueController>() };
+			var ServicesToRun = new ServiceBase[] { new QueueService() };
             LogManager.Current.LogInfo("Service Started.");            
 			ServiceBase.Run(ServicesToRun);
         }
 
         static void FakeRunService()
         {
-            var service = new QueueService<SampleQueueController>();
+            var service = new QueueService();
             service.Start();            
 
             // never ends but waits

@@ -17,30 +17,33 @@ namespace Westwind.MessageQueueing.Service
     /// </summary>
     public class GlobalService
     {
-        public static QueueController<QueueMessageManagerSql> Controller;       
+        public static QueueController Controller;       
         public static IQueueService Service;        
     }
     
     public interface IQueueService        
     {
-        void Start();
+        void Start(QueueMessageManager manager);
         void Stop();
     }
 
-    public class QueueService<T> : ServiceBase, IQueueService, IDisposable
-        where T :  QueueController,new()
+    public class QueueService : ServiceBase, IQueueService, IDisposable        
     {
-        public T Controller { get; set; }
+        public QueueController Controller { get; set; }
         public IDisposable SignalR { get; set; }
 
         // global instances that keep controller and windows service alive
 
-        public void Start()
+        public void Start(QueueMessageManager manager = null)
         {
+            if (manager == null)
+                manager = new QueueMessageManagerSql();
+
             LogManager.Current.LogInfo("Start called");
 
             var config = QueueMessageManagerConfiguration.Current;
-            Controller = new T()
+
+            Controller = new QueueController(manager)
             {
                 ConnectionString = config.ConnectionString,
                 QueueName = config.QueueName,
