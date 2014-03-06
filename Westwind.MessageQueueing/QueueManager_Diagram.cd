@@ -1,36 +1,42 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Class Name="Westwind.QueueMessageManager.QueueMessageItem">
-    <Position X="5.5" Y="0.5" Width="3.25" />
+  <Class Name="Westwind.MessageQueueing.QueueMessageItem">
+    <Position X="5" Y="0.5" Width="3.25" />
     <TypeIdentifier>
       <HashCode>AQACCAAEAAACAAIEAAAQACAAAAIAAAABAQAAKgQAEAQ=</HashCode>
       <FileName>QueueMessageItem.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Westwind.QueueMessageManager.QueueController">
-    <Position X="10.5" Y="0.5" Width="2.5" />
+  <Class Name="Westwind.MessageQueueing.QueueController">
+    <Position X="10" Y="0.5" Width="2.5" />
     <TypeIdentifier>
       <HashCode>AAEgAQAAECAEABBAAAAaAAAAAAgABQAgQCAAIIgIAAA=</HashCode>
       <FileName>QueueController.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="Westwind.QueueMessageManager.QueueMessageManager">
+  <Class Name="Westwind.MessageQueueing.QueueMessageManager">
     <Position X="1" Y="0.5" Width="3" />
     <Compartments>
       <Compartment Name="Fields" Collapsed="true" />
     </Compartments>
-    <AssociationLine Name="Entity" Type="Westwind.QueueMessageManager.QueueMessageItem">
+    <AssociationLine Name="Item" Type="Westwind.MessageQueueing.QueueMessageItem" ManuallyRouted="true">
+      <Path>
+        <Point X="4" Y="2.828" />
+        <Point X="4.5" Y="2.828" />
+        <Point X="4.5" Y="2.769" />
+        <Point X="5" Y="2.769" />
+      </Path>
       <MemberNameLabel ManuallyPlaced="true">
-        <Position X="0.787" Y="0.06" />
+        <Position X="0.277" Y="0.05" />
       </MemberNameLabel>
     </AssociationLine>
     <TypeIdentifier>
-      <HashCode>cQBAjqIAICASABAAEAAAAIAAAAQCEAAEoCVAAAACAIA=</HashCode>
+      <HashCode>cQBAjqIAICAQABAAAAAAAIAEAAQCUBAEqCQAABACAIA=</HashCode>
       <FileName>QueueMessageManager.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
-      <Property Name="Entity" />
+      <Property Name="Item" />
     </ShowAsAssociation>
     <Lollipop Position="0.2" />
   </Class>

@@ -25,6 +25,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{8ABD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LongRunningSignalRWeb", "..\Samples\Westwind.QueueMessageManager\LongRunningSignalRWeb\LongRunningSignalRWeb.csproj", "{3ED33A01-53EE-4858-AA0F-6A1B02AB5F62}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Westwind.MessageQueueing.MongoDb", "Westwind.MessageQueueing.MongoDb\Westwind.MessageQueueing.MongoDb.csproj", "{90BF54F7-C038-4695-9494-429F4676598C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Westwind.Data.MongoDb", "..\..\WestwindToolkit\Westwind.Data.MongoDb\Westwind.Data.MongoDb.csproj", "{0CE58260-3B66-480C-8394-35BA649F77D6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -65,6 +69,22 @@ Global
 		{3ED33A01-53EE-4858-AA0F-6A1B02AB5F62}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3ED33A01-53EE-4858-AA0F-6A1B02AB5F62}.SandBox|Any CPU.ActiveCfg = Release|Any CPU
 		{3ED33A01-53EE-4858-AA0F-6A1B02AB5F62}.SandBox|Any CPU.Build.0 = Release|Any CPU
+		{90BF54F7-C038-4695-9494-429F4676598C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90BF54F7-C038-4695-9494-429F4676598C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90BF54F7-C038-4695-9494-429F4676598C}.Deploy|Any CPU.ActiveCfg = Debug|Any CPU
+		{90BF54F7-C038-4695-9494-429F4676598C}.Deploy|Any CPU.Build.0 = Debug|Any CPU
+		{90BF54F7-C038-4695-9494-429F4676598C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90BF54F7-C038-4695-9494-429F4676598C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{90BF54F7-C038-4695-9494-429F4676598C}.SandBox|Any CPU.ActiveCfg = Release|Any CPU
+		{90BF54F7-C038-4695-9494-429F4676598C}.SandBox|Any CPU.Build.0 = Release|Any CPU
+		{0CE58260-3B66-480C-8394-35BA649F77D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0CE58260-3B66-480C-8394-35BA649F77D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0CE58260-3B66-480C-8394-35BA649F77D6}.Deploy|Any CPU.ActiveCfg = Debug|Any CPU
+		{0CE58260-3B66-480C-8394-35BA649F77D6}.Deploy|Any CPU.Build.0 = Debug|Any CPU
+		{0CE58260-3B66-480C-8394-35BA649F77D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0CE58260-3B66-480C-8394-35BA649F77D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0CE58260-3B66-480C-8394-35BA649F77D6}.SandBox|Any CPU.ActiveCfg = Release|Any CPU
+		{0CE58260-3B66-480C-8394-35BA649F77D6}.SandBox|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

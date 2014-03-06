@@ -2,12 +2,28 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading;
 using Westwind.MessageQueueing;
+using Westwind.Utilities;
 
 namespace Westwind.MessageQueueing.Tests
 {
     [TestClass]
     public class QueueControllerTests
     {
+
+        [TestMethod]
+        public void MyTestMethod()
+        {
+            var type = typeof (QueueMessageManagerSql);
+
+            string connString = null;
+            
+            connString = connString ?? string.Empty;
+
+            var qm = ReflectionUtils.CreateInstanceFromType(type, connString) as QueueMessageManager;
+
+            Assert.IsNotNull(type);
+
+        }
         [TestMethod]
         public void QueueControllerTest()
         {
@@ -37,9 +53,10 @@ namespace Westwind.MessageQueueing.Tests
             // on separate threads
             var controller = new QueueController()
             {
-                ThreadCount = 2
+                ThreadCount = 2 ,
+                WaitInterval = 200
             };
-
+            Console.WriteLine("Wait: " + controller.WaitInterval);
 
             // ExecuteStart Event is where your processing logic goes
             controller.ExecuteStart += controller_ExecuteStart;
@@ -53,7 +70,7 @@ namespace Westwind.MessageQueueing.Tests
 
             // For test we have to keep the threads alive 
             // to allow the 3 requests to process
-            Thread.Sleep(2000);
+            Thread.Sleep(800);
 
             // shut down
             controller.StopProcessing();
@@ -80,6 +97,7 @@ namespace Westwind.MessageQueueing.Tests
             {
                 // recommend you offload processing
                 //PrintImage(manager);
+                Interlocked.Increment(ref RequestCount);
             }
             else if (item.Action == "RESIZETHUMBNAIL")
                 //ResizeThumbnail(manager);
@@ -97,9 +115,7 @@ namespace Westwind.MessageQueueing.Tests
 
             // Complete request 
             manager.CompleteRequest(messageText: "Completed request " + DateTime.Now,
-                                    autoSave: true);
-
-            Console.WriteLine(manager.Item.Id + " - Item Completed");
+                                    autoSave: true);            
         }
         private void controller_ExecuteComplete(QueueMessageManager manager)
         {
@@ -107,6 +123,7 @@ namespace Westwind.MessageQueueing.Tests
             var item = manager.Item;
 
             // Log or otherwise complete request
+            Console.WriteLine(item.Id + " - Item Completed");
         }
         private void controller_ExecuteFailed(QueueMessageManager manager, Exception ex)
         {

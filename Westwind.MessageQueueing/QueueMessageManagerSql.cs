@@ -133,27 +133,47 @@ namespace Westwind.MessageQueueing
             return Item;
         }
 
+        /// <summary>
+        /// Deletes all pending messages
+        /// </summary>
+        /// <param name="queueName">Optional queue to delete them on. If null all are deleted</param>
+        /// <returns></returns>
+        public override bool DeletePendingMessages(string queueName = null)
+        {
+            string sql = "delete from QueueMessageItems where ISNULL(Started,0) = 0";
+            if (queueName != null)
+                sql += " and type=@0";
+
+            int res = Db.ExecuteNonQuery(sql,queueName);
+            if (res < 0)
+            {
+                SetError(Db.ErrorMessage);
+                return false;
+            }
+
+            return true;
+        }
 
         /// <summary>
-        /// Saves the passed entity or the attached entity
+        /// Saves the passed item or the attached item
         /// to the database. Call this after updating properties
         /// or individual values.
         /// </summary>
-        /// <param name="entity"></param>
+        /// <param name="item"></param>
         /// <returns></returns>
-        public override bool Save(QueueMessageItem entity = null)
+        public override bool Save(QueueMessageItem item = null)
         {
-            if (entity == null)
-                entity = Item;
+            if (item == null)
+                item = Item;
 
             // Write the Properties collection to the XmlProperties field
-            this.SetProperties("XmlProperties", entity);
+            this.SetProperties("XmlProperties", item);
 
 
             bool result = false;
-            if (!entity.__IsNew)
+            if (!item.__IsNew)
             {
-                result = Db.UpdateEntity(entity, "QueueMessageItems", "Id", "Id");
+                result = Db.UpdateEntity(item, "QueueMessageItems", "Id", "Id");
                 if (!result)
                     SetError(Db.ErrorMessage);
             }
@@ -161,13 +181,13 @@ namespace Westwind.MessageQueueing
             {
                 Db.ErrorMessage = null;
 
-                Db.InsertEntity(entity, "QueueMessageItems");
+                Db.InsertEntity(item, "QueueMessageItems");
                 if (!string.IsNullOrEmpty(Db.ErrorMessage))
                     SetError(Db.ErrorMessage);
                 else
                 {
                     result = true;
-                    entity.__IsNew = false;
+                    item.__IsNew = false;
                     Item.__IsNew = false;
                 }
             }

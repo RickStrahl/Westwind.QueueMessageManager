@@ -43,7 +43,7 @@ namespace Westwind.MessageQueueing.Service
 
             var config = QueueMessageManagerConfiguration.Current;
 
-            Controller = new QueueController(manager)
+            Controller = new QueueController()
             {
                 ConnectionString = config.ConnectionString,
                 QueueName = config.QueueName,

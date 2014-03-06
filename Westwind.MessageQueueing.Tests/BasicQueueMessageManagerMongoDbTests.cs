@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using System.Transactions;
+using MongoDB.Driver.Linq;
 
 namespace Westwind.MessageQueueing.Tests
 {
@@ -11,9 +12,9 @@ namespace Westwind.MessageQueueing.Tests
     /// Summary description for UnitTest2
     /// </summary>
     [TestClass]
-    public class BasicQueueMessageManagerTests
+    public class BasicQueueMessageManagerMongoDbTests
     {
-        public const string CONNECTION_STRING = "TestContext";
+        public const string CONNECTION_STRING = "mongodb://localhost/QueueMessageManagerTests";
 
         /// <summary>
         /// Checks to see whether connection strings are set
@@ -23,7 +24,7 @@ namespace Westwind.MessageQueueing.Tests
         public void ConstructorOverrideTest()
         {
 
-            var manager = new QueueMessageManagerSql(CONNECTION_STRING);
+            var manager = new QueueMessageManagerMongoDb(CONNECTION_STRING);
             Console.WriteLine(manager.ConnectionString);
             Assert.IsTrue(manager.ConnectionString == CONNECTION_STRING,"ConnectionString is not set");
 
@@ -31,7 +32,7 @@ namespace Westwind.MessageQueueing.Tests
             {                 
                 ConnectionString = "MyApplicationConnectionString"
             };
-            manager = new QueueMessageManagerSql(config);
+            manager = new QueueMessageManagerMongoDb(config);
             Console.WriteLine(manager.ConnectionString);
             Assert.IsTrue(manager.ConnectionString == "MyApplicationConnectionString");
         }
@@ -40,7 +41,7 @@ namespace Westwind.MessageQueueing.Tests
         public void SubmitRequestWithPresetObjectTest()
         {
             string xml = "<doc><value>Hello</value></doc>";
-            var manager = new QueueMessageManagerSql();
+            var manager = new QueueMessageManagerMongoDb(CONNECTION_STRING);
 
                 var msg = new QueueMessageItem()
                 {
@@ -50,7 +51,8 @@ namespace Westwind.MessageQueueing.Tests
                     Xml = xml
                 };
                 manager.SubmitRequest(msg);
-                Assert.IsTrue(manager.Save(), manager.ErrorMessage);
+
+                Assert.IsTrue(manager.Save(msg), manager.ErrorMessage);
         }
 
         [TestMethod]
@@ -139,10 +141,9 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void LoadRequestTest()
         {
-            var manager = new QueueMessageManagerSql();
-            var db = manager.Db;
-
-            var item = db.Find<QueueMessageItem>("select TOP 1 * from queueMessageItems where IsComplete = 0");
+            var manager = new QueueMessageManagerMongoDb(CONNECTION_STRING);
+            
+            var item = manager.Collection.AsQueryable().FirstOrDefault();
 
             // no pending items - nothing to do
             if (item == null)
@@ -209,22 +210,19 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void GetNextQueueMessageItemWithAddedItemTest()
         {
-            using (var manager = new QueueMessageManagerSql())
+  
+            using (var manager = new QueueMessageManagerMongoDb(CONNECTION_STRING))
             {
-                // delete all pending requests
-                int res = manager.Db.ExecuteNonQuery("delete from queuemessageItems where IsNull(started,'') = '' or started < '01/01/2000'");
-                Console.WriteLine(res);
+                Assert.IsTrue(manager.DeletePendingMessages());
 
+                // create a pending message
                 manager.SubmitRequest(messageText: "Next Complete Test " + DateTime.Now.ToString("t"));
                 Assert.IsTrue(manager.Save(), manager.ErrorMessage);
-            }
-
-            using (var manager = new QueueMessageManagerSql())
-            {
+                
                 var item = manager.GetNextQueueMessage();
                 Assert.IsNotNull(item, manager.ErrorMessage);
 
-                Console.WriteLine(item.Message);
+                Console.WriteLine(item.Status);
 
                 manager.CompleteRequest(item, "Next Complete complete " + DateTime.Now.ToString("t"));
 

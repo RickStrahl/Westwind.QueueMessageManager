@@ -18,18 +18,16 @@ namespace Westwind.MessageQueueing
     /// A client application can simply drop this component
     /// into the app and attach to the events provdided here.
     /// </summary>
-    public class QueueController : IDisposable
+    public class QueueController : IDisposable        
     {
-        public QueueController(QueueMessageManager manager = null, 
-                               string connectionString = null)
+        public QueueController(string connectionString = null,Type queueManagerType = null)
         {
             // Poll once a second
             WaitInterval = 1000;
             QueueName = string.Empty;
             ConnectionString = connectionString;
-
-            if (manager == null)
-                manager = new QueueMessageManagerSql(connectionString);
+            
+            ManagerType = queueManagerType ?? typeof (QueueMessageManagerSql);            
         }
 
         
@@ -71,9 +69,9 @@ namespace Westwind.MessageQueueing
         public string QueueName {get; set; }
 
         /// <summary>
-        /// Instance of the the QueueMessageManager
+        /// The specific type of the message manager class
         /// </summary>
-        public QueueMessageManager Manager { get; set; }
+        public Type ManagerType { get; set; }
 
         /// <summary>
         /// Synchronous Message Processing routine - will process one message after
@@ -92,11 +90,15 @@ namespace Westwind.MessageQueueing
                     continue;
                 }
 
-                
-                if (Manager.GetNextQueueMessage(QueueName) == null)
+                // Start by retrieving the next message if any
+                // ALWAYS create a new instance so the events get thread safe object
+                QueueMessageManager manager = ReflectionUtils.CreateInstanceFromType(ManagerType,ConnectionString ?? string.Empty) as QueueMessageManager;
+                                            
+    
+                if (manager.GetNextQueueMessage(QueueName) == null)
                 {
-                    if (!string.IsNullOrEmpty(Manager.ErrorMessage))
-                        this.OnNextMessageFailed(Manager, new ApplicationException(Manager.ErrorMessage));                        
+                    if (!string.IsNullOrEmpty(manager.ErrorMessage))
+                        OnNextMessageFailed(manager, new ApplicationException(manager.ErrorMessage));                        
 
                     // Nothing to do - wait for next poll interval
                     Thread.Sleep(WaitInterval);
@@ -104,7 +106,7 @@ namespace Westwind.MessageQueueing
                 }
                 
                 // Fire events to execute the real operations
-                ExecuteSteps(Manager);
+                ExecuteSteps(manager);
                                 
                 // let CPU breathe
                 Thread.Yield();
@@ -120,7 +122,7 @@ namespace Westwind.MessageQueueing
                 return;
 
             // next loop through checks will exit
-            this.Active = false;            
+            Active = false;            
         }
         
         /// <summary>
@@ -144,7 +146,7 @@ namespace Westwind.MessageQueueing
 
             for (int x = 0; x < threads; x++)
             {
-                Thread th = new Thread(new ThreadStart(this.StartProcessing));
+                Thread th = new Thread(StartProcessing);
                 th.Start();
             }
         }
@@ -165,17 +167,17 @@ namespace Westwind.MessageQueueing
             try
             {
                 // Hook up start processing
-                this.OnExecuteStart(manager);
+                OnExecuteStart(manager);
 
                 // Hookup end processing
-                this.OnExecuteComplete(manager);
+                OnExecuteComplete(manager);
             }
             catch(Exception ex)
             {
-                this.OnExecuteFailed(manager,ex);
+                OnExecuteFailed(manager,ex);
             }
 
-            this.MessagesProcessed++;
+            MessagesProcessed++;
         }
 
 
@@ -264,8 +266,8 @@ namespace Westwind.MessageQueueing
         /// </param>
         protected virtual void OnNextMessageFailed(QueueMessageManager manager, Exception ex)
         {
-            if (this.NextMessageFailed != null)
-                this.NextMessageFailed(manager, ex);
+            if (NextMessageFailed != null)
+                NextMessageFailed(manager, ex);
         }
 
 
@@ -295,74 +297,10 @@ namespace Westwind.MessageQueueing
 
         public virtual void Dispose()
         {
-            this.StopProcessing();
+            StopProcessing();
         }
 
     }
 
 
-#if false
-        
-        /// <summary>
-        /// The maximum number of threads for the pool. The thread size
-        /// determines the maximum number of requests that can be processed
-        /// side by side
-        /// </summary>
-        public int MaxThreadPoolSize
-        {
-            get { return _MaxThreadPoolSize; }
-            set { _MaxThreadPoolSize = value; }
-        }
-        private int _MaxThreadPoolSize = 3;
-
-
-        /// <summary>
-        /// Internal property to track current number of threads
-        /// for the delegate threadpool
-        /// </summary>
-        private int ThreadCount = 0;   
-        /// <summary>
-        /// Uses async delegates to execute QueueMessage operations. Keeps tracks
-        /// of active requests operating and limits the number delegates that get created
-        /// another
-        /// </summary>
-        /// <param name="ThreadCount">Number of simultaneous requests to process</param>
-        public void StartProcessingPool()
-        {            
-            this.Active = true;
-            while (this.Active)
-            {
-                if (this.ThreadCount > this.MaxThreadPoolSize)
-                {
-                    Thread.Sleep(10);
-                    continue;
-                }
-
-                QueueMessageManager MessageServer = new QueueMessageManager(this.ConnectionString);
-                if (!MessageServer.GetNextQueueMessage(this.MessageType))
-                {
-                    // Nothing to do - wait for next poll interval
-                    Thread.Sleep(this.PollInterval);
-                    continue;
-                }
-
-                this.ThreadCount++;
-
-                // Run asyncronously
-                delExecuteWithMessage delExecute = new delExecuteWithMessage(this.ExecuteSteps);
-                delExecute.BeginInvoke(MessageServer, this.ExecuteStepsComplete, null);
-            } 
-        }
-
-        /// <summary>
-        /// Callback on completion of ExecuteSteps Delegate. Used
-        /// to update the thread counter
-        /// </summary>
-        /// <param name="ar"></param>
-        void ExecuteStepsComplete(IAsyncResult ar)
-        {
-            this.ThreadCount--;
-        }
-
-#endif
 }

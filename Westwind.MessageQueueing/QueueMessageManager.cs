@@ -37,7 +37,7 @@ namespace Westwind.MessageQueueing
         public string DefaultQueue { get; set; }
 
         /// <summary>
-        /// Holds the actual entity data for a message
+        /// Holds the actual item data for a message
         /// </summary>
         public QueueMessageItem Item { get; set; }
 
@@ -101,9 +101,12 @@ namespace Westwind.MessageQueueing
         /// <param name="queueName"></param>
         /// <returns>item or null. Null can be returned when there are no items or when there is an error</returns>
         public abstract QueueMessageItem GetNextQueueMessage(string queueName = null);
-     
+
+
+        public abstract bool DeletePendingMessages(string queueName = null);
+
         /// <summary>
-        /// Creates a new entity instance and properly
+        /// Creates a new item instance and properly
         /// initializes the instance's values.
         /// </summary>
         /// <returns></returns>
@@ -116,7 +119,7 @@ namespace Westwind.MessageQueueing
 
             Item.__IsNew = true;
 
-            // ensure entity is properly configured
+            // ensure item is properly configured
             Item.Submitted = DateTime.UtcNow;
             Item.Status = "Submitted";
             Item.Started = null;
@@ -127,13 +130,13 @@ namespace Westwind.MessageQueueing
 
 
         /// <summary>
-        /// Saves the passed entity or the attached entity
+        /// Saves the passed item or the attached item
         /// to the database. Call this after updating properties
         /// or individual values.
         /// </summary>
-        /// <param name="entity"></param>
+        /// <param name="item"></param>
         /// <returns></returns>
-        public abstract bool Save(QueueMessageItem entity = null);
+        public abstract bool Save(QueueMessageItem item = null);
 
         /// <summary>
         ///  Determines if anqueue has been completed
@@ -152,27 +155,27 @@ namespace Westwind.MessageQueueing
         /// Sets the message properties for starting a new message request operation.
         /// Note the record is not written to the database use Save explicitly
         /// </summary>
-        /// <param name="entity">An existing entity instance</param>
-        public bool SubmitRequest(QueueMessageItem entity = null, string messageText = null, bool autoSave = false)
+        /// <param name="item">An existing item instance</param>
+        public bool SubmitRequest(QueueMessageItem item = null, string messageText = null, bool autoSave = false)
         {
-            if (entity == null)
-                entity = CreateItem();            
+            if (item == null)
+                item = CreateItem();            
 
-            entity.PercentComplete = 0;
-            entity.Status = "Submitted";
-            entity.Submitted = DateTime.UtcNow;
-            entity.Started = null;
-            entity.Completed = null;
-            entity.IsComplete = false;
-            entity.IsCancelled = false;
+            item.PercentComplete = 0;
+            item.Status = "Submitted";
+            item.Submitted = DateTime.UtcNow;
+            item.Started = null;
+            item.Completed = null;
+            item.IsComplete = false;
+            item.IsCancelled = false;
 
-            if (entity.Type == null)
-                entity.Type = this.DefaultQueue;
+            if (item.Type == null)
+                item.Type = this.DefaultQueue;
 
             if (messageText != null)
-                entity.Message = messageText;
+                item.Message = messageText;
 
-            Item = entity;
+            Item = item;
 
             if (autoSave)
                 return Save();
@@ -186,21 +189,21 @@ namespace Westwind.MessageQueueing
         /// to complete a request. Note record is not written
         /// to database - Call Save explicitly.
         /// </summary>
-        public bool CompleteRequest(QueueMessageItem entity = null, string messageText = null, bool autoSave = false)
+        public bool CompleteRequest(QueueMessageItem item = null, string messageText = null, bool autoSave = false)
         {
-            if (entity == null)
-                entity = Item;
-            if (entity == null)
-                entity = CreateItem();
+            if (item == null)
+                item = Item;
+            if (item == null)
+                item = CreateItem();
 
-            entity.PercentComplete = 100;
-            entity.Status = "Completed";
-            entity.Completed = DateTime.UtcNow;
-            entity.IsComplete = true;
-            entity.IsCancelled = false;
+            item.PercentComplete = 100;
+            item.Status = "Completed";
+            item.Completed = DateTime.UtcNow;
+            item.IsComplete = true;
+            item.IsCancelled = false;
 
             if (messageText != null)
-                entity.Message = messageText;
+                item.Message = messageText;
 
             if (autoSave)
                 return Save();
@@ -213,20 +216,20 @@ namespace Westwind.MessageQueueing
         /// to complete and cancel a request. Not saved to database
         /// call Save() explicitly.
         /// </summary>
-        public bool CancelRequest(QueueMessageItem entity = null, string messageText = null, bool autoSave = false)
+        public bool CancelRequest(QueueMessageItem item = null, string messageText = null, bool autoSave = false)
         {
-            if (entity == null)
-                entity = Item;
-            if (entity == null)
-                entity = CreateItem();
+            if (item == null)
+                item = Item;
+            if (item == null)
+                item = CreateItem();
 
-            entity.Status = "Cancelled";
-            entity.Completed = DateTime.UtcNow;
-            entity.IsComplete = true;
-            entity.IsCancelled = true;
+            item.Status = "Cancelled";
+            item.Completed = DateTime.UtcNow;
+            item.IsComplete = true;
+            item.IsCancelled = true;
 
             if (messageText != null)
-                entity.Message = messageText;
+                item.Message = messageText;
 
             if (autoSave)
                 return Save();
@@ -241,21 +244,21 @@ namespace Westwind.MessageQueueing
         /// <param name="status"></param>
         /// <param name="messageText"></param>
         /// <param name="percentComplete"></param>
-        public bool UpdateQueueMessageStatus(QueueMessageItem entity = null, string status = null, string messageText = null, int percentComplete = -1, bool autoSave = false)
+        public bool UpdateQueueMessageStatus(QueueMessageItem item = null, string status = null, string messageText = null, int percentComplete = -1, bool autoSave = false)
         {
-            if (entity == null)
-                entity = Item;
-            if (entity == null)
-                entity = CreateItem();
+            if (item == null)
+                item = Item;
+            if (item == null)
+                item = CreateItem();
 
             if (!string.IsNullOrEmpty(status))
-                entity.Status = status;
+                item.Status = status;
 
             if (!string.IsNullOrEmpty(messageText))
-                entity.Message = messageText;
+                item.Message = messageText;
 
             if (percentComplete > -1)
-                entity.PercentComplete = percentComplete;
+                item.PercentComplete = percentComplete;
 
             if (autoSave)
                 return Save();
@@ -430,7 +433,7 @@ namespace Westwind.MessageQueueing
 
         /// <summary>
         /// Loads the Properties dictionary with values from a Properties property of 
-        /// an entity object. Once loaded you can access the dictionary to read and write
+        /// an item object. Once loaded you can access the dictionary to read and write
         /// values from it arbitrarily and use SetProperties to write the values back
         /// in serialized form to the underlying property for database storage.
         /// </summary>
@@ -454,7 +457,7 @@ namespace Westwind.MessageQueueing
         }
 
         /// <summary>
-        /// Saves the Properties Dictionary - in serialized string form - to a specified entity field which 
+        /// Saves the Properties Dictionary - in serialized string form - to a specified item field which 
         /// in turn allows writing the data back to the database.
         /// </summary>
         /// <param name="stringFieldToSaveTo"></param>
