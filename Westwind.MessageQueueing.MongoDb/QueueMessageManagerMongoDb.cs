@@ -47,37 +47,14 @@ namespace Westwind.MessageQueueing
                 return _collection;
             }
         }
-        private MongoCollection<QueueMessageItem> _collection;
-
-        /// <summary>
-        /// Connection string used for this component
-        /// </summary>
-        public string ConnectionString { get; set; }
+        private MongoCollection<QueueMessageItem> _collection;    
 
 
-        public QueueMessageManagerMongoDb()
-        {
-            DefaultQueue = string.Empty;
+        public QueueMessageManagerMongoDb() : base()
+        {}
 
-            // 2 hours
-            MessageTimeout = new TimeSpan(2, 0, 0);            
-        }
-
-        public QueueMessageManagerMongoDb(QueueMessageManagerConfiguration configuration)
-        {
-            DefaultQueue = string.Empty;
-
-            // 2 hours
-            MessageTimeout = new TimeSpan(2, 0, 0);
-
-            Configuration = configuration;
-            ConnectionString = Configuration.ConnectionString;
-        }
-
-        public QueueMessageManagerMongoDb(string connectionString) : this()
-        {            
-            ConnectionString = connectionString;
-        }
+        public QueueMessageManagerMongoDb(string connectionString) : base(connectionString)
+        {}
 
 
         public override QueueMessageItem Load(string id)
@@ -244,7 +221,7 @@ namespace Westwind.MessageQueueing
         {
             // apply global values from this context if not passed
             if (string.IsNullOrEmpty(connectionString))
-                connectionString = Configuration.ConnectionString;
+                connectionString = ConnectionString;
 
             // if not specified use connection string with name of type
             if (string.IsNullOrEmpty(connectionString))

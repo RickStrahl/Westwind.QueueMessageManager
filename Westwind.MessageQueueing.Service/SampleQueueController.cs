@@ -13,9 +13,13 @@ namespace Westwind.MessageQueueing.Service
         private const string STR_STARTTIME_KEY = "_QMMC_StartTime";
         
         
-        public SampleQueueController()         
+        public SampleQueueController() : base()        
         { }
-  
+
+        public SampleQueueController(QueueMessageManagerConfiguration configuration = null, Type queueManagerType = null)
+            : base(configuration, queueManagerType)
+        {
+        }
 
         protected override void OnExecuteStart(QueueMessageManager manager)
         {

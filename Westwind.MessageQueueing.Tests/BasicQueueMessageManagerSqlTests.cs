@@ -27,11 +27,8 @@ namespace Westwind.MessageQueueing.Tests
             Console.WriteLine(manager.ConnectionString);
             Assert.IsTrue(manager.ConnectionString == CONNECTION_STRING,"ConnectionString is not set");
 
-            var config = new QueueMessageManagerConfiguration()
-            {                 
-                ConnectionString = "MyApplicationConnectionString"
-            };
-            manager = new QueueMessageManagerSql(config);
+
+            manager = new QueueMessageManagerSql("MyApplicationConnectionString");
             Console.WriteLine(manager.ConnectionString);
             Assert.IsTrue(manager.ConnectionString == "MyApplicationConnectionString");
         }

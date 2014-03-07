@@ -20,21 +20,30 @@ namespace Westwind.MessageQueueing
     /// </summary>
     public class QueueController : IDisposable        
     {
-        public QueueController(string connectionString = null,Type queueManagerType = null)
+        public QueueController(QueueMessageManagerConfiguration configuration = null, Type queueManagerType = null)
         {
             // Poll once a second
             WaitInterval = 1000;
             QueueName = string.Empty;
-            ConnectionString = connectionString;
-            
-            ManagerType = queueManagerType ?? typeof (QueueMessageManagerSql);            
-        }
 
+            Configuration = configuration;
+            if (Configuration == null)
+                Configuration = QueueMessageManagerConfiguration.Current;
+
+            ManagerType = queueManagerType ?? typeof(QueueMessageManagerSql);
+                        
+            ConnectionString = Configuration.ConnectionString;
+            ThreadCount = Configuration.ControllerThreads;
+            QueueName = Configuration.QueueName ?? string.Empty;
+            WaitInterval = Configuration.WaitInterval;
+        }
         
         /// <summary>
         /// Connection String for the database
         /// </summary>
         public string ConnectionString { get; set; }
+
+        public QueueMessageManagerConfiguration Configuration { get; set;  }
 
         /// <summary>
         /// Determines whether the controller is processing messages
@@ -92,7 +101,8 @@ namespace Westwind.MessageQueueing
 
                 // Start by retrieving the next message if any
                 // ALWAYS create a new instance so the events get thread safe object
-                QueueMessageManager manager = ReflectionUtils.CreateInstanceFromType(ManagerType,ConnectionString ?? string.Empty) as QueueMessageManager;
+                QueueMessageManager manager = null;
+                manager = ReflectionUtils.CreateInstanceFromType(ManagerType,ConnectionString ?? string.Empty) as QueueMessageManager;
                                             
     
                 if (manager.GetNextQueueMessage(QueueName) == null)

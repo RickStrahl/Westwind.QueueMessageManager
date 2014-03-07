@@ -47,10 +47,10 @@ namespace Westwind.MessageQueueing
         /// </summary>
         public QueueMessageManagerSerializationHelper Serialization { get; set; }
 
-        /// <summary>
-        /// Instance of the configuration object for queuemessage manager
-        /// </summary>
-        public QueueMessageManagerConfiguration Configuration { get; set; }
+        ///// <summary>
+        ///// Instance of the configuration object for queuemessage manager
+        ///// </summary>
+        //public QueueMessageManagerConfiguration Configuration { get; set; }
 
         /// <summary>
         /// Error information about the last error that occurred
@@ -70,20 +70,12 @@ namespace Westwind.MessageQueueing
             // 2 hours
             MessageTimeout = new TimeSpan(2, 0, 0);
 
-            Serialization = new QueueMessageManagerSerializationHelper(this);
-           
-            Configuration = QueueMessageManagerConfiguration.Current;
-            ConnectionString = Configuration.ConnectionString;
-        }
-
-        public QueueMessageManager(QueueMessageManagerConfiguration configuration) : this()
-        {
-            Configuration = configuration;
-            ConnectionString = Configuration.ConnectionString;
+            Serialization = new QueueMessageManagerSerializationHelper(this);                       
+            ConnectionString = QueueMessageManagerConfiguration.Current.ConnectionString;
         }
 
         public QueueMessageManager(string connectionString) : this()
-        {
+        {            
             ConnectionString = connectionString;
         }
 

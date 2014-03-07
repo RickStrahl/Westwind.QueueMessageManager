@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Westwind.Utilities;
 using Westwind.Utilities.Configuration;
 
 namespace Westwind.MessageQueueing
@@ -65,7 +66,21 @@ namespace Westwind.MessageQueueing
             Current = new QueueMessageManagerConfiguration();
             Current.Initialize(sectionName: "QueueManagerConfiguration");
         }
-        
+
+        /// <summary>
+        /// Creates a new instance of a configuration object that's
+        /// copied from the stock configuration.
+        /// 
+        /// Use this if you need to create multiple configurations
+        /// for multiple Controllers running at the same time.
+        /// </summary>
+        /// <returns></returns>
+        public static QueueMessageManagerConfiguration CreateConfiguration()
+        {
+            var manager = new QueueMessageManagerConfiguration();
+            DataUtils.CopyObjectData(Current, manager);
+            return manager;
+        }
     }
 
 

@@ -42,34 +42,14 @@ namespace Westwind.MessageQueueing
         }
         private SqlDataAccess _Db;
 
-        /// <summary>
-        /// Connection string used for this component
-        /// </summary>
-        public string ConnectionString { get; set; }
 
 
-        public QueueMessageManagerSql()
+        public QueueMessageManagerSql() : base()
         {
-            DefaultQueue = string.Empty;
-
-            // 2 hours
-            MessageTimeout = new TimeSpan(2, 0, 0);            
         }
-
-        public QueueMessageManagerSql(QueueMessageManagerConfiguration configuration)
-        {
-            DefaultQueue = string.Empty;
-
-            // 2 hours
-            MessageTimeout = new TimeSpan(2, 0, 0);
-
-            Configuration = configuration;
-            ConnectionString = Configuration.ConnectionString;
-        }
-
-        public QueueMessageManagerSql(string connectionString) : this()
-        {
-            ConnectionString = connectionString;
+    
+        public QueueMessageManagerSql(string connectionString) : base(connectionString)
+        {            
         }
 
 
@@ -396,7 +376,7 @@ namespace Westwind.MessageQueueing
         protected virtual SqlDataAccess LoadDal(string connectionString = null)
         {
             if (connectionString == null)
-                connectionString = Configuration.ConnectionString;            
+                connectionString = ConnectionString;            
 
             var db = new SqlDataAccess(connectionString);
 
