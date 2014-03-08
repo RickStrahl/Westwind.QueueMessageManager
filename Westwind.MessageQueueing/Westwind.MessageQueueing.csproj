@@ -75,19 +75,20 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="QueueMessageManagerSql.cs" />
-    <Compile Include="QueueMessageManager.cs" />
-    <Compile Include="QueueMessageItem.cs" />
+    <Compile Include="QueueController\QueueControllerMultiple.cs" />
+    <Compile Include="QueueManager\QueueMessageManagerSql.cs" />
+    <Compile Include="QueueManager\QueueMessageManager.cs" />
+    <Compile Include="QueueManager\QueueMessageItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="QueueMessageManagerConfiguration.cs" />
-    <Compile Include="QueueController.cs" />
-    <Compile Include="QueueMessageManagerSerializationHelper.cs" />
-    <Compile Include="Scheduler.cs" />
+    <Compile Include="QueueManager\QueueMessageManagerConfiguration.cs" />
+    <Compile Include="QueueController\QueueController.cs" />
+    <Compile Include="QueueManager\QueueMessageManagerSerializationHelper.cs" />
+    <Compile Include="Utilities\Scheduler.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -118,7 +119,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="QueueManager_Diagram.cd" />
+    <None Include="QueueManager\QueueManager_Diagram.cd" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">

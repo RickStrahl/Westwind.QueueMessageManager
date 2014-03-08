@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading;
 using Westwind.MessageQueueing;
@@ -21,6 +22,7 @@ namespace Westwind.MessageQueueing.Tests
             {
                 var item = new QueueMessageItem()
                 {
+                    Type = "Queue1",
                     Message = "Print Image",
                     Action = "PRINTIMAGE",
                     TextInput = "4334333" // image Id
@@ -41,7 +43,8 @@ namespace Westwind.MessageQueueing.Tests
             var controller = new QueueController()
             {
                 ThreadCount = 2 ,
-                WaitInterval = 200
+                WaitInterval = 200,
+                QueueName = "Queue1"
             };
             Console.WriteLine("Wait: " + controller.WaitInterval);
 
@@ -57,7 +60,7 @@ namespace Westwind.MessageQueueing.Tests
 
             // For test we have to keep the threads alive 
             // to allow the 3 requests to process
-            Thread.Sleep(800);
+            Thread.Sleep(2000);
 
             // shut down
             controller.StopProcessing();
@@ -168,6 +171,101 @@ namespace Westwind.MessageQueueing.Tests
         }
 
 
+        /// <summary>
+        /// This test demonstrates the QueueControllerMultiple
+        /// which allows loading up multiple queue processors
+        /// and start them running simultaneously side by side.
+        /// </summary>
+        [TestMethod]
+        public void QueueControllerMultipleTest()
+        {
+            var manager = new QueueMessageManagerSql();
+
+            // sample - create 3 message in 'default' queue
+            for (int i = 0; i < 3; i++)
+            {
+                var item = new QueueMessageItem()
+                {
+                    Message = "Print Image",
+                    Action = "PRINTIMAGE",
+                    TextInput = "4334333", // image Id
+                    Type = "Queue1"
+                };
+
+                // sets appropriate settings for submit on item
+                manager.SubmitRequest(item);
+
+                // item has to be saved
+                Assert.IsTrue(manager.Save(), manager.ErrorMessage);
+                Console.WriteLine("added to Queue1:" + manager.Item.Id);
+            }
+
+            // sample - create 3 message in 'default' queue
+            for (int i = 0; i < 3; i++)
+            {
+                var item = new QueueMessageItem()
+                {
+                    Message = "Print Image (2nd)",
+                    Action = "PRINTIMAGE",
+                    TextInput = "5334333", // image Id
+                    Type = "Queue2"
+                };
+
+                // sets appropriate settings for submit on item
+                manager.SubmitRequest(item);
+
+                // item has to be saved
+                Assert.IsTrue(manager.Save(), manager.ErrorMessage);
+                Console.WriteLine("added to Queue2: " + manager.Item.Id);
+            }
+
+            
+
+            // create a new Controller to process in the background
+            // on separate threads
+            var controller = new QueueControllerMultiple(new List<QueueController>()
+            {
+                new QueueController()
+                {
+                    QueueName = "Queue1", 
+                    WaitInterval = 300,
+                    ThreadCount = 5
+                },
+                new QueueController()
+                {
+                    QueueName = "Queue2",
+                    WaitInterval = 500, 
+                    ThreadCount = 3
+                }
+            });
+
+            // Point all controllers at the same execution handlers
+            // Alternately you can configure each controller with their
+            // own event handlers or implement custom controller subclasses
+            // that use the OnXXX handlers to handle the events
+            controller.ExecuteStart += controller_ExecuteStart;
+            controller.ExecuteComplete += controller_ExecuteComplete;
+            controller.ExecuteFailed += controller_ExecuteFailed;
+
+            // actually start the queue
+            Console.WriteLine("Starting... Async Manager Processing");
+
+            controller.StartProcessingAsync();
+
+
+            // For test we have to keep the threads alive 
+            // to allow the 10 requests to process
+            Thread.Sleep(3000);
+
+            // shut down
+            controller.StopProcessing();
+            
+            Thread.Sleep(200);
+
+            Console.WriteLine("Stopping... Async Manager Processing");
+            Assert.IsTrue(true);
+        }
+
         public int RequestCount = 0;
 
         /// <summary>
@@ -183,17 +281,18 @@ namespace Westwind.MessageQueueing.Tests
             if (item.Action == "PRINTIMAGE")
             {
                 // recommend you offload processing
-                //PrintImage(manager);
-                Interlocked.Increment(ref RequestCount);
+                //PrintImage(manager);                
             }
             else if (item.Action == "RESIZETHUMBNAIL")
+            {
                 //ResizeThumbnail(manager);
+            }
 
-                // just for kicks
-                Interlocked.Increment(ref RequestCount);
+            // just for kicks
+           Interlocked.Increment(ref RequestCount);
 
-            // third request should throw exception, trigger ExecuteFailed            
-            if (RequestCount > 2)
+            // every other request should throw exception, trigger ExecuteFailed            
+            if (RequestCount % 2 == 0)
             {
                 // Execption:
                 object obj = null;

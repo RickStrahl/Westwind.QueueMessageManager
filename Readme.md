@@ -70,7 +70,7 @@ completing messages.
 Typical client submission code looks like this:
 
 ```C#
-var manager = new QueueMessageManager();
+var manager = new QueueMessageManagerSql();
 
 string imageId = "10";
 
@@ -110,7 +110,7 @@ of the data fields to retrieve progress information or potentially in
 progress update data.
 
 ```C#
-var manager = new QueueMessageManager();
+var manager = new QueueMessageManagerSql();
 
 // assume you have a queueId
 string queueId = ...;
@@ -177,7 +177,7 @@ Here's what this looks like:
 public void QueueControllerTest()
 {
     // for testing - submit 3 client messages
-    var manager = new QueueMessageManager();
+    var manager = new QueueMessageManagerSql();
     for (int i = 0; i < 3; i++)
     {
         var item = new QueueMessageItem()
@@ -192,7 +192,7 @@ public void QueueControllerTest()
                 
         // item has to be saved
         Assert.IsTrue(manager.Save(), manager.ErrorMessage);
-        Console.WriteLine("added " + manager.Entity.Id);
+        Console.WriteLine("added " + manager.Item.Id);
     }
 
     Console.WriteLine("Starting... Async Manager Processing");
@@ -229,7 +229,7 @@ public int RequestCount = 0; // for testing
 private void controller_ExecuteStart(QueueMessageManager manager)
 {
     // get active queue item
-    var item = manager.Entity;
+    var item = manager.Item;
 
     // Typically perform tasks based on some Action/request
     if (item.Action == "PRINTIMAGE")
@@ -255,16 +255,16 @@ private void controller_ExecuteStart(QueueMessageManager manager)
     manager.CompleteRequest(messageText: "Completed request " + DateTime.Now, 
                             autoSave: true);
 
-    Console.WriteLine(manager.Entity.Id + " - Item Completed");
+    Console.WriteLine(manager.Item.Id + " - Item Completed");
 }        
 private void controller_ExecuteComplete(QueueMessageManager manager)
 {
     // Log or otherwise complete request
-    Console.WriteLine("Success: " + manager.Entity.Id)
+    Console.WriteLine("Success: " + manager.Item.Id)
 }                
 private void controller_ExecuteFailed(QueueMessageManager manager, Exception ex)
 {
-    Console.WriteLine("Failed (on purpose): " + manager.Entity.Id + " - " + ex.Message);
+    Console.WriteLine("Failed (on purpose): " + manager.Item.Id + " - " + ex.Message);
 }
 ```
 
@@ -278,7 +278,7 @@ public class MyController : QueueController
 {
     protected override OnExecuteStart(QueueMessageManager manager)
     {
-          string action = manager.Entity.Action;
+          string action = manager.Item.Action;
           if (action == "PrintImage")
               PrintImage(manager);
           else if (action == "CreateThumbnail")
@@ -295,7 +295,7 @@ public class MyController : QueueController
     
     private void PrintImage(QueueMessageManager manager)
     {
-        var item = manager.Entity;
+        var item = manager.Item;
         // do your processing
     }    
 }
@@ -309,9 +309,10 @@ controller.StartProcessingAsync();
 ```
 
 ###Configuration###
-The QueueMessageManager works with Sql Server to handle queue messaging. By
-default the QueueMessageManager uses configuration settings that are stored in the
-configuration file where you specify relevant settings:
+The QueueMessageManager works with a database data store to handle queue messaging. 
+Currently Sql Server is supported and we're working on a MongoDb version.
+By default the QueueMessageManager uses configuration settings that are stored 
+in the configuration file where you specify relevant settings:
 
 ```xml
 <QueueManagerConfiguration>
@@ -333,7 +334,9 @@ var config = new QueueMessageManagerConfiguration()
     ConnectionString = "MyApplicationConnectionString",
     ControllerThreads = 10
 };
-manager = new QueueMessageManager(config);
+
+// Now use the customer configuration
+manager = new QueueMessageManagerSql(config);
 Console.WriteLine(manager.ConnectionString);
 Assert.IsTrue(manager.ConnectionString == "MyApplicationConnectionString");
 ```
@@ -350,7 +353,9 @@ entry in the config <connectionStrings> section.
 Optional name of the queue that is to be checked for requests to be
 processed. The default name is an empty string which checks all queues.
 Note that you can have multiple queues and each queue operation can 
-be performed on a specific queue.
+be performed on a specific queue. You can override the queue in
+all requests individually - the queue name is most important for
+the QueueController.
 
 *WaitInterval*
 The interval in milliseconds to wait between checking for new queue items

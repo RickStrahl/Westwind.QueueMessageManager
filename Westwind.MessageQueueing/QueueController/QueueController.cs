@@ -25,25 +25,28 @@ namespace Westwind.MessageQueueing
             // Poll once a second
             WaitInterval = 1000;
             QueueName = string.Empty;
-
-            Configuration = configuration;
-            if (Configuration == null)
-                Configuration = QueueMessageManagerConfiguration.Current;
+            
+            if (configuration == null)
+                configuration = QueueMessageManagerConfiguration.Current;
 
             ManagerType = queueManagerType ?? typeof(QueueMessageManagerSql);
                         
-            ConnectionString = Configuration.ConnectionString;
-            ThreadCount = Configuration.ControllerThreads;
-            QueueName = Configuration.QueueName ?? string.Empty;
-            WaitInterval = Configuration.WaitInterval;
+            ConnectionString = configuration.ConnectionString;
+            ThreadCount = configuration.ControllerThreads;
+            QueueName = configuration.QueueName ?? string.Empty;
+            WaitInterval = configuration.WaitInterval;
         }
+
         
         /// <summary>
         /// Connection String for the database
         /// </summary>
         public string ConnectionString { get; set; }
 
-        public QueueMessageManagerConfiguration Configuration { get; set;  }
+        /// <summary>
+        /// Optional list of controllers passed into to the constructor
+        /// </summary>
+        protected IEnumerable<QueueController> Controllers { get; set; }
 
         /// <summary>
         /// Determines whether the controller is processing messages
@@ -86,7 +89,7 @@ namespace Westwind.MessageQueueing
         /// Synchronous Message Processing routine - will process one message after
         /// another
         /// </summary>        
-        public void StartProcessing()
+        public virtual void StartProcessing()
         {                        
             Active = true;
             Paused = false;
@@ -126,7 +129,7 @@ namespace Westwind.MessageQueueing
         /// <summary>
         /// Shuts down the Message Processing loop
         /// </summary>
-        public void StopProcessing()
+        public virtual void StopProcessing()
         {
             if (!OnStopProcessing())
                 return;
@@ -141,7 +144,7 @@ namespace Westwind.MessageQueueing
         /// stays active while the application monitors and processes the
         /// queue on a separate non-ui thread
         /// </summary>
-        public void StartProcessingAsync(int threads = -1)
+        public virtual void StartProcessingAsync(int threads = -1)
         {
             if (!OnStartProcessing())
                 return;
@@ -196,7 +199,7 @@ namespace Westwind.MessageQueueing
         /// Your user code can attach to this event and start processing
         /// with the message information.
         /// </summary>        
-        public event  Action<QueueMessageManager> ExecuteStart;
+        public virtual event  Action<QueueMessageManager> ExecuteStart;
 
 
         /// <summary>
@@ -211,14 +214,14 @@ namespace Westwind.MessageQueueing
         /// </param>
         protected virtual void OnExecuteStart(QueueMessageManager manager)
         {
-            if (this.ExecuteStart != null)
-                this.ExecuteStart(manager);
+            if (ExecuteStart != null)
+                ExecuteStart(manager);
         }
 
         /// <summary>
         /// Event fired when the asynch operation has successfully completed
         /// </summary>
-        public event Action<QueueMessageManager> ExecuteComplete;
+        public virtual event Action<QueueMessageManager> ExecuteComplete;
 
         /// <summary>
         /// Override this method to do any post processing that needs to happen
@@ -230,8 +233,8 @@ namespace Westwind.MessageQueueing
         /// </param>
         protected virtual void OnExecuteComplete(QueueMessageManager Message)
         {
-            if (this.ExecuteComplete != null)
-                this.ExecuteComplete(Message);
+            if (ExecuteComplete != null)
+                ExecuteComplete(Message);
         }
 
         /// <summary>
