@@ -225,13 +225,13 @@ namespace Westwind.MessageQueueing.Tests
             // on separate threads
             var controller = new QueueControllerMultiple(new List<QueueController>()
             {
-                new QueueController()
+                new QueueControllerMultiple()
                 {
                     QueueName = "Queue1", 
                     WaitInterval = 300,
                     ThreadCount = 5
                 },
-                new QueueController()
+                new QueueControllerMultiple()
                 {
                     QueueName = "Queue2",
                     WaitInterval = 500, 
@@ -246,12 +246,11 @@ namespace Westwind.MessageQueueing.Tests
             controller.ExecuteStart += controller_ExecuteStart;
             controller.ExecuteComplete += controller_ExecuteComplete;
             controller.ExecuteFailed += controller_ExecuteFailed;
-
+            
             // actually start the queue
             Console.WriteLine("Starting... Async Manager Processing");
 
             controller.StartProcessingAsync();
-
 
             // For test we have to keep the threads alive 
             // to allow the 10 requests to process
@@ -264,6 +263,8 @@ namespace Westwind.MessageQueueing.Tests
 
             Console.WriteLine("Stopping... Async Manager Processing");
             Assert.IsTrue(true);
+
+            Console.WriteLine("Processed: " + controller.MessagesProcessed);
         }
 
         public int RequestCount = 0;

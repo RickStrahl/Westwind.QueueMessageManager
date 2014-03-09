@@ -8,8 +8,14 @@ namespace Westwind.MessageQueueing
 {
     public class QueueControllerMultiple : QueueController
     {
-        protected IEnumerable<QueueController> Controllers;
-        
+        public List<QueueController> Controllers;
+
+        public QueueControllerMultiple(QueueMessageManagerConfiguration configuration = null, Type managerType = null) 
+            : base(configuration, managerType)
+        {
+            Controllers = new List<QueueController>();
+        }
+
         /// <summary>
         /// Pass in a list of controllers and their configuration to
         /// start all of the controllers processing simultaneously
@@ -24,6 +30,25 @@ namespace Westwind.MessageQueueing
             Controllers = controllerList;            
         }
 
+  
+
+      
+
+        /// <summary>
+        /// Counter that keeps track of how many messages have been processed 
+        /// since the server started.
+        /// </summary>
+        public override int MessagesProcessed
+        {
+            get
+            {
+                var count = 0;
+                foreach (var controller in Controllers)
+                    count += controller.MessagesProcessed;
+                return count;
+            }
+        }
+
 
         /// <summary>
         /// Event called when an individual request starts processing
@@ -35,7 +60,7 @@ namespace Westwind.MessageQueueing
         /// <summary>
         /// Event fired when the asynch operation has successfully completed
         /// </summary>
-        public virtual event Action<QueueMessageManager> ExecuteComplete;
+        public event Action<QueueMessageManager> ExecuteComplete;
 
         /// <summary>
         /// Event fired when the asynch operation has failed to complete (an exception
@@ -83,5 +108,13 @@ namespace Westwind.MessageQueueing
                 controller.StopProcessing();
             }
         }
+
+        public override void PauseProcessing(bool pause = true)
+        {
+            foreach (var controller in Controllers)
+                controller.Paused = pause;
+            
+        }        
+
     }
 }

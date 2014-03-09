@@ -51,29 +51,31 @@ namespace Westwind.MessageQueueing
         /// <summary>
         /// Determines whether the controller is processing messages
         /// </summary>
-        public bool Active {get; set; }
+        protected virtual bool Active {get; set;}
+      
 
         /// <summary>
         /// determines if the service is paused
-        /// </summary>
-        public bool Paused { get; set; }
+        /// </summary>        
+        public virtual bool Paused {get; set;}
+        
         
         /// <summary>
         /// Determines how often the control checks for new messages
         /// Set in milliseconds.
         /// </summary>
-        public int WaitInterval {get; set; }
+        public virtual int WaitInterval {get; set; }
         
         /// <summary>
         /// Number of threads processing the queue
         /// </summary>
-        public int ThreadCount { get; set; }
+        public virtual int ThreadCount { get; set; }
 
         /// <summary>
         /// Counter that keeps track of how many messages have been processed 
         /// since the server started.
         /// </summary>
-        public int MessagesProcessed {get; set; }
+        public virtual int MessagesProcessed { get; set; }
 
         /// <summary>
         /// Sets the types of messages that this controller is looking for
@@ -95,7 +97,7 @@ namespace Westwind.MessageQueueing
             Paused = false;
 
             while (Active)
-            {
+            {                
                 if (Paused)
                 {
                     Thread.Sleep(WaitInterval);
@@ -263,7 +265,7 @@ namespace Westwind.MessageQueueing
         /// Event fired when the read operation to retrieve the next message from
         /// the database has failed. Allows for error handling or logging.
         /// </summary>
-        public event Action<QueueMessageManager, Exception> NextMessageFailed;
+        public virtual event Action<QueueMessageManager, Exception> NextMessageFailed;
 
         /// <summary>
         /// Override this method to handle any errors that occured trying to receive 
@@ -305,6 +307,16 @@ namespace Westwind.MessageQueueing
         protected virtual bool OnStartProcessing()
         {
             return true;
+        }
+
+        /// <summary>
+        /// Pauses processing by keeping the thread alive
+        /// and waiting until the pause is unset
+        /// </summary>
+        /// <param name="pause"></param>
+        public virtual void PauseProcessing(bool pause = true)
+        {
+            Paused = pause;
         }
 
 
