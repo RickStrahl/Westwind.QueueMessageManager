@@ -207,7 +207,7 @@ namespace Westwind.MessageQueueing
             if (type == null)
                 type = string.Empty;
 
-            string sql = "select top " + itemCount + " * from QueueMessageItems where type=@0 order by submitted desc";
+            string sql = "select top " + itemCount + " * from QueueMessageItems with (NOLOCK) where type=@0 order by submitted desc";
             
             var items = Db.Query<QueueMessageItem>(sql, type);
             if (items == null)
@@ -257,7 +257,7 @@ namespace Westwind.MessageQueueing
             if (queueName == null)
                 queueName = string.Empty;
 
-            object result = Db.ExecuteScalar("select count(id) from QueueMessageItems " +
+            object result = Db.ExecuteScalar("select count(id) from QueueMessageItems with (NOLOCK) " +
                     "WHERE type=@0 AND started is null", queueName);
             if (result == null)
             {

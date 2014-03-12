@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Text;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using System.Transactions;
+using Westwind.Utilities;
 
 namespace Westwind.MessageQueueing.Tests
 {
@@ -372,5 +375,95 @@ namespace Westwind.MessageQueueing.Tests
             var manager = new QueueMessageManagerSql();            
             Assert.IsTrue(manager.CreateDatastore(),manager.ErrorMessage);            
         }
+
+        [TestMethod]
+        public void ScaleRetrievalTest()
+        {
+
+            var manager = new QueueMessageManagerSql();
+            
+            for (int i = 0; i < 2500; i++)
+            {
+                string imageId = "10";
+
+                // Create a message object
+                // item contains many properties for pushing
+                // values back and forth as well as a  few message fields
+                var item = manager.CreateItem();
+                item.Type = "Queue1";
+                item.TextInput = DataUtils.GenerateUniqueId(15);
+
+                // Set the message status and timestamps as submitted             
+                manager.SubmitRequest(item,autoSave: true);
+            }
+
+
+            Console.WriteLine("Items inserted.");
+
+            IdList = new List<string>();
+            IdErrors = new List<string>();
+
+            for (int i = 0; i < 20; i++)
+            {
+                var thread = new Thread(ProcessGetNextItem);
+                thread.Start();
+            }
+
+            //Task.Run(() =>
+            //{
+            //    for (int i = 0; i < 100; i++)
+            //    {
+            //        manager = new QueueMessageManagerSql();
+
+            //        string imageId = "10";
+
+            //        // Create a message object
+            //        // item contains many properties for pushing
+            //        // values back and forth as well as a  few message fields
+            //        var item = manager.CreateItem();
+            //        item.Type = "Queue1";
+            //        item.TextInput = DataUtils.GenerateUniqueId(15);
+
+            //        // Set the message status and timestamps as submitted             
+            //        manager.SubmitRequest(item, autoSave: true);
+            //    }
+
+            //    Thread.Sleep(60);
+            //});
+
+
+            Console.WriteLine("Waiting for 5 seconds");
+            Thread.Sleep(7000);
+
+            Console.WriteLine("Done");
+
+            Console.WriteLine("Items processed: " + IdList.Count);
+
+            var grouped = IdList.GroupBy(s => s);
+            Console.WriteLine("Unique Count: " + grouped.Count());
+
+            foreach (var error in IdErrors)
+                Console.WriteLine("  " + error);
+
+        }
+
+        private static object GetNextItemLock = new Object();
+        private List<string> IdList;
+        private List<string> IdErrors;
+
+        void ProcessGetNextItem()
+        {
+            for (int i = 0; i < 2000; i++)
+            {
+                var manager = new QueueMessageManagerSql();
+                var item = manager.GetNextQueueMessage("queue1");
+                if (item != null)
+                    IdList.Add(item.Id);
+                else
+                    IdErrors.Add(manager.ErrorMessage);
+
+                Thread.Yield();
+            }
+        }        
     }
 }
