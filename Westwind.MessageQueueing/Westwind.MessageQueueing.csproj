@@ -68,6 +68,7 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Messaging" />
     <Reference Include="System.Xml" />
     <Reference Include="Westwind.Utilities, Version=2.50.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -76,7 +77,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="QueueController\QueueControllerMultiple.cs" />
-    <Compile Include="QueueManager\QueueMessageManagerSql.cs" />
+    <Compile Include="QueueManagerSql\QueueMessageManagerSqlMsMq.cs" />
+    <Compile Include="QueueManagerSql\QueueMessageManagerSql.cs" />
     <Compile Include="QueueManager\QueueMessageManager.cs" />
     <Compile Include="QueueManager\QueueMessageItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

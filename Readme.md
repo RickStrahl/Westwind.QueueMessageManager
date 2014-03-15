@@ -1,10 +1,20 @@
-#Westwind.QueueMessageManager
+#Westwind.QueueMessaging
 ####.NET Library to provide a simple, two-way messaging queue for enabling offloading of long running operations to other processes/machines####
 This .NET library provides a simple and easy to implement mechanism for  offloading 
-async processing for long running or CPU intensive tasks. It also provides two-way status
-and progress messaging. The library uses a SQL Server table to hold the 'message' 
-information and processing instructions that can be accessed repeatedly by both the 
-client and server to provide two way communication during processing of a message.
+async processing for long running or CPU intensive tasks, to other processes or threads
+or even for processing on remote machines. 
+
+Unlike traditional queue services though this implementation allows for two-way messaging
+between the client and the async processing server, to allow for progress information,
+cancelling and completion information. So unlike traditional Queues which only let you pop
+items of the queue, this library lets both client and server have access to the updated 
+message item that allows for the two-way communication. 
+
+The library uses a database server table to hold the 'message'  information and processing 
+instructions that can be accessed repeatedly by both the client and server to provide 
+two way communication during processing of a message. Messages are guaranteed to be picked
+up only once, and then are made available to both client and server to allow for status
+update information and for reading the actual message data.
 
 The message data is generic so, you can pass any kind of string or string serializable 
 data as input or receive it as result output. The message structure also supports 
@@ -15,31 +25,34 @@ need to be offloaded either to background threads (say in an ASP.NET application
 to remote machines for async processing. The client can then check back for completion
 and/or progress information if the server provides it.
 
-Both client (QueueMessageManager) and server (QueueController )are provided by this 
-library, and the server can be hosted in any kind of application and run in the background.
+Both client (QueueMessageManager) and server (QueueController) are provided by this 
+library, and the server can be hosted in any kind of .NET application including
+console apps, services, Windows desktop apps (WinForms, WPF) and even inside of
+a ASP.NET or OWin self-hosted process and run in the background on its own threads.
 
-Because the queue is running in SQL Server it's easy to scale to any machine that can
-access the SQL Server that hosts the messaging table. You can add additional
-threads, or additional machines to handle the remote processing as your load increases.
- 
-Unlike traditional Message Queues, this implementation allows for read/write access to 
-message items so that progress information can be shared as well as having an easy mechanism
-for determining completion status which is non-trivial with pure Queue implementations.
+Because the queue is running using a database server it's easy to scale to 
+any machine that can access a supported db server. You can add additional
+threads, or additional machines to handle the remote processing as your 
+load increases.
 
-Currently only supports SQL Server and SQL Compact.
+Currently only supports SQL Server, SQL Compact and MongoDb as data stores.
 
+###Typical Processing###
 A typical messaging process with the Queueing components goes like this:
 
+* Client creats a message object and sets its properties to pass data in
+  for processing. Typically you set the 'Action' property and one of the
+  data fields to pass data like TextInput, BinaryResult, Xml etc.
 * Client submits a message with QueueMessageManager and SubmitRequest()
-* Server (QueueController) polls for queue messages and pops off any pending queue items
-* Server picks up the message by 'popping off' the next pending Queue message
-* Server routes the message for processing to ExecuteStart() method
-* QueueController class implements logic to handle processing of message requests
 * Messages are identified by a unique ID and an 'action' used for routing
+* Server (QueueController) polls for queue messages and pops off any  pending queue items
+* Server picks up the message by 'popping off' the next pending Queue message
+* Server routes the message for processing to ExecuteStart/OnExecuteStart event/method
+* QueueController class implements logic to handle processing of message requests
+  by implementing ExecuteStart/ExecuteComplete/ExecuteFaile handlers
 * Server starts processing the message asynchronously
-* You implement ExecuteStart handler that performs async or remote processing task
 * Server optionally writes progress information into Queue record as it processes
-* Client can optionally query the queue record for progress information
+* Client can optionally query the message for progress information
 * Server completes request and optionally writes result data into record
 * Server fires ExecuteComplete or ExecuteFailed
 * Client checks and finds completed message and picks up results
@@ -77,7 +90,7 @@ string imageId = "10";
 // Create a message object
 // item contains many properties for pushing
 // values back and forth as well as a  few message fields
-var item = manager.NewEntity();
+var item = manager.CreateItem();
 item.Action = "PRINTIMAGE";
 item.TextInput = imageId;
 item.Message = "Print Image operation started at " + DateTime.Now.ToString();
@@ -112,11 +125,10 @@ progress update data.
 ```C#
 var manager = new QueueMessageManagerSql();
 
-// assume you have a queueId
+// assume you have held on to the queueId
 string queueId = ...;
 
 // load the message 
-var manager = new QueueMessageManager();
 item = manager.Load(queueId);
 
 Assert.IsNotNull(item, manager.ErrorMessage);
@@ -156,11 +168,21 @@ to notify of new incoming messages to process. The customized code can then exam
 the QueueMessageItem for its properties to determine how to process the message.
 Typically an Action can be set on the QueueMessageItem to route processing.
 
+*QueueController is optional*<br/>
+Although QueueController is recommended to handle the polling for messages and firing
+requests into the event handlers automatically, it's not required. You can also have
+two applications pushing and pulling out queue messages on a peer to peer basis and
+pick up messages as they need them.
+
 ###Implementing a QueueController to process Queued Requests###
-The QueueController is a background task that spins up several threads and
-then pings the queue table for new messages. When new messages arrive it
+The QueueController is a background task that spins up a configured number of threads 
+and then pings the queue table for new messages. When new messages arrive it
 fires ExecuteStart, ExecuteComplete and ExecuteFailed events that you
-can hook your application logic to.
+can hook your application logic to execute the actual tasks you need to perform
+- usually filtered based on an Action parameter.
+It runs continually on a background thread until you stop it, so it's ideal for an 
+an always-on 'application server' scenario that can run in a Service type application
+or even inside of an ASP.NET Web application started from Application_Start().
 
 The QueueController can be plugged into any kind of application as long
 as the application has a lifetime to keep the controller alive. This can

@@ -1,13 +1,8 @@
 using System;
-using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
 using Westwind.MessageQueueing.Properties;
-using System.Data;
-using Westwind.Utilities;
 using System.Collections.Generic;
 using Westwind.Utilities.Data;
-using System.Diagnostics;
 
 namespace Westwind.MessageQueueing
 {
@@ -16,6 +11,13 @@ namespace Westwind.MessageQueueing
     /// that provides random acccess to requests so they can be retrived
     /// for long running tasks where both client and server can interact
     /// with each message for processing.
+    /// 
+    /// This implementation uses purely SQL server data access to handle
+    /// the queue which works well for low to medium work loads and as long
+    /// as waiting queue items stay relatively low (under a few thousand).
+    /// If load gets heavier than that use the MsMq variant that offloads
+    /// the next message de-queueing to MsMq, while leaving the actual 
+    /// messages in SQL Server.
     /// 
     /// Great for long running tasks or even light workflow scenarios.
     /// </summary>    
@@ -42,7 +44,12 @@ namespace Westwind.MessageQueueing
         }
         private SqlDataAccess _Db;
 
-
+        /// <summary>
+        /// If true automatically attempts to create the database if
+        /// it doesn't exist. Note this adds a little overhead as a single
+        /// query is run to check for existance. False by default.
+        /// </summary>
+        public bool AutoCreateDataStore { get; set;  }
 
         public QueueMessageManagerSql() : base()
         {
@@ -54,7 +61,7 @@ namespace Westwind.MessageQueueing
 
 
         /// <summary>
-        /// Loads a Queue Item
+        /// Loads a Queue Item by its associated id
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -65,79 +72,21 @@ namespace Westwind.MessageQueueing
             if (Item == null)
                 SetError(Db.ErrorMessage);
             else
+            {
                 // load up Properties from XmlProperties field
                 this.GetProperties("XmlProperties", Item);
-            
-            Item.__IsNew = false;
+                Item.__IsNew = false;
+            }
 
             return Item;
         }
 
         /// <summary>
-        /// Retrieves the next pending Message from the Queue based on a provided type
-        /// </summary>
-        /// <param name="queueName"></param>
-        /// <returns>item or null. Null can be returned when there are no items or when there is an error</returns>
-        public override QueueMessageItem GetNextQueueMessage(string queueName = null)
-        {
-            if (queueName == null)
-                queueName = DefaultQueue;
-            
-            var enumItems = Db.ExecuteStoredProcedureReader<QueueMessageItem>("qmm_GetNextQueueMessageItem",
-                                                                              Db.CreateParameter("@type", queueName));
-            if (enumItems == null)
-            {
-                SetError(Db.ErrorMessage);
-                return null;
-            }
-
-            try
-            {
-                Item = enumItems.FirstOrDefault();
-            }
-            catch (Exception ex)
-            {
-                SetError(ex, true);
-                return null;
-            }
-
-            if (Item == null)
-                return null;
-
-            Item.__IsNew = false;
-            Item.Status = "Started";
-
-            // load up Properties from XmlProperties field
-            this.GetProperties("XmlProperties", Item);
-
-            return Item;
-        }
-
-        /// <summary>
-        /// Deletes all pending messages
-        /// </summary>
-        /// <param name="queueName">Optional queue to delete them on. If null all are deleted</param>
-        /// <returns></returns>
-        public override bool DeletePendingMessages(string queueName = null)
-        {
-            string sql = "delete from QueueMessageItems where ISNULL(Started,0) = 0";
-            if (queueName != null)
-                sql += " and type=@0";
-
-            int res = Db.ExecuteNonQuery(sql,queueName);
-            if (res < 0)
-            {
-                SetError(Db.ErrorMessage);
-                return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Saves the passed item or the attached item
+        /// Saves the passed message item or the attached item
         /// to the database. Call this after updating properties
         /// or individual values.
+        /// 
+        /// Inserts or updates based on whether the ID exists
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
@@ -147,7 +96,7 @@ namespace Westwind.MessageQueueing
                 item = Item;
 
             // Write the Properties collection to the XmlProperties field
-            this.SetProperties("XmlProperties", item);
+            SetProperties("XmlProperties", item);
 
 
             bool result = false;
@@ -176,6 +125,87 @@ namespace Westwind.MessageQueueing
         }
 
         /// <summary>
+        /// Retrieves the next pending Message from the Queue based on a provided queueName
+        /// </summary>
+        /// <param name="queueName"></param>
+        /// <returns>item or null. Null can be returned when there are no items or when there is an error</returns>
+        public override QueueMessageItem GetNextQueueMessage(string queueName = null)
+        {
+            if (queueName == null)
+                queueName = DefaultQueue;
+            
+            var enumItems = Db.ExecuteStoredProcedureReader<QueueMessageItem>("qmm_GetNextQueueMessageItem",
+                                                                              Db.CreateParameter("@QueueName", queueName));
+            if (enumItems == null)
+            {
+                SetError(Db.ErrorMessage);
+                return null;
+            }
+
+            try
+            {
+                Item = enumItems.FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                SetError(ex, true);
+                return null;
+            }
+
+            if (Item == null)
+                return null;
+
+            Item.__IsNew = false;
+            Item.Status = "Started";
+
+            // load up Properties from XmlProperties field
+            this.GetProperties("XmlProperties", Item);
+
+            return Item;
+        }
+
+
+        /// <summary>
+        /// Deletes a particular message by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public override bool DeleteMessage(string id)
+        {
+            SetError();
+
+            int result = Db.ExecuteNonQuery("Delete from queuemessageItems where id=@0", id);
+            if (result == -1)
+            {
+                SetError(Db.ErrorMessage);
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Deletes all pending messages
+        /// </summary>
+        /// <param name="queueName">Optional queue to delete them on. If null all are deleted</param>
+        /// <returns></returns>
+        public override bool DeleteWaitingMessages(string queueName = null)
+        {
+            string sql = "delete from QueueMessageItems where ISNULL(Started,0) = 0";
+            if (queueName != null)
+                sql += " and QueueName=@0";
+
+            int res = Db.ExecuteNonQuery(sql,queueName);
+            if (res < 0)
+            {
+                SetError(Db.ErrorMessage);
+                return false;
+            }
+
+            return true;
+        }
+
+       
+        /// <summary>
         ///  Determines if anqueue has been completed
         /// successfully or failed.
         /// 
@@ -199,17 +229,17 @@ namespace Westwind.MessageQueueing
         /// <summary>
         /// Returns a list of recent queue items
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="queueName"></param>
         /// <param name="itemCount"></param>
         /// <returns></returns>
-        public override IEnumerable<QueueMessageItem> GetRecentQueueItems(string type = null, int itemCount = 25)
+        public override IEnumerable<QueueMessageItem> GetRecentQueueItems(string queueName = null, int itemCount = 25)
         {
-            if (type == null)
-                type = string.Empty;
+            if (queueName == null)
+                queueName = string.Empty;
 
-            string sql = "select top " + itemCount + " * from QueueMessageItems with (NOLOCK) where type=@0 order by submitted desc";
+            string sql = "select top " + itemCount + " * from QueueMessageItems with (NOLOCK) where QueueName=@0 order by submitted desc";
             
-            var items = Db.Query<QueueMessageItem>(sql, type);
+            var items = Db.Query<QueueMessageItem>(sql, queueName);
             if (items == null)
             {
                 SetError(Db.ErrorMessage);
@@ -237,7 +267,7 @@ namespace Westwind.MessageQueueing
             IEnumerable<QueueMessageItem> items;
 
             items = Db.Query<QueueMessageItem>("select TOP " + maxCount + " * from QueueMessageItems " +
-                        "WHERE type=@0 AND iscomplete = 0 AND started is not null AND completed is null " +
+                        "WHERE queueName=@0 AND iscomplete = 0 AND started is not null AND completed is null " +
                         "ORDER BY started DESC", queueName);
 
             if (items == null)
@@ -251,14 +281,14 @@ namespace Westwind.MessageQueueing
         /// to be processed - this is the queue backup.
         /// </summary>
         /// <param name="queueName"></param>
-        /// <returns></returns>
+        /// <returns>Count or -1 on failure</returns>
         public override int GetWaitingQueueMessageCount(string queueName = null)
         {
             if (queueName == null)
                 queueName = string.Empty;
 
             object result = Db.ExecuteScalar("select count(id) from QueueMessageItems with (NOLOCK) " +
-                    "WHERE type=@0 AND started is null", queueName);
+                    "WHERE queueName=@0 AND started is null", queueName);
             if (result == null)
             {
                 SetError(Db.ErrorMessage);
@@ -274,7 +304,7 @@ namespace Westwind.MessageQueueing
         /// to be processed - this is the queue backup.
         /// </summary>
         /// <param name="queueName"></param>
-        /// <returns></returns>
+        /// <returns>list of messages or null</returns>
         public override IEnumerable<QueueMessageItem> GetWaitingQueueMessages(string queueName = null, int maxCount = 0)
         {
             if (maxCount == 0)
@@ -284,8 +314,8 @@ namespace Westwind.MessageQueueing
 
             IEnumerable<QueueMessageItem> items;
 
-            items = Db.Query<QueueMessageItem>("select TOP " + maxCount + " * from QueueMessageItems " +
-                    "WHERE type=@0 AND iscomplete = 0 and started is null " +
+            items = Db.Query<QueueMessageItem>("select TOP " + maxCount + " * from QueueMessageItems (NOLOCK) " +
+                    "WHERE QueueName=@0 AND started is null " +
                     "ORDER BY submitted DESC", queueName);
             if (items == null)
                 SetError(Db.ErrorMessage);
@@ -308,7 +338,7 @@ namespace Westwind.MessageQueueing
             IEnumerable<QueueMessageItem> items;
 
             items = Db.Query<QueueMessageItem>("select TOP " + maxCount + " * from QueueMessageItems " +
-                    "WHERE type=@0 AND iscomplete = 1" +
+                    "WHERE queueName=@0 AND iscomplete = 1" +
                     "ORDER BY completed DESC", queueName);
             if (items == null)
                 SetError(Db.ErrorMessage);
@@ -334,7 +364,7 @@ namespace Westwind.MessageQueueing
 
             IEnumerable<QueueMessageItem> items;
             items = Db.Query<QueueMessageItem>("select TOP " + maxCount + " * from QueueMessageItems " +
-                    "WHERE type=@0 AND iscomplete = 0 AND started < @1 " +
+                    "WHERE queueName=@0 AND iscomplete = 0 AND started < @1 " +
                     "ORDER BY started DESC", queueName, dt);
             if (items == null)
                 SetError(Db.ErrorMessage);
@@ -358,7 +388,7 @@ namespace Westwind.MessageQueueing
             
             IEnumerable<QueueMessageItem> items;
             items = Db.Query<QueueMessageItem>("select TOP " + maxCount + " * from QueueMessageItems " +
-                    "WHERE type=@0 AND iscancelled = 1 " +
+                    "WHERE queueName=@0 AND iscancelled = 1 " +
                     "ORDER BY started DESC", queueName);
             
             if (items == null)
@@ -380,19 +410,25 @@ namespace Westwind.MessageQueueing
 
             var db = new SqlDataAccess(connectionString);
 
-            var result = db.ExecuteNonQuery("select id from QueueMessageItems");
-            
-            //// table doesn't exist - try to create
-            //if (db.ErrorNumber == -2146232060)
-            //{
-            //    // hack - avoid recursion here because 
-            //    // _Db is not set yet when in constructor
-            //    _Db = db; 
-            //    if (!CreateDataStore())
-            //        throw new ArgumentException(Resources.CouldntAccessQueueDatabase);
-            //}
-            //else if (db.ErrorNumber != 0)
-            //    throw new ArgumentException(Resources.CouldntAccessQueueDatabase);
+            if (AutoCreateDataStore)
+            {
+                var result = db.ExecuteNonQuery("select id from QueueMessageItems where id='@!@'");
+                if (result == -1)
+                {
+
+                    // table doesn't exist - try to create
+                    if (db.ErrorNumber == -2146232060)
+                    {
+                        // hack - avoid recursion here because 
+                        // _Db is not set yet when in constructor
+                        _Db = db;
+                        if (!CreateDatastore())
+                            throw new ArgumentException(Resources.CouldntAccessQueueDatabase + "\r\n" + ErrorMessage);
+                    }
+                    else if (db.ErrorNumber != 0)
+                        throw new ArgumentException(Resources.CouldntAccessQueueDatabase);
+                }
+            }
 
             return db;
         }
@@ -455,33 +491,33 @@ SET ANSI_PADDING ON
 GO
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[QueueMessageItems]') AND type in (N'U'))
 BEGIN
-    CREATE TABLE [dbo].[QueueMessageItems](
-	    [Id] [nvarchar](50) NOT NULL,
-	    [Type] [nvarchar](40) NULL,
-	    [Status] [nvarchar](50) NULL,
-	    [Action] [nvarchar](80) NULL,
-	    [Submitted] [datetime] NOT NULL,
-	    [Started] [datetime] NULL,
-	    [Completed] [datetime] NULL,
-	    [IsComplete] [bit] NOT NULL,
-	    [IsCancelled] [bit] NOT NULL,
-	    [Expire] [int] NOT NULL,
-	    [Message] [nvarchar](max) NULL,
-	    [TextResult] [nvarchar](max) NULL,
-	    [BinResult] [varbinary](max) NULL,
-	    [NumberResult] [decimal](18, 2) NOT NULL,
-	    [Xml] [nvarchar](max) NULL,
-	    [TextInput] [nvarchar](max) NULL,
-	    [TextOutput] [nvarchar](max) NULL,
-	    [PercentComplete] [int] NOT NULL,
-	    [XmlProperties] [nvarchar](max) NULL,
-     CONSTRAINT [PK_dbo.QueueMessageItems] PRIMARY KEY CLUSTERED 
-    (
-	    [Id] ASC
-    )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-    ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
- 
-    SET ANSI_PADDING OFF
+CREATE TABLE [dbo].[QueueMessageItems](
+	[Id] [nvarchar](50) NOT NULL,
+	[QueueName] [nvarchar](40) NULL,
+	[Status] [nvarchar](50) NULL,
+	[Action] [nvarchar](80) NULL,
+	[Submitted] [datetime] NOT NULL,
+	[Started] [datetime] NULL,
+	[Completed] [datetime] NULL,
+	[IsComplete] [bit] NOT NULL,
+	[IsCancelled] [bit] NOT NULL,
+	[Expire] [int] NOT NULL,
+	[Message] [nvarchar](max) NULL,
+    [TextInput] [nvarchar](max) NULL,	
+    [TextResult] [nvarchar](max) NULL,	
+	[NumberResult] [decimal](18, 2) NOT NULL,	
+    [Data] [nvarchar] (max) NULL,    
+    [BinData] [varbinary](max) NULL,
+    [Xml] [nvarchar](max) NULL,
+    [Json] [nvarchar] (max) NULL,		
+	[PercentComplete] [int] NOT NULL,
+	[XmlProperties] [nvarchar](max) NULL,
+ CONSTRAINT [PK_dbo.QueueMessageItems] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
 
     ALTER TABLE [dbo].[QueueMessageItems] ADD  CONSTRAINT [DF_QueueMessageItems_Id]  DEFAULT (CONVERT([nvarchar](36),newid())) FOR [Id]
     ALTER TABLE [dbo].[QueueMessageItems] ADD  CONSTRAINT [DF_QueueMessageItems_IsComplete]  DEFAULT ((0)) FOR [IsComplete]
@@ -498,11 +534,20 @@ BEGIN
     (
 	    [Started] ASC
     )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY] 
-    CREATE NONCLUSTERED INDEX [IX_QueueMessageItems_Type] ON [dbo].[QueueMessageItems]
+
+    CREATE NONCLUSTERED INDEX [IX_StartedNull] ON [dbo].[QueueMessageItems]
     (
-	    [Type] ASC
+	    [Started] ASC
+    )
+    WHERE ([Started] IS NULL)
+    WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+    
+    CREATE NONCLUSTERED INDEX [IX_QueueMessageItems_QueueName] ON [dbo].[QueueMessageItems]
+    (
+	    [QueueName] ASC
     )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY] 
-  CREATE NONCLUSTERED INDEX [IX_QueueMessageItems_Submitted] ON [dbo].[QueueMessageItems]
+
+    CREATE NONCLUSTERED INDEX [IX_QueueMessageItems_Submitted] ON [dbo].[QueueMessageItems]
     (
 	    [Submitted] ASC
     )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY] 
@@ -512,17 +557,17 @@ GO
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[qmm_GetNextQueueMessageItem]') AND type in (N'P', N'PC'))
 BEGIN
 EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE  [dbo].[qmm_GetNextQueueMessageItem]
-  @Type nvarchar(80)
+  @QueueName nvarchar(80), @Count int = 1
  AS
  
    UPDATE QueueMessageItems
           SET [Started] = GetUtcDate(), [Status] = ''Started''
 		  OUTPUT INSERTED.*		  
           WHERE Id in (
-			  SELECT TOP 1 
+			  SELECT TOP(@Count)
 				   Id FROM QueueMessageItems WITH (UPDLOCK)	   
-				   WHERE  [Started] is null and              
-						 type =  @Type
+				   WHERE [QueueName] =  @QueueName AND
+                         [Started] is null         						 
 				   ORDER BY Submitted  
 		  )
 ' 

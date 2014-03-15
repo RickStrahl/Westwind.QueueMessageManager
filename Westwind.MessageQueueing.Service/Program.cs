@@ -15,7 +15,7 @@ namespace Westwind.MessageQueueing.Service
         /// </summary>
         /// <param name="args">
         /// Three positional parameters can be passed:
-        ///  1  -  Message Type 
+        ///  1  -  Message QueueName 
         ///  2  -  Thread Count  (2)
         ///  3  -  Poll Interval  (1000)
         /// </param>

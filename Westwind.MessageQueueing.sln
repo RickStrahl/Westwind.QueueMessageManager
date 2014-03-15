@@ -18,6 +18,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Westwind.MessageQueueing.Se
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{6FC1FCB5-6238-423F-A7C4-FF4C01C8291C}"
 	ProjectSection(SolutionItems) = preProject
+		Changelog.md = Changelog.md
 		Readme.md = Readme.md
 	EndProjectSection
 EndProject

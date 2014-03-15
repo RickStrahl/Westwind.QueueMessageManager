@@ -22,7 +22,7 @@ namespace Westwind.MessageQueueing.Tests
             {
                 var item = new QueueMessageItem()
                 {
-                    Type = "Queue1",
+                    QueueName = "Queue1",
                     Message = "Print Image",
                     Action = "PRINTIMAGE",
                     TextInput = "4334333" // image Id
@@ -85,7 +85,7 @@ namespace Westwind.MessageQueueing.Tests
                     Message = "Print Image",
                     Action = "PRINTIMAGE",
                     TextInput = "4334333", // image Id
-                    Type="Queue1"
+                    QueueName="Queue1"
                 };
 
                 // sets appropriate settings for submit on item
@@ -104,7 +104,7 @@ namespace Westwind.MessageQueueing.Tests
                     Message = "Print Image (2nd)",
                     Action = "PRINTIMAGE",
                     TextInput = "5334333", // image Id
-                    Type = "Queue2"
+                    QueueName = "Queue2"
                 };
 
                 // sets appropriate settings for submit on item
@@ -189,7 +189,7 @@ namespace Westwind.MessageQueueing.Tests
                     Message = "Print Image",
                     Action = "PRINTIMAGE",
                     TextInput = "4334333", // image Id
-                    Type = "Queue1"
+                    QueueName = "Queue1"
                 };
 
                 // sets appropriate settings for submit on item
@@ -208,7 +208,7 @@ namespace Westwind.MessageQueueing.Tests
                     Message = "Print Image (2nd)",
                     Action = "PRINTIMAGE",
                     TextInput = "5334333", // image Id
-                    Type = "Queue2"
+                    QueueName = "Queue2"
                 };
 
                 // sets appropriate settings for submit on item
@@ -310,11 +310,11 @@ namespace Westwind.MessageQueueing.Tests
             var item = manager.Item;
 
             // Log or otherwise complete request
-            Console.WriteLine(item.Id + " - " + item.Type +  " - Item Completed");
+            Console.WriteLine(item.Id + " - " + item.QueueName +  " - Item Completed");
         }
         private void controller_ExecuteFailed(QueueMessageManager manager, Exception ex)
         {
-            Console.WriteLine("Failed (on purpose): " + manager.Item.Type + " - " +  manager.Item.Id + " - " + ex.Message);
+            Console.WriteLine("Failed (on purpose): " + manager.Item.QueueName + " - " +  manager.Item.Id + " - " + ex.Message);
         }
     }
 }

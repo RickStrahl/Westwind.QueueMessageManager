@@ -88,14 +88,14 @@ namespace Westwind.MessageQueueing
         public abstract QueueMessageItem Load(string id);
 
         /// <summary>
-        /// Retrieves the next pending Message from the Queue based on a provided type
+        /// Retrieves the next pending Message from the Queue based on a provided queueName
         /// </summary>
         /// <param name="queueName"></param>
         /// <returns>item or null. Null can be returned when there are no items or when there is an error</returns>
         public abstract QueueMessageItem GetNextQueueMessage(string queueName = null);
 
 
-        public abstract bool DeletePendingMessages(string queueName = null);
+        public abstract bool DeleteWaitingMessages(string queueName = null);
 
         /// <summary>
         /// Creates a new item instance and properly
@@ -161,8 +161,8 @@ namespace Westwind.MessageQueueing
             item.IsComplete = false;
             item.IsCancelled = false;
 
-            if (item.Type == null)
-                item.Type = this.DefaultQueue;
+            if (item.QueueName == null)
+                item.QueueName = this.DefaultQueue;
 
             if (messageText != null)
                 item.Message = messageText;
@@ -262,10 +262,10 @@ namespace Westwind.MessageQueueing
         /// <summary>
         /// Returns a list of recent queue items
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="queueName"></param>
         /// <param name="itemCount"></param>
         /// <returns></returns>
-        public abstract IEnumerable<QueueMessageItem> GetRecentQueueItems(string type = null, int itemCount = 25);
+        public abstract IEnumerable<QueueMessageItem> GetRecentQueueItems(string queueName = null, int itemCount = 25);
 
 
         /// <summary>
@@ -474,6 +474,8 @@ namespace Westwind.MessageQueueing
         public void Dispose()
         {
         }
+
+        public abstract bool DeleteMessage(string id);
     }
 
 

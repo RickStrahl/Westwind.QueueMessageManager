@@ -22,7 +22,7 @@ namespace Westwind.MessageQueueing
         }
 
         /// <summary>
-        /// Serializes an object into the BinResult field
+        /// Serializes an object into the BinData field
         /// </summary>
         /// <param name="objectInstance"></param>
         /// <returns></returns>
@@ -48,7 +48,7 @@ namespace Westwind.MessageQueueing
                 return false;
             }
 
-            item.BinResult = result;
+            item.BinData = result;
 
             return true;
         }
@@ -70,13 +70,13 @@ namespace Westwind.MessageQueueing
                 Manager.SetError(Resources.NoEntityIsLoaded);
                 return default(T);
             }
-            if (item.BinResult == null)
+            if (item.BinData == null)
                 return default(T);
 
             object result = null;
             try
             {
-                result = SerializationUtils.DeSerializeObject(item.BinResult, typeof(T));
+                result = SerializationUtils.DeSerializeObject(item.BinData, typeof(T));
             }
             catch (Exception ex)
             {

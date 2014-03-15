@@ -10,7 +10,7 @@ namespace Westwind.MessageQueueing
     public partial class QueueMessageItem
     {        
         public string Id { get; set; }        
-        public string Type { get; set; } 
+        public string QueueName { get; set; } 
        
         public string Status { get; set; }
         public string Action { get; set; }
@@ -28,10 +28,13 @@ namespace Westwind.MessageQueueing
         public string TextInput { get; set; }
         
         public string TextResult { get; set; }
-        public byte[] BinResult { get; set; }
         public decimal NumberResult { get; set; }
+
+        public string Data { get; set; }
         public string Xml { get; set; }
-        
+        public string Json { get; set;  }
+        public byte[] BinData { get; set; }
+
         public int PercentComplete { get; set; }
 
         public string XmlProperties { get; set; }
@@ -41,7 +44,7 @@ namespace Westwind.MessageQueueing
         public QueueMessageItem()
         {
             Id = DataUtils.GenerateUniqueId(15);
-            Type = string.Empty;
+            QueueName = string.Empty;
             Status = "Submitted";
             Submitted = DateTime.UtcNow;
         }

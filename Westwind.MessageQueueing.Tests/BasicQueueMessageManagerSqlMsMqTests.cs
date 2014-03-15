@@ -3,10 +3,10 @@ using System.Diagnostics;
 using System.Text;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using System.Transactions;
-using MongoDB.Driver.Linq;
 using Westwind.Utilities;
 
 namespace Westwind.MessageQueueing.Tests
@@ -15,9 +15,10 @@ namespace Westwind.MessageQueueing.Tests
     /// Summary description for UnitTest2
     /// </summary>
     [TestClass]
-    public class BasicQueueMessageManagerMongoDbTests
+    public class BasicQueueMessageManagerSqlMsMqTests
     {
-        public const string CONNECTION_STRING = "mongodb://localhost/QueueMessageManagerTests";
+        public const string CONNECTION_STRING = "QueueMessageManager";
+        public const string BASE_QUEUE_PATH = @".\private$\";
 
         /// <summary>
         /// Checks to see whether connection strings are set
@@ -27,12 +28,12 @@ namespace Westwind.MessageQueueing.Tests
         public void ConstructorOverrideTest()
         {
 
-            var manager = new QueueMessageManagerMongoDb(CONNECTION_STRING);
+            var manager = new QueueMessageManagerSqlMsMq(CONNECTION_STRING,BASE_QUEUE_PATH);
             Console.WriteLine(manager.ConnectionString);
             Assert.IsTrue(manager.ConnectionString == CONNECTION_STRING,"ConnectionString is not set");
 
-         
-            manager = new QueueMessageManagerMongoDb("MyApplicationConnectionString");
+
+            manager = new QueueMessageManagerSqlMsMq("MyApplicationConnectionString",BASE_QUEUE_PATH);
             Console.WriteLine(manager.ConnectionString);
             Assert.IsTrue(manager.ConnectionString == "MyApplicationConnectionString");
         }
@@ -41,7 +42,7 @@ namespace Westwind.MessageQueueing.Tests
         public void SubmitRequestWithPresetObjectTest()
         {
             string xml = "<doc><value>Hello</value></doc>";
-            var manager = new QueueMessageManagerMongoDb(CONNECTION_STRING);
+            var manager = new QueueMessageManagerSqlMsMq(CONNECTION_STRING,BASE_QUEUE_PATH);
 
                 var msg = new QueueMessageItem()
                 {
@@ -51,14 +52,13 @@ namespace Westwind.MessageQueueing.Tests
                     Xml = xml
                 };
                 manager.SubmitRequest(msg);
-
-                Assert.IsTrue(manager.Save(msg), manager.ErrorMessage);
+                Assert.IsTrue(manager.Save(), manager.ErrorMessage);
         }
 
         [TestMethod]
         public void SubmitRequestsToQueueTest()
         {
-            var manager = new QueueMessageManagerMongoDb(CONNECTION_STRING);
+            var manager = new QueueMessageManagerSqlMsMq(CONNECTION_STRING,BASE_QUEUE_PATH);
             int queueCount = 10;
 
             bool res = true;
@@ -84,9 +84,9 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void GetRecentMessagesTest()
         {
-            using (var manager = new QueueMessageManagerMongoDb(CONNECTION_STRING))
+            using (var manager = new QueueMessageManagerSqlMsMq(CONNECTION_STRING,BASE_QUEUE_PATH))
             {
-                var items = manager.GetRecentQueueItems("MPWF");
+                var items = manager.GetRecentQueueItems();
                 foreach (var item in items)
                 {
                     Console.WriteLine(item.Id + " " + item.Message);
@@ -98,7 +98,7 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void SubmitRequestTest()
         {
-            var manager = new QueueMessageManagerMongoDb(CONNECTION_STRING);
+            var manager = new QueueMessageManagerSqlMsMq(CONNECTION_STRING,BASE_QUEUE_PATH);
 
             string imageId = "10";
            
@@ -106,7 +106,6 @@ namespace Westwind.MessageQueueing.Tests
             // item contains many properties for pushing
             // values back and forth as well as a  few message fields
             var item = manager.CreateItem();
-            item.QueueName = "MPWF";
             item.Action = "PRINTIMAGE";
             item.TextInput = imageId;
             item.Message = "Print Image operation started at " + DateTime.Now.ToString();
@@ -130,7 +129,7 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void SubmitRequestWithPropertiesTest()
         {
-            var manager = new QueueMessageManagerMongoDb(CONNECTION_STRING);
+            var manager = new QueueMessageManagerSqlMsMq(CONNECTION_STRING,BASE_QUEUE_PATH);
             manager.SubmitRequest(messageText: "New Entry with Properties");
 
             // add a custom property
@@ -142,9 +141,10 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void LoadRequestTest()
         {
-            var manager = new QueueMessageManagerMongoDb(CONNECTION_STRING);
-            
-            var item = manager.Collection.AsQueryable().FirstOrDefault();
+            var manager = new QueueMessageManagerSqlMsMq(CONNECTION_STRING,BASE_QUEUE_PATH);
+            var db = manager.Db;
+
+            var item = db.Find<QueueMessageItem>("select TOP 1 * from queueMessageItems where Started is null");
 
             // no pending items - nothing to do
             if (item == null)
@@ -154,7 +154,6 @@ namespace Westwind.MessageQueueing.Tests
             }
 
             string reqId = item.Id;
-            Console.WriteLine(reqId);
 
             // clear out item
             item = null;
@@ -212,19 +211,27 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void GetNextQueueMessageItemWithAddedItemTest()
         {
-  
-            using (var manager = new QueueMessageManagerMongoDb(CONNECTION_STRING))
+            using (var manager = new QueueMessageManagerSqlMsMq(CONNECTION_STRING,BASE_QUEUE_PATH))
             {
-                Assert.IsTrue(manager.DeleteWaitingMessages());
+                // delete all pending requests
+                int res = manager.Db.ExecuteNonQuery("delete from queuemessageItems where started is null");
+                Console.WriteLine(res);
 
-                // create a pending message
+                // delete all queued ids - otherwise no items will match :-)
+                var queue = manager.GetQueue("");
+                queue.Purge();
+
+                // creates sql and msmq items
                 manager.SubmitRequest(messageText: "Next Complete Test " + DateTime.Now.ToString("t"));
                 Assert.IsTrue(manager.Save(), manager.ErrorMessage);
-                
+            }
+
+            using (var manager = new QueueMessageManagerSqlMsMq(CONNECTION_STRING,BASE_QUEUE_PATH))
+            {
                 var item = manager.GetNextQueueMessage();
                 Assert.IsNotNull(item, manager.ErrorMessage);
 
-                Console.WriteLine(item.Status);
+                Console.WriteLine(item.Message);
 
                 manager.CompleteRequest(item, "Next Complete complete " + DateTime.Now.ToString("t"));
 
@@ -232,128 +239,21 @@ namespace Westwind.MessageQueueing.Tests
             }
         }
 
-        [TestMethod]
-        public void GetNextQueueMessageItemWithoutAddedItemTest()
-        {
-            // allow rolling back
-            using (var scope = new TransactionScope())
-            {
-                using (var manager = new QueueMessageManagerMongoDb(CONNECTION_STRING))
-                {
-                    // delete all pending requests
-                    var result = manager.Collection.RemoveAll();
-                    Assert.IsTrue(result.Ok, result.ErrorMessage);
-
-                    var item = manager.GetNextQueueMessage();
-                    Assert.IsNull(item);
-
-                    // Error Message should be: No queue messages pending
-                    Console.WriteLine(manager.ErrorMessage);
-                }
-            }
-        }
-
-
 
         [TestMethod]
-        public void CompleteMessageTest()
+        public void ScaleRetrievalTest()
         {
-            this.SubmitRequestWithPropertiesTest();
+            string queueName = "Queue1";
 
-            var manager = new QueueMessageManagerMongoDb(CONNECTION_STRING);
+            var manager = new QueueMessageManagerSqlMsMq(CONNECTION_STRING,BASE_QUEUE_PATH);
 
-            var item = new QueueMessageItem()
-            {
-                 TextInput = "My input",
-                 Message = "Getting started."
-            };
-            manager.CreateItem(item);
-
-            manager.Properties["Time"] = DateTime.Now;
-
-            Assert.IsTrue(manager.Save(),manager.ErrorMessage);
-
-            string reqId = item.Id;
-
-            manager = new QueueMessageManagerMongoDb();            
-            item = manager.GetNextQueueMessage();
-
-            DateTime? time = manager.GetProperty("Time") as DateTime?;
-            Assert.IsNotNull(time);
-
-            manager.CompleteRequest(item,"Message completed @" + DateTime.Now.ToString("t"));
-
-            Assert.IsTrue(manager.Save(), manager.ErrorMessage);
-        }
-
-        [TestMethod]
-        public void GetPendingMessagesTest()
-        {
-            var manager = new QueueMessageManagerSql();
-            
-            var items = manager.GetPendingQueueMessages();
-
-            Assert.IsNotNull(items);
-
-            foreach (var item in items)
-            {
-                Console.WriteLine(item.Submitted + " - " + item.Id + " - " +  item.Message);
-            }
-        }
-
-        [TestMethod]
-        public void GetWaitingMessagesTest()
-        {
-            var manager = new QueueMessageManagerSql();
-
-            var items = manager.GetWaitingQueueMessages();
-
-            Assert.IsNotNull(items);
-
-            foreach (var item in items)
-            {
-                Console.WriteLine(item.Submitted + " - " + item.Id + " - " + item.Message);
-            }
-        }
-
-        [TestMethod]
-        public void GetWaitingMessagesCountTest()
-        {
-            var manager = new QueueMessageManagerSql();
-
-            int count = manager.GetWaitingQueueMessageCount();
-
-            Assert.IsNotNull(count > -1);
-
-            Console.WriteLine(count + " queued items waiting.");
-        }
-
-        [TestMethod]
-        public void GetCompleteMessagesTest()
-        {
-            var manager = new QueueMessageManagerSql();
-
-            var items = manager.GetCompleteQueueMessages();
-
-            Assert.IsNotNull(items);
-
-            foreach (var item in items)
-            {
-                Console.WriteLine(item.Completed + " - " + item.Id + " - " + item.Message);
-            }
-        }
-
-        [TestMethod]
-        public void ScaleControllerRetrievalTest()
-        {
-            var manager = new QueueMessageManagerMongoDb(CONNECTION_STRING);
-            manager.Collection.RemoveAll();
-            CancelProcessing = false;
+            manager.Db.ExecuteNonQuery("delete from queuemessageitems");
+            manager.GetQueue(queueName).Purge();
 
             var sw = new Stopwatch();
             sw.Start();
 
-            for (int i = 0; i < 30000; i++)
+            for (int i = 0; i < 50000; i++)
             {
                 string imageId = "10";
 
@@ -361,21 +261,19 @@ namespace Westwind.MessageQueueing.Tests
                 // item contains many properties for pushing
                 // values back and forth as well as a  few message fields
                 var item = manager.CreateItem();
-                item.QueueName = "Queue1";
+                item.QueueName = queueName;
                 item.TextInput = DataUtils.GenerateUniqueId(15);
 
                 // Set the message status and timestamps as submitted             
-                manager.SubmitRequest(item, autoSave: true);
+                manager.SubmitRequest(item,autoSave: true);
             }
 
-            Console.WriteLine("Done adding: " + sw.ElapsedMilliseconds);
-
-            Console.WriteLine("Items inserted.");
+            Console.WriteLine("Insert time: " + sw.ElapsedMilliseconds);
 
             IdList = new List<string>();
             IdErrors = new List<string>();
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 50; i++)
             {
                 var thread = new Thread(ProcessGetNextItem);
                 thread.Start();
@@ -414,30 +312,26 @@ namespace Westwind.MessageQueueing.Tests
                 // item contains many properties for pushing
                 // values back and forth as well as a  few message fields
                 var item = manager.CreateItem();
-                item.QueueName = "Queue1";
+                item.QueueName = queueName;
                 item.TextInput = DataUtils.GenerateUniqueId(15);
 
                 // Set the message status and timestamps as submitted             
                 manager.SubmitRequest(item, autoSave: true);
 
-                Thread.Yield();
+                Thread.Sleep(4);
             }
 
 
             Console.WriteLine("Waiting for 5 seconds");
             Thread.Sleep(5000);
             CancelProcessing = true;
-            Thread.Sleep(150);
+            Thread.Sleep(100);
 
             Console.WriteLine("Done");
 
             Console.WriteLine("Items processed: " + IdList.Count);
 
-            IdList.Add("12345");
-            IdList.Add("321321");
-            IdList.Add("12345");
-
-            var grouped = IdList.GroupBy(s => s);            
+            var grouped = IdList.GroupBy(s => s);
             Console.WriteLine("Unique Count: " + grouped.Count());
 
             foreach (var error in IdErrors)
@@ -452,9 +346,9 @@ namespace Westwind.MessageQueueing.Tests
 
         void ProcessGetNextItem()
         {
-            while(!CancelProcessing)
+            while (!CancelProcessing)
             {
-                var manager = new QueueMessageManagerMongoDb(CONNECTION_STRING);
+                var manager = new QueueMessageManagerSqlMsMq();
                 var item = manager.GetNextQueueMessage("Queue1");
                 if (item != null)
                     IdList.Add(item.Id);
@@ -463,6 +357,6 @@ namespace Westwind.MessageQueueing.Tests
 
                 Thread.Yield();
             }
-        } 
+        }        
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Text;
 using System.Collections.Generic;
 using System.Threading;
@@ -44,7 +45,7 @@ namespace Westwind.MessageQueueing.Tests
 
                 var msg = new QueueMessageItem()
                 {
-                    Type="MPWF",
+                    QueueName="MPWF",
                     Message = "Xml Message  @ " + DateTime.Now.ToString("t"),
                     Action = "NEWXMLORDER",                    
                     Xml = xml
@@ -64,7 +65,7 @@ namespace Westwind.MessageQueueing.Tests
             {
                 var msg = new QueueMessageItem()
                 {
-                    Type = "MPWF",
+                    QueueName = "MPWF",
                     Message = "Xml Message #" + i.ToString() + " @ " + DateTime.Now.ToString("t"),
                     Action = "NEWXMLORDER"                 
                 };                
@@ -304,11 +305,14 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void GetWaitingMessagesTest()
         {
-            var manager = new QueueMessageManagerSql();
+            var manager = new QueueMessageManagerSql()
+            {
+                AutoCreateDataStore = true
+            };
 
             var items = manager.GetWaitingQueueMessages();
 
-            Assert.IsNotNull(items);
+            Assert.IsNotNull(items, manager.ErrorMessage);
 
             foreach (var item in items)
             {
@@ -379,10 +383,15 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void ScaleRetrievalTest()
         {
-
             var manager = new QueueMessageManagerSql();
-            
-            for (int i = 0; i < 2500; i++)
+
+            manager.Db.ExecuteNonQuery("delete from queuemessageitems");
+
+
+            var sw = new Stopwatch();
+            sw.Start();
+
+            for (int i = 0; i < 10000; i++)
             {
                 string imageId = "10";
 
@@ -390,15 +399,14 @@ namespace Westwind.MessageQueueing.Tests
                 // item contains many properties for pushing
                 // values back and forth as well as a  few message fields
                 var item = manager.CreateItem();
-                item.Type = "Queue1";
+                item.QueueName = "Queue1";
                 item.TextInput = DataUtils.GenerateUniqueId(15);
 
                 // Set the message status and timestamps as submitted             
                 manager.SubmitRequest(item,autoSave: true);
             }
 
-
-            Console.WriteLine("Items inserted.");
+            Console.WriteLine("Insert time: " + sw.ElapsedMilliseconds);
 
             IdList = new List<string>();
             IdErrors = new List<string>();
@@ -421,7 +429,7 @@ namespace Westwind.MessageQueueing.Tests
             //        // item contains many properties for pushing
             //        // values back and forth as well as a  few message fields
             //        var item = manager.CreateItem();
-            //        item.Type = "Queue1";
+            //        item.QueueName = "Queue1";
             //        item.TextInput = DataUtils.GenerateUniqueId(15);
 
             //        // Set the message status and timestamps as submitted             
@@ -431,9 +439,31 @@ namespace Westwind.MessageQueueing.Tests
             //    Thread.Sleep(60);
             //});
 
+            for (int i = 0; i < 500; i++)
+            {
+                if (CancelProcessing)
+                    break;
+
+                string imageId = "10";
+
+                // Create a message object
+                // item contains many properties for pushing
+                // values back and forth as well as a  few message fields
+                var item = manager.CreateItem();
+                item.QueueName = "Queue1";
+                item.TextInput = DataUtils.GenerateUniqueId(15);
+
+                // Set the message status and timestamps as submitted             
+                manager.SubmitRequest(item, autoSave: true);
+
+                Thread.Sleep(4);
+            }
+
 
             Console.WriteLine("Waiting for 5 seconds");
-            Thread.Sleep(7000);
+            Thread.Sleep(5000);
+            CancelProcessing = true;
+            Thread.Sleep(100);
 
             Console.WriteLine("Done");
 
@@ -448,12 +478,13 @@ namespace Westwind.MessageQueueing.Tests
         }
 
         private static object GetNextItemLock = new Object();
+        private bool CancelProcessing = false;
         private List<string> IdList;
         private List<string> IdErrors;
 
         void ProcessGetNextItem()
         {
-            for (int i = 0; i < 2000; i++)
+            while (!CancelProcessing)
             {
                 var manager = new QueueMessageManagerSql();
                 var item = manager.GetNextQueueMessage("queue1");
