@@ -50,7 +50,7 @@ namespace Westwind.MessageQueueing
                 // Create the Queue
                 MessageQueue.Create(queueId);
                 queue = new MessageQueue(queueId);
-                queue.Label = "Queue Message Manager for " + queueName;
+                queue.Label = "Queue Message Manager for " + queueName;                
             }
 
             return queue;
@@ -82,6 +82,7 @@ namespace Westwind.MessageQueueing
 
             try
             {
+                queue.Formatter = new StringMessageFormatter();
                 queue.Send(Item.Id);
             }
             catch (Exception ex)
@@ -108,11 +109,19 @@ namespace Westwind.MessageQueueing
             if (queue == null)
                 throw new InvalidOperationException("Unable to access MSMQ queue: " + MsMqQueuePath + "QMM_" + queueName);
 
-            var msg = queue.Receive(new TimeSpan(0,0,0,0,1));
+            Message msg = null;
+            try
+            {
+                msg = queue.Receive(new TimeSpan(1));
+            }
+            catch
+            {                                 
+            }
+
             if (msg == null)
                 return null;  // nothing waiting
 
-            msg.Formatter = new XmlMessageFormatter(new Type[] {typeof (string)});
+            msg.Formatter = new StringMessageFormatter();
             var id = msg.Body;
             if (id == null)
                 return null; // invalid key
@@ -120,7 +129,6 @@ namespace Westwind.MessageQueueing
             // now load the item
             return Load(id.ToString());
         }
-
 
     }
 }

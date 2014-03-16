@@ -253,7 +253,7 @@ namespace Westwind.MessageQueueing.Tests
             var sw = new Stopwatch();
             sw.Start();
 
-            for (int i = 0; i < 50000; i++)
+            for (int i = 0; i < 40000; i++)
             {
                 string imageId = "10";
 
@@ -273,7 +273,7 @@ namespace Westwind.MessageQueueing.Tests
             IdList = new List<string>();
             IdErrors = new List<string>();
 
-            for (int i = 0; i < 50; i++)
+            for (int i = 0; i < 20; i++)
             {
                 var thread = new Thread(ProcessGetNextItem);
                 thread.Start();
@@ -351,7 +351,10 @@ namespace Westwind.MessageQueueing.Tests
                 var manager = new QueueMessageManagerSqlMsMq();
                 var item = manager.GetNextQueueMessage("Queue1");
                 if (item != null)
-                    IdList.Add(item.Id);
+                    lock (GetNextItemLock)
+                    {
+                        IdList.Add(item.Id);
+                    }
                 else
                     IdErrors.Add(manager.ErrorMessage);
 

@@ -79,6 +79,7 @@
     <Compile Include="QueueController\QueueControllerMultiple.cs" />
     <Compile Include="QueueManagerSql\QueueMessageManagerSqlMsMq.cs" />
     <Compile Include="QueueManagerSql\QueueMessageManagerSql.cs" />
+    <Compile Include="QueueManagerSql\StringMessageFormatter.cs" />
     <Compile Include="QueueManager\QueueMessageManager.cs" />
     <Compile Include="QueueManager\QueueMessageItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
