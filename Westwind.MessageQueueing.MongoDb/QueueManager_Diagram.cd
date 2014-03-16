@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Westwind.MessageQueueing.QueueMessageItem">
+    <Position X="5" Y="0.5" Width="3.25" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="Westwind.MessageQueueing.QueueController">
+    <Position X="10" Y="0.5" Width="2.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Westwind.MessageQueueing.QueueMessageManager">
+    <Position X="1" Y="0.5" Width="3" />
+    <Members>
+      <Field Name="_IsNew" Hidden="true" />
+      <Field Name="INT_maxCount" Hidden="true" />
+    </Members>
+    <AssociationLine Name="this" Type="Westwind.MessageQueueing.QueueMessageItem" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="4" Y="1.875" />
+        <Point X="4.5" Y="1.875" />
+        <Point X="4.5" Y="1.875" />
+        <Point X="5" Y="1.875" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="1.079" Y="-0.075" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier />
+    <ShowAsAssociation>
+      <Property Name="this" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Westwind.MessageQueueing.QueueMessageManagerSql">
+    <Position X="1" Y="8" Width="3" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Westwind.MessageQueueing.QueueMessageManagerSqlMsMq">
+    <Position X="4.75" Y="8" Width="2.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Westwind.MessageQueueing.QueueMessageManagerMongoDb">
+    <Position X="8.25" Y="8" Width="3.25" />
+    <Members>
+      <Field Name="_collection" Hidden="true" />
+      <Field Name="_Db" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>IABAgoIAgCACQEAAEEAAAAAAAAQCEBAAKAAAABCAAAA=</HashCode>
+      <FileName>QueueMessageManagerMongoDb.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Tahoma" Size="8.25" />
+</ClassDiagram>
