@@ -32,7 +32,7 @@ service or OWin Host applications. This class is optional, but provides a very
 simple solution to handling incoming messages from any kind of .NET application
 in the background.
 
-![Westwind.MessageQueueing](QueueManager_Diagram.png)
+![Westwind.MessageQueueing](https://raw.github.com/RickStrahl/Westwind.QueueMessageManager/master/QueueManager_Diagram.png)
 
 ###Data Providers###
 The implementation of this library is based on replacable data providers using
@@ -52,7 +52,6 @@ of messages in SQL Server. Uses the same data model used for the QueueMessageMan
 but provides much better scalability to avoid locked message retrieval bottlenecks.
 Appropriate for high volume of message items.
 *(~10000 msg/sec for pickups)*
-
 
 The library uses a database server table to hold the 'message' information and processing 
 instructions that can be accessed repeatedly by both the client and server to provide 
