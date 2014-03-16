@@ -137,7 +137,10 @@ namespace Westwind.MessageQueueing
                 return;
 
             // next loop through checks will exit
-            Active = false;            
+            Active = false;
+
+            // allow threads some time to shut down
+            Thread.Sleep(1000);
         }
         
         /// <summary>
@@ -257,8 +260,8 @@ namespace Westwind.MessageQueueing
         /// </param>
         protected virtual void OnExecuteFailed(QueueMessageManager manager, Exception ex)
         {
-            if (this.ExecuteFailed != null)
-                this.ExecuteFailed(manager, ex);
+            if (ExecuteFailed != null)
+                ExecuteFailed(manager, ex);
         }
 
         /// <summary>

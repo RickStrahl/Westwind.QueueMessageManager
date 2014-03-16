@@ -207,7 +207,7 @@ to notify of new incoming messages to process. The customized code can then exam
 the QueueMessageItem for its properties to determine how to process the message.
 Typically an Action can be set on the QueueMessageItem to route processing.
 
-*QueueController is optional*<br/>
+**QueueController is optional**<br/>
 Although QueueController is recommended to handle the polling for messages and firing
 requests into the event handlers automatically, it's not required. You can also have
 two applications pushing and pulling out queue messages on a peer to peer basis and
@@ -217,8 +217,9 @@ pick up messages as they need them.
 The QueueController is a background task that spins up a configured number of threads 
 and then pings the queue table for new messages. When new messages arrive it
 fires ExecuteStart, ExecuteComplete and ExecuteFailed events that you
-can hook your application logic to execute the actual tasks you need to perform
-- usually filtered based on an Action parameter.
+can hook your application logic to execute the actual tasks you need to perform - usually 
+filtered based on an Action parameter.
+
 It runs continually on a background thread until you stop it, so it's ideal for an 
 an always-on 'application server' scenario that can run in a Service type application
 or even inside of an ASP.NET Web application started from Application_Start().
@@ -281,7 +282,7 @@ public void QueueControllerTest()
 
     // shut down
     controller.StopProcessing();
-    Thread.Sleep(1000);  // let threads shut down
+   
 
     Console.WriteLine("Stopping... Async Manager Processing");    
 }
@@ -372,6 +373,61 @@ var controller = new MyQueueController();
 controller.StartProcessingAsync();
 ```
 
+###Multiple QueueControllers###
+You can also run multiplate QueueControllers simultaneously, simply
+by configuring multiple QueueController instances pointing at separate
+queue names. This allows you to handle multiple operations to run at
+seperate isolation levels and queue priorities. For example, you may
+have one queue that processes relatively few, but lengthy requests and
+another queue that processes very short but quick requests. In order for
+the long requests to not hold up slower requests you can have two separate
+queues that isolate each from each other.
+
+```C#
+var controller = new MyQueueController(){
+   QueueName = "Queue1"
+};
+controller.StartProcessingAsync();
+
+controller2 = new MyQueueController() {
+   QueueName = "Queue2"
+}
+controller2.StartProcessingAsync();
+
+// Typically you'd keep a lasting reference of the controllers
+// around for duration of application. Here we simulate by 
+// waiting for 10 seconds
+Thread.Sleep(100000)
+
+
+controller.StopProcessing();
+controller2.StopProcessing();
+```
+
+There's also a QueueControllerMultiple class that allows for creation of
+multiple queues that are handled by the same event handlers and which
+simplify controlling multiple queues through singular queue start and stop
+operations.
+
+```C#
+var controller = new QueueControllerMultiple(
+    new MyQueueController() {
+        QueueName = "Queue1",
+        ThreadCount = 2
+    },
+    new MyQueueController() {
+        QueueName = "Queue2",
+        ThreadCount = 4
+    }
+);
+    
+controller.StartProcessingAsync();
+
+Thread.Sleep(100000)
+
+controller.StopProcessing();
+```
+
 ###Configuration###
 The QueueMessageManager works with a database data store to handle queue messaging. 
 Currently Sql Server is supported and we're working on a MongoDb version.
@@ -431,59 +487,5 @@ The number of threads that the controller uses to process requests.
 The number of threads determines how many concurrent queue monitors
 ping the queue for new requests. The default is 2.
 
-###Multiple QueueControllers###
-You can also run multiplate QueueControllers simultaneously, simply
-by configuring multiple QueueController instances pointing at separate
-queue names. This allows you to handle multiple operations to run at
-seperate isolation levels and queue priorities. For example, you may
-have one queue that processes relatively few, but lengthy requests and
-another queue that processes very short but quick requests. In order for
-the long requests to not hold up slower requests you can have two separate
-queues that isolate each from each other.
-
-```C#
-var controller = new MyQueueController(){
-   QueueName = "Queue1"
-};
-controller.StartProcessingAsync();
-
-controller2 = new MyQueueController() {
-   QueueName = "Queue2"
-}
-controller2.StartProcessingAsync();
-
-// Typically you'd keep a lasting reference of the controllers
-// around for duration of application. Here we simulate by 
-// waiting for 10 seconds
-Thread.Sleep(100000)
-
-
-controller.StopProcessing();
-controller2.StopProcessing();
-```
-
-There's also a QueueControllerMultiple class that allows for creation of
-multiple queues that are handled by the same event handlers and which
-simplify controlling multiple queues through singular queue start and stop
-operations.
-
-```C#
-var controller = new QueueControllerMultiple(
-    new MyQueueController() {
-        QueueName = "Queue1",
-        ThreadCount = 2
-    },
-    new MyQueueController() {
-        QueueName = "Queue2",
-        ThreadCount = 4
-    }
-);
-    
-controller.StartProcessingAsync();
-
-Thread.Sleep(100000)
-
-controller.StopProcessing();
-```
 
 ###License###
