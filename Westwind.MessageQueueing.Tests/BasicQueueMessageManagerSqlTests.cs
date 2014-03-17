@@ -385,13 +385,12 @@ namespace Westwind.MessageQueueing.Tests
         {
             var manager = new QueueMessageManagerSql();
 
-            manager.Db.ExecuteNonQuery("delete from queuemessageitems");
-
+            manager.Db.ExecuteNonQuery("delete from queuemessageitems");            
 
             var sw = new Stopwatch();
             sw.Start();
 
-            for (int i = 0; i < 20000; i++)
+            for (int i = 0; i < 15000; i++)
             {
                 string imageId = "10";
 
@@ -417,27 +416,6 @@ namespace Westwind.MessageQueueing.Tests
                 thread.Start();
             }
 
-            //Task.Run(() =>
-            //{
-            //    for (int i = 0; i < 100; i++)
-            //    {
-            //        manager = new QueueMessageManagerSql();
-
-            //        string imageId = "10";
-
-            //        // Create a message object
-            //        // item contains many properties for pushing
-            //        // values back and forth as well as a  few message fields
-            //        var item = manager.CreateItem();
-            //        item.QueueName = "Queue1";
-            //        item.TextInput = DataUtils.GenerateUniqueId(15);
-
-            //        // Set the message status and timestamps as submitted             
-            //        manager.SubmitRequest(item, autoSave: true);
-            //    }
-
-            //    Thread.Sleep(60);
-            //});
 
             for (int i = 0; i < 500; i++)
             {
@@ -456,7 +434,7 @@ namespace Westwind.MessageQueueing.Tests
                 // Set the message status and timestamps as submitted             
                 manager.SubmitRequest(item, autoSave: true);
 
-                Thread.Sleep(4);
+                Thread.Sleep(2);
             }
 
 

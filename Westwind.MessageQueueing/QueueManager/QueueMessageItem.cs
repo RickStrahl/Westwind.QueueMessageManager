@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Westwind.Utilities;
 
@@ -41,9 +42,17 @@ namespace Westwind.MessageQueueing
 
         internal bool __IsNew = true;
 
+        private static readonly DateTime baseDate = new DateTime(DateTime.UtcNow.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
         public QueueMessageItem()
-        {
-            Id = DataUtils.GenerateUniqueId(15);
+        {             
+            // Generate a sequential date based on ticks since the beginning of 
+            // the year plus a 8 char unique id - this makes the primary key
+            // mostly sequentially sortable from oldest to newest without 
+            // having to specify a sort order
+            Id = ((long) (DateTime.UtcNow - baseDate).Ticks) + "_" +
+                 DataUtils.GenerateUniqueId(8);
+   
             QueueName = string.Empty;
             Status = "Submitted";
             Submitted = DateTime.UtcNow;
