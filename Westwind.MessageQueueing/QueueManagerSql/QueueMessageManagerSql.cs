@@ -555,7 +555,7 @@ EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE  [dbo].[qmm_GetNextQueueM
 		  OUTPUT INSERTED.*		  
           WHERE Id in (
 			  SELECT TOP(@Count)
-				   Id FROM QueueMessageItems WITH (UPDLOCK, READPAST)	   
+				   Id FROM QueueMessageItems WITH (UPDLOCK)	   
 				   WHERE [QueueName] =  @QueueName AND
                          [Started] is null         						 
 				   --ORDER BY Submitted 

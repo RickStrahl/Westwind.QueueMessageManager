@@ -390,7 +390,7 @@ namespace Westwind.MessageQueueing.Tests
             var sw = new Stopwatch();
             sw.Start();
 
-            for (int i = 0; i < 15000; i++)
+            for (int i = 0; i < 30000; i++)
             {
                 string imageId = "10";
 
@@ -417,7 +417,7 @@ namespace Westwind.MessageQueueing.Tests
             }
 
 
-            for (int i = 0; i < 500; i++)
+            for (int i = 0; i < 10000; i++)
             {
                 if (CancelProcessing)
                     break;

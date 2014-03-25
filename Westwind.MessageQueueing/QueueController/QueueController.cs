@@ -124,7 +124,7 @@ namespace Westwind.MessageQueueing
                 ExecuteSteps(manager);
                                 
                 // let CPU breathe
-                Thread.Yield();
+                Thread.Sleep(1);  
             } 
         }
 
