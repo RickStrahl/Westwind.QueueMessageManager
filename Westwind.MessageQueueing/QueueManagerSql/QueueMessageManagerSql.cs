@@ -234,10 +234,12 @@ namespace Westwind.MessageQueueing
         /// <returns></returns>
         public override IEnumerable<QueueMessageItem> GetRecentQueueItems(string queueName = null, int itemCount = 25)
         {
-            if (queueName == null)
-                queueName = string.Empty;
+            string sql = "select top " + itemCount + " * from QueueMessageItems with (NOLOCK)";
 
-            string sql = "select top " + itemCount + " * from QueueMessageItems with (NOLOCK) where QueueName=@0 order by submitted desc";
+            if (queueName != null)
+                sql += " where QueueName=@0 ";
+
+            sql += "order by submitted desc";
             
             var items = Db.Query<QueueMessageItem>(sql, queueName);
             if (items == null)
@@ -283,12 +285,11 @@ namespace Westwind.MessageQueueing
         /// <param name="queueName"></param>
         /// <returns>Count or -1 on failure</returns>
         public override int GetWaitingQueueMessageCount(string queueName = null)
-        {
-            if (queueName == null)
-                queueName = string.Empty;
-
+        {            
             object result = Db.ExecuteScalar("select count(id) from QueueMessageItems with (NOLOCK) " +
-                    "WHERE queueName=@0 AND started is null", queueName);
+                    "WHERE " + 
+                    (queueName != null ? "queueName=@0 AND " : "" ) + 
+                    "started is null", queueName);
             if (result == null)
             {
                 SetError(Db.ErrorMessage);
@@ -558,7 +559,7 @@ EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE  [dbo].[qmm_GetNextQueueM
 				   Id FROM QueueMessageItems WITH (UPDLOCK)	   
 				   WHERE [QueueName] =  @QueueName AND
                          [Started] is null         						 
-				   --ORDER BY Submitted 
+				   -- ORDER BY Submitted 
 		  )
 ' 
 END

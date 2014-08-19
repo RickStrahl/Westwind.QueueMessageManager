@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Westwind.Utilities;
 
 namespace Westwind.MessageQueueing
@@ -42,7 +37,7 @@ namespace Westwind.MessageQueueing
 
         internal bool __IsNew = true;
 
-        private static readonly DateTime baseDate = new DateTime(DateTime.UtcNow.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        
 
         public QueueMessageItem()
         {             
@@ -50,12 +45,18 @@ namespace Westwind.MessageQueueing
             // the year plus a 8 char unique id - this makes the primary key
             // mostly sequentially sortable from oldest to newest without 
             // having to specify a sort order
-            Id = ((long) (DateTime.UtcNow - baseDate).Ticks) + "_" +
-                 DataUtils.GenerateUniqueId(8);
-   
+            Id = GenerateId();
+
             QueueName = string.Empty;
             Status = "Submitted";
             Submitted = DateTime.UtcNow;
+        }
+
+        private static readonly DateTime baseDate = new DateTime(DateTime.UtcNow.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        public static string GenerateId()
+        {
+            return (DateTime.UtcNow - baseDate).Ticks + "_" +
+                 DataUtils.GenerateUniqueId(8);
         }
         
     }

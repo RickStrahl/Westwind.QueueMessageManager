@@ -43,6 +43,8 @@ namespace Westwind.MessageQueueing
         /// </summary>
         public string MonitorHostUrl { get; set; }
 
+        public List<ControllerConfiguration> Controllers { get; set; }
+
         /// <summary>
         /// Singleton instance of a Configuration Manager.
         /// Can be used globally to access a single 
@@ -83,5 +85,11 @@ namespace Westwind.MessageQueueing
         }
     }
 
-
+    public class ControllerConfiguration
+    {
+        public string ConnectionString { get; set; }
+        public string QueueName { get; set;  }
+        public int ControllerThreads { get; set; }
+        public int WaitInterval { get; set; }
+    }
 }
