@@ -10,7 +10,7 @@ namespace Westwind.MessageQueueing.Tests
     public class MsMqTests
     {
         [TestMethod]
-        public void TestMethod1()
+        public void WriteReadMessage()
         {
             var ids = new List<string>();
             var mq = new MessageQueue(@".\private$\QMM_");

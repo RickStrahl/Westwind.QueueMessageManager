@@ -18,54 +18,63 @@ namespace Westwind.MessageQueueing
     /// A client application can simply drop this component
     /// into the app and attach to the events provdided here.
     /// </summary>
-    public class QueueController : IDisposable        
+    public class QueueController : IDisposable
     {
-        public QueueController(QueueMessageManagerConfiguration configuration = null, Type queueManagerType = null)
-        {
-            // Poll once a second
-            WaitInterval = 1000;
+        public QueueController()
+        {            
             QueueName = string.Empty;
-            
+            WaitInterval = 1000;
+            ThreadCount = 1; 
+            ManagerType = typeof(QueueMessageManagerSql);                        
+        }
+
+        /// <summary>
+        /// Initializes the QueueController from the 
+        /// Queue Configuration Settings
+        /// </summary>
+        /// <param name="configuration"></param>
+        /// <param name="queueManagerType"></param>
+        public void Initialize(QueueMessageManagerConfiguration configuration = null, Type queueManagerType = null)
+        {                        
+            if (queueManagerType != null)
+                ManagerType = queueManagerType;
+
             if (configuration == null)
                 configuration = QueueMessageManagerConfiguration.Current;
 
-            ManagerType = queueManagerType ?? typeof(QueueMessageManagerSql);
-                        
+            if (configuration == null)
+                return;
+                    
             ConnectionString = configuration.ConnectionString;
             ThreadCount = configuration.ControllerThreads;
             QueueName = configuration.QueueName ?? string.Empty;
             WaitInterval = configuration.WaitInterval;
         }
 
-        
+
         /// <summary>
         /// Connection String for the database
         /// </summary>
         public string ConnectionString { get; set; }
 
         /// <summary>
-        /// Optional list of controllers passed into to the constructor
-        /// </summary>
-        protected IEnumerable<QueueController> Controllers { get; set; }
-
-        /// <summary>
         /// Determines whether the controller is processing messages
         /// </summary>
-        protected virtual bool Active {get; set;}
-      
+        protected virtual bool Active { get; set; }
+
 
         /// <summary>
         /// determines if the service is paused
         /// </summary>        
-        public virtual bool Paused {get; set;}
-        
-        
+        public virtual bool Paused { get; set; }
+
+
         /// <summary>
         /// Determines how often the control checks for new messages
         /// Set in milliseconds.
         /// </summary>
-        public virtual int WaitInterval {get; set; }
-        
+        public virtual int WaitInterval { get; set; }
+
         /// <summary>
         /// Number of threads processing the queue
         /// </summary>
@@ -80,7 +89,7 @@ namespace Westwind.MessageQueueing
         /// <summary>
         /// Sets the types of messages that this controller is looking for
         /// </summary>
-        public string QueueName {get; set; }
+        public string QueueName { get; set; }
 
         /// <summary>
         /// The specific type of the message manager class
@@ -92,12 +101,12 @@ namespace Westwind.MessageQueueing
         /// another
         /// </summary>        
         public virtual void StartProcessing()
-        {                        
+        {
             Active = true;
             Paused = false;
 
             while (Active)
-            {                
+            {
                 if (Paused)
                 {
                     Thread.Sleep(WaitInterval);
@@ -107,25 +116,27 @@ namespace Westwind.MessageQueueing
                 // Start by retrieving the next message if any
                 // ALWAYS create a new instance so the events get thread safe object
                 QueueMessageManager manager = null;
-                manager = ReflectionUtils.CreateInstanceFromType(ManagerType,ConnectionString ?? string.Empty) as QueueMessageManager;
-                                            
-    
+                manager =
+                    ReflectionUtils.CreateInstanceFromType(ManagerType, ConnectionString ?? string.Empty) as
+                        QueueMessageManager;
+
+
                 if (manager.GetNextQueueMessage(QueueName) == null)
                 {
                     if (!string.IsNullOrEmpty(manager.ErrorMessage))
-                        OnNextMessageFailed(manager, new ApplicationException(manager.ErrorMessage));                        
+                        OnNextMessageFailed(manager, new ApplicationException(manager.ErrorMessage));
 
                     // Nothing to do - wait for next poll interval
                     Thread.Sleep(WaitInterval);
                     continue;
                 }
-                
+
                 // Fire events to execute the real operations
                 ExecuteSteps(manager);
-                                
+
                 // let CPU breathe
-                Thread.Sleep(1);  
-            } 
+                Thread.Sleep(1);
+            }
         }
 
         /// <summary>
@@ -142,7 +153,7 @@ namespace Westwind.MessageQueueing
             // allow threads some time to shut down
             Thread.Sleep(1000);
         }
-        
+
         /// <summary>
         /// Starts queue processing asynchronously on the specified number of threads.
         /// This is a common scenario for Windows Forms interfaces so the UI
@@ -156,7 +167,7 @@ namespace Westwind.MessageQueueing
 
             if (threads < 0)
                 threads = ThreadCount;
-                        
+
             if (threads < 1)
                 threads = 1;
 
@@ -190,9 +201,9 @@ namespace Westwind.MessageQueueing
                 // Hookup end processing
                 OnExecuteComplete(manager);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                OnExecuteFailed(manager,ex);
+                OnExecuteFailed(manager, ex);
             }
 
             MessagesProcessed++;
@@ -204,7 +215,7 @@ namespace Westwind.MessageQueueing
         /// Your user code can attach to this event and start processing
         /// with the message information.
         /// </summary>        
-        public virtual event  Action<QueueMessageManager> ExecuteStart;
+        public virtual event Action<QueueMessageManager> ExecuteStart;
 
 
         /// <summary>
@@ -329,6 +340,4 @@ namespace Westwind.MessageQueueing
         }
 
     }
-
-
 }

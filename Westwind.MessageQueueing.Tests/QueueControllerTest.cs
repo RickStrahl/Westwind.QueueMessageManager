@@ -42,10 +42,13 @@ namespace Westwind.MessageQueueing.Tests
             // on separate threads
             var controller = new QueueController()
             {
-                ThreadCount = 2 ,
+                ConnectionString = "QueueMessageManager",
+                ThreadCount = 2,
                 WaitInterval = 200,
                 QueueName = "Queue1"
             };
+        
+
             Console.WriteLine("Wait: " + controller.WaitInterval);
 
             // ExecuteStart Event is where your processing logic goes
@@ -71,6 +74,24 @@ namespace Westwind.MessageQueueing.Tests
             Assert.IsTrue(true);
         }
 
+
+        [TestMethod]
+        public void MultipleQueueControllerConfigTest()
+        {
+            var master = new QueueControllerMultiple()
+            {
+                ConnectionString = "QueueMessageManager"
+            };
+            master.Initialize();   // read configuration values
+
+            Assert.IsNotNull(master);
+            Assert.IsTrue(master.Controllers.Count > 0);
+
+            foreach (var controller in master.Controllers)
+            {               
+                Console.WriteLine(controller.QueueName + ", " + controller.ThreadCount + ", " + controller.WaitInterval);
+            }
+        }
 
         [TestMethod]
         public void MultiQueueControllerTest()
@@ -121,6 +142,7 @@ namespace Westwind.MessageQueueing.Tests
             // on separate threads
             var controller = new QueueController()
             {
+                ConnectionString = "QueueMessageManager",
                 QueueName = "Queue1"
             };
             Console.WriteLine("Wait: " + controller.WaitInterval);
@@ -141,6 +163,7 @@ namespace Westwind.MessageQueueing.Tests
 
             var controller2 = new QueueController()
             {
+                ConnectionString = "QueueMessageManager",
                 QueueName = "Queue2"
             };
             Console.WriteLine("Wait: " + controller.WaitInterval);
@@ -227,17 +250,18 @@ namespace Westwind.MessageQueueing.Tests
             {
                 new QueueControllerMultiple()
                 {
-                    QueueName = "Queue1", 
+                    QueueName = "Queue1",
                     WaitInterval = 300,
                     ThreadCount = 5
                 },
                 new QueueControllerMultiple()
                 {
                     QueueName = "Queue2",
-                    WaitInterval = 500, 
+                    WaitInterval = 500,
                     ThreadCount = 3
                 }
-            });
+            });                     
+                        
 
             // Point all controllers at the same execution handlers
             // Alternately you can configure each controller with their
@@ -254,7 +278,7 @@ namespace Westwind.MessageQueueing.Tests
 
             // For test we have to keep the threads alive 
             // to allow the 10 requests to process
-            Thread.Sleep(3000);
+            Thread.Sleep(2000);
 
             // shut down
             controller.StopProcessing();

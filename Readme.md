@@ -263,9 +263,11 @@ public void QueueControllerTest()
     // create the new Controller to process in the background    
     var controller = new QueueController()
     {
-        QueueName = "MyQueue",
+       ConnectionString = "QueueMessageManager",
+       QueueName = "MyQueue",
         ThreadCount = 2
     };            
+    // controller.Initialize(); // read configuration settings
             
     // ExecuteStart Event is where your processing logic goes
     controller.ExecuteStart += controller_ExecuteStart;
@@ -411,15 +413,16 @@ operations.
 
 ```C#
 var controller = new QueueControllerMultiple(
-    new MyQueueController() {
-        QueueName = "Queue1",
-        ThreadCount = 2
-    },
-    new MyQueueController() {
-        QueueName = "Queue2",
-        ThreadCount = 4
-    }
-);
+    new List<MyQueueController>() {
+        new MyQueueController() {
+            QueueName = "Queue1",
+            ThreadCount = 2
+        },
+        new MyQueueController() {
+            QueueName = "Queue2",
+            ThreadCount = 4
+        }
+    }, "QueueMessageManager");
     
 controller.StartProcessingAsync();
 
@@ -427,6 +430,49 @@ Thread.Sleep(100000)
 
 controller.StopProcessing();
 ```
+
+This starts two separate controllers that use the QueueMessageManager 
+connection string to access their respective queues.
+
+##Configuring Controllers via .config Settings##
+Note you can also shortcut code based configuration by using the config
+file settings:
+
+```xml
+<?xml version="1.0"?>
+<configuration>
+  <configSections>
+    <section name="QueueManagerConfiguration" requirePermission="false" type="System.Configuration.NameValueSectionHandler,System,Version=1.0.3300.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"/>    
+  </configSections>
+  <connectionStrings>    
+    <add name="QueueMessageManager" connectionString="Server=.;Database=QueueMessageManager;integrated security=true;Enlist=True;MultipleActiveResultSets=True;" providerName="System.Data.SqlClient"/>
+  </connectionStrings>
+  <QueueManagerConfiguration>
+    <add key="ConnectionString" value="QueueMessageManager"/>
+    <add key="WaitInterval" value="1000"/>
+    <add key="QueueName" value="Queue1"/>
+    <add key="ControllerThreads" value="2"/>
+    <add key="Controllers1" value=",TestQueue,2,2000" />
+    <add key="Controllers2" value=",TestQueue2,2,5000" />
+    <add key="Controllers3" value=",TestQueue3,3,5000" />         
+  </QueueManagerConfiguration>
+  <startup>
+  <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.5"/></startup>
+</configuration>
+```
+
+The ConnectionString and QueueName parameters are used both for QueueManager and  
+QueueController configuration. 
+
+The WaitInterval, ControllerThreads and optional Controllers list are used only for
+controllers. The first single parms are default configuration values for the controller.
+The Controllers List is used with QueueControllerMultiple() which allows a single handler
+for several different queues. The list allows specification of controller settings
+as a comma delimited list of values. 
+
+The parameters are the connection string, queue name, threadcount and wait interval
+respectively. The connection string can be left blank which uses the default connection
+string specified above.
 
 ###Configuration###
 The QueueMessageManager works with a database data store to handle queue messaging. 

@@ -368,7 +368,7 @@ namespace Westwind.MessageQueueing.Tests
                 manager.SubmitRequest(item, autoSave: true);
             }
 
-            Console.WriteLine("Done adding: " + sw.ElapsedMilliseconds);
+            Console.WriteLine("Done adding: " + sw.ElapsedMilliseconds + "ms");
 
             Console.WriteLine("Items inserted.");
 

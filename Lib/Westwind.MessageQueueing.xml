@@ -16,6 +16,14 @@
             into the app and attach to the events provdided here.
             </summary>
         </member>
+        <member name="M:Westwind.MessageQueueing.QueueController.Initialize(Westwind.MessageQueueing.QueueMessageManagerConfiguration,System.Type)">
+            <summary>
+            Initializes the QueueController from the 
+            Queue Configuration Settings
+            </summary>
+            <param name="configuration"></param>
+            <param name="queueManagerType"></param>
+        </member>
         <member name="M:Westwind.MessageQueueing.QueueController.StartProcessing">
             <summary>
             Synchronous Message Processing routine - will process one message after
@@ -124,11 +132,6 @@
             Connection String for the database
             </summary>
         </member>
-        <member name="P:Westwind.MessageQueueing.QueueController.Controllers">
-            <summary>
-            Optional list of controllers passed into to the constructor
-            </summary>
-        </member>
         <member name="P:Westwind.MessageQueueing.QueueController.Active">
             <summary>
             Determines whether the controller is processing messages
@@ -190,12 +193,25 @@
             the database has failed. Allows for error handling or logging.
             </summary>
         </member>
-        <member name="M:Westwind.MessageQueueing.QueueControllerMultiple.#ctor(System.Collections.Generic.IEnumerable{Westwind.MessageQueueing.QueueController})">
+        <member name="F:Westwind.MessageQueueing.QueueControllerMultiple.Controllers">
+            <summary>
+            Child Controllers that are actually launched
+            </summary>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueControllerMultiple.#ctor(System.Collections.Generic.IEnumerable{Westwind.MessageQueueing.QueueController},System.String)">
             <summary>
             Pass in a list of controllers and their configuration to
             start all of the controllers processing simultaneously
             </summary>
             <param name="controllers">List of pre-configured controllers</param>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueControllerMultiple.Initialize(Westwind.MessageQueueing.QueueMessageManagerConfiguration,System.Type)">
+            <summary>
+            Loads configuration settings from configuration file and loads up
+            the Controllers list.
+            </summary>
+            <param name="configuration"></param>
+            <param name="managerType"></param>
         </member>
         <member name="M:Westwind.MessageQueueing.QueueControllerMultiple.StartProcessingAsync">
             <summary>
@@ -769,6 +785,12 @@
             uses to process incoming queue requests
             </summary>
         </member>
+        <member name="P:Westwind.MessageQueueing.QueueMessageManagerConfiguration.Controllers">
+            <summary>
+            A list of controllers that can be launched automatically
+            when QueueControllerMultiple is started
+            </summary>
+        </member>
         <member name="P:Westwind.MessageQueueing.QueueMessageManagerConfiguration.MonitorHostUrl">
             <summary>
             When hosting as a Service you can optionnally 
@@ -782,6 +804,13 @@
             Can be used globally to access a single 
             Queue Configuration.
             </summary>
+        </member>
+        <member name="M:Westwind.MessageQueueing.ControllerConfiguration.FromString(System.String)">
+            <summary>
+            Allows retrieving an object from a string generated with ToString()
+            </summary>
+            <param name="data"></param>
+            <returns></returns>
         </member>
         <member name="T:Westwind.MessageQueueing.QueueMessageManagerSerializationHelper">
             <summary>

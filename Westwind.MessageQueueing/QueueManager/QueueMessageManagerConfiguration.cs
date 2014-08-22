@@ -36,14 +36,19 @@ namespace Westwind.MessageQueueing
         /// </summary>
         public int ControllerThreads { get; set; }
 
+
+        /// <summary>
+        /// A list of controllers that can be launched automatically
+        /// when QueueControllerMultiple is started
+        /// </summary>
+        public List<ControllerConfiguration> Controllers { get; set; }
+
         /// <summary>
         /// When hosting as a Service you can optionnally 
         /// host the SignalR Service to feed the Monitor Web
         /// interface from the service
         /// </summary>
         public string MonitorHostUrl { get; set; }
-
-        public List<ControllerConfiguration> Controllers { get; set; }
 
         /// <summary>
         /// Singleton instance of a Configuration Manager.
@@ -91,5 +96,20 @@ namespace Westwind.MessageQueueing
         public string QueueName { get; set;  }
         public int ControllerThreads { get; set; }
         public int WaitInterval { get; set; }
+
+        /// <summary>
+        /// Allows retrieving an object from a string generated with ToString()
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static ControllerConfiguration FromString(string data)
+        {
+            return StringSerializer.Deserialize<ControllerConfiguration>(data, ",");
+        }
+
+        public override string ToString()
+        {
+            return StringSerializer.SerializeObject(this, ",");
+        }
     }
 }
