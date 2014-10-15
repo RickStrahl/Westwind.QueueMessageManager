@@ -1,0 +1,212 @@
+﻿@{
+    // read host url from .config file
+    var hostUrl = "http://localhost/queuemanagerstarter/";
+    var initialQueue = "MPWF";
+    var token = "";
+}
+<html>
+<head>
+    <title>Queue Message Monitor</title>
+    <link href="~/Css/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Css/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet" />
+    <link href="~/Css/standard.min.css" rel="stylesheet" />
+    <link href="~/Css/marvelpress.css" rel="stylesheet" />
+    <link href="~/Css/toastr.min.css" rel="stylesheet" />
+
+    <style type="text/css">
+        .container {
+        }
+
+        #MessageContainer {
+            margin: 30px;
+            margin-top: 15px;
+        }
+
+        #MessageContent {
+            height: 350px;
+            overflow-y: scroll;
+        }
+
+            #MessageContent td {
+                padding: 2px;
+            }
+
+        .message-item {
+            padding: 5px;
+            padding-left: 10px;
+            border-bottom: dotted 1px lightgray;
+            cursor: pointer;
+        }
+
+            .message-item.alternate {
+                background: #fffeee;
+            }
+
+            .message-item:hover {
+                background-color: #ffe766;
+            }
+
+
+        .message-table {
+            width: 100%;
+        }
+
+        .message-status {
+            width: 85px;
+        }
+
+        .message-time {
+            width: 70px;
+        }
+
+        .message-elapsed {
+            text-align: right;
+        }
+
+        [class^="icon-"],
+        [class*=" icon-"] {
+            width: 20px;
+            height: 16px;
+            background-repeat: no-repeat;
+            background-position: 0 0;
+        }
+
+        .icon-ok {
+            background: url("../images/ok.png");
+            background-repeat: no-repeat;
+        }
+
+        .icon-error {
+            background-image: url("../images/error.png");
+            background-repeat: no-repeat;
+        }
+
+        .icon-running {
+            background-image: url("../images/running.png");
+            background-repeat: no-repeat;
+        }
+
+        .icon-info {
+            background-image: url("../images/info.png");
+            background-repeat: no-repeat;
+        }
+
+        #PageContainer {
+            margin-top: 64px;
+        }
+    </style>
+</head>
+<body>
+    <div id="Toolbar" class="toolbarcontainer">
+        <div>
+            <select id="lstQueues" name="lstQueues"
+                    data-bind="value: activeQueue,
+                           options: queueNames,
+                           optionsText: 'text',
+                           optionsValue: 'value'"></select>
+
+            <a id="btnRefresh" class="hoverbutton"><img src="~/css/images/refresh.png" /> Refresh</a>
+            
+            <a href="#" id="btnStopService" class="hoverbutton " title="Stop the Service"><img src="~/images/stop.png" /> Stop</a>
+            <a href="#" id="btnStartService" class="hoverbutton" title="Start the queue service."><img src="~/images/start.png" /> Start</a>
+            
+            <span>{{view.connectionStatus}}</span>
+        </div>
+
+        <div style="margin-top: 5px; padding-top: 2px; border-top: solid 1px grey;">
+            Queue: <input type="text" name="txtQueueName" value=""
+                          data-bind="value: status.queueName" class="input-small" readonly disabled />
+            &nbsp;
+            Threads: <input type="number" name="txtThreadCount" value="" class="input-mini number" readonly disabled
+                            data-bind="value: status.threadCount" />
+            &nbsp;
+            WaitTime: <input type="number" name="txtWaitTime" value="" class="input-mini number" disabled
+                             data-bind="value: status.waitInterval" />
+            <a id="btnUpdateStatus" class="btn" style="display: none; padding: 2px 8px; font-size: 8pt;">Update</a>
+        </div>
+    </div>
+
+
+
+    <div id="MessageContainer" class="dialog boxshadow">
+        <div class="dialog-header">Requests Processing</div>
+        <div id="MessageContent">
+        </div>
+        <div class="toolbarcontainer">
+            <div class="rightalign"><span data-bind="text: waitingMessages"></span> waiting </div>
+            <div>Ready</div>
+        </div>
+    </div>
+
+
+
+    <div id="ItemDetail" class="dialog boxshadow" style="width: 90%;display: none;">
+        <div class="dialog-header" data-bind="text: 'Queue item: ' +  queueItem.id() + ' | status: ' + queueItem.status()">Queue Item Detail</div>
+        <div class="dialog-content" style="max-height: 550px;min-height: 200px; overflow: auto">
+
+            <div data-bind="text: queueItem.date()"
+                 class="rightalign small" style="color: steelblue;">
+            </div>
+
+            <div class="control-group">
+                <label>Message:</label>
+                <div class="" data-bind="text: queueItem.message">
+                </div>
+            </div>
+            <div class="control-group">
+                <label>Xml:</label>
+                <pre data-bind="text: queueItem.xml">        
+            </pre>
+            </div>
+        </div>
+    </div>
+
+
+    <img id="imgLoader" src="~/Css/Images/loading_black.gif" style="display:none;" />
+
+    <!--Script references. -->
+    <script src="~/Scripts/jquery-1.8.3.min.js"></script>
+    <script src="~/Scripts/ww.jquery.min.js"></script>
+    <script src="~/Css/bootstrap/js/bootstrap.min.js"></script>
+    <script src="~/Scripts/underscore-min.js"></script>
+    <script src="~/Scripts/toastr.min.js"></script>
+    <script src="~/Scripts/App/MarvelPress.js"></script>
+
+    <!--Reference the jQuery library. -->
+    <script src="~/Scripts/jquery.signalR-2.1.2.min.js"></script>
+    <script src="~/Scripts/knockout-2.2.1.js"></script>
+    <script src="~/Scripts/knockout-mapping.js"></script>
+    <script src="~/scripts/app/QueueMonitor.js"></script>
+    <script>
+        window.page = new Page();
+
+        page.resizeMessageContent = function () {
+            var height = $(window).height();
+            $("#MessageContent").height(height - 260);
+        };
+
+        $(window).resize(_.debounce(page.resizeMessageContent,100));
+        page.resizeMessageContent();
+
+        $("#imgLoader").modalDialog();
+
+        var config = {};
+        config.baseUrl = 'QueueMonitor.csHtml?';
+        config.hubUrl = '@(hostUrl)signalr';
+        config.token = "@token";
+        config.initialQueue = "@initialQueue";
+
+        page.initialize(page);
+    </script>
+
+    <!-- do this later to allow page to load first -->
+    <!--Reference the autogenerated SignalR hub script. -->
+    <script src="@(hostUrl)signalr/hubs"></script>
+    <script>
+        $(function () {
+            page.startHub();
+            $("#imgLoader").modalDialog("hide");
+        });
+    </script>
+</body>
+</html>
