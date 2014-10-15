@@ -119,7 +119,7 @@ namespace Westwind.MessageQueueing
                 manager =
                     ReflectionUtils.CreateInstanceFromType(ManagerType, ConnectionString ?? string.Empty) as
                         QueueMessageManager;
-
+                
 
                 if (manager.GetNextQueueMessage(QueueName) == null)
                 {

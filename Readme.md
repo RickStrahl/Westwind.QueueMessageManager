@@ -434,46 +434,6 @@ controller.StopProcessing();
 This starts two separate controllers that use the QueueMessageManager 
 connection string to access their respective queues.
 
-##Configuring Controllers via .config Settings##
-Note you can also shortcut code based configuration by using the config
-file settings:
-
-```xml
-<?xml version="1.0"?>
-<configuration>
-  <configSections>
-    <section name="QueueManagerConfiguration" requirePermission="false" type="System.Configuration.NameValueSectionHandler,System,Version=1.0.3300.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"/>    
-  </configSections>
-  <connectionStrings>    
-    <add name="QueueMessageManager" connectionString="Server=.;Database=QueueMessageManager;integrated security=true;Enlist=True;MultipleActiveResultSets=True;" providerName="System.Data.SqlClient"/>
-  </connectionStrings>
-  <QueueManagerConfiguration>
-    <add key="ConnectionString" value="QueueMessageManager"/>
-    <add key="WaitInterval" value="1000"/>
-    <add key="QueueName" value="Queue1"/>
-    <add key="ControllerThreads" value="2"/>
-    <add key="Controllers1" value=",TestQueue,2,2000" />
-    <add key="Controllers2" value=",TestQueue2,2,5000" />
-    <add key="Controllers3" value=",TestQueue3,3,5000" />         
-  </QueueManagerConfiguration>
-  <startup>
-  <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.5"/></startup>
-</configuration>
-```
-
-The ConnectionString and QueueName parameters are used both for QueueManager and  
-QueueController configuration. 
-
-The WaitInterval, ControllerThreads and optional Controllers list are used only for
-controllers. The first single parms are default configuration values for the controller.
-The Controllers List is used with QueueControllerMultiple() which allows a single handler
-for several different queues. The list allows specification of controller settings
-as a comma delimited list of values. 
-
-The parameters are the connection string, queue name, threadcount and wait interval
-respectively. The connection string can be left blank which uses the default connection
-string specified above.
-
 ###Configuration###
 The QueueMessageManager works with a database data store to handle queue messaging. 
 Currently Sql Server is supported and we're working on a MongoDb version.
@@ -513,7 +473,8 @@ Here's what values are available on the configuration:
 The only required value for these settings is the connection string that 
 points at the SQL Server instance to hold the data. This value can be
 a raw SQL connection string, or - as used above - a ConnectionString
-entry in the config <connectionStrings> section.
+entry in the config <connectionStrings> section. Applies both to 
+the manager and controller (via Controller.Initialize()).
 
 *QueueName*
 Optional name of the queue that is to be checked for requests to be
@@ -521,17 +482,53 @@ processed. The default name is an empty string which checks all queues.
 Note that you can have multiple queues and each queue operation can 
 be performed on a specific queue. You can override the queue in
 all requests individually - the queue name is most important for
-the QueueController.
+the QueueController. Applies both to manager and controller.
 
 *WaitInterval*
 The interval in milliseconds to wait between checking for new queue items
 if no items are found. If the queue is not empty, a check for the next
 item is immediately performed following de-queing of the previous item.
+Applies only to controllers.
 
 *ControllerThreads*
 The number of threads that the controller uses to process requests.
 The number of threads determines how many concurrent queue monitors
-ping the queue for new requests. The default is 2.
+ping the queue for new requests. The default is 2. Applies only to
+controllers.
 
+##Configuring Multiple Controllers via .config Settings##
+If you plan on running multiple controllers to monitor multiple queues simultaneously
+you can also configure multiple controllers:
+
+```xml
+<QueueManagerConfiguration>
+    <add key="ConnectionString" value="QueueMessageManager"/>
+    <add key="WaitInterval" value="1000"/>
+    <add key="QueueName" value="Queue1"/>
+    <add key="ControllerThreads" value="2"/>
+
+    <!-- CONTROLLER LIST BELOW -->
+    <add key="Controllers1" value=",TestQueue,2,2000" />
+    <add key="Controllers2" value=",TestQueue2,2,5000" />
+    <add key="Controllers3" value=",TestQueue3,3,5000" />
+</QueueManagerConfiguration>
+```
+
+The Controllers List is used with QueueControllerMultiple() which allows a single handler
+for several different queues. The list allows specification of controller settings
+as a comma delimited list of values. 
+
+The parameters are the connection string, queue name, threadcount and wait interval
+respectively. The connection string can be left blank which uses the default connection
+string specified above.
 
 ###License###
+The Westwind.QueueMessaging library is licensed under the MIT License and there's no charge to use, integrate or modify the code for this project. You are free to use it in personal, commercial, government and any other type of application.
+
+Commercial Licenses are also available as an option. If you are using these tools in a commercial application please consider purchasing one of our reasonably priced commercial licenses that help support this project's development.
+
+All source code is copyright West Wind Technologies, regardless of changes made to them. Any source code modifications must leave the original copyright code headers intact.
+
+###Warranty Disclaimer: No Warranty!###
+
+IN NO EVENT SHALL THE AUTHOR, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR REDISTRIBUTE THIS PROGRAM AND DOCUMENTATION, BE LIABLE FOR ANY COMMERCIAL, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE PROGRAM INCLUDING, BUT NOT LIMITED TO, LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR LOSSES SUSTAINED BY THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS, EVEN IF YOU OR OTHER PARTIES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.

@@ -98,7 +98,6 @@ namespace Westwind.MessageQueueing
             // Write the Properties collection to the XmlProperties field
             SetProperties("XmlProperties", item);
 
-
             bool result = false;
             if (!item.__IsNew)
             {
@@ -116,8 +115,7 @@ namespace Westwind.MessageQueueing
                 else
                 {
                     result = true;
-                    item.__IsNew = false;
-                    Item.__IsNew = false;
+                    item.__IsNew = false;                    
                 }
             }
 
@@ -559,7 +557,7 @@ EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE  [dbo].[qmm_GetNextQueueM
 				   Id FROM QueueMessageItems WITH (UPDLOCK)	   
 				   WHERE [QueueName] =  @QueueName AND
                          [Started] is null         						 
-				   -- ORDER BY Submitted 
+				   ORDER BY Id
 		  )
 ' 
 END

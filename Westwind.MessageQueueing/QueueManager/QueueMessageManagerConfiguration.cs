@@ -39,21 +39,39 @@ namespace Westwind.MessageQueueing
 
         /// <summary>
         /// A list of controllers that can be launched automatically
-        /// when QueueControllerMultiple is started
+        /// when QueueControllerMultiple is started. Note this
+        /// property is available only to the multi-controller implementation.
+        /// Otherwise use the QueueName and WaitInterval properties
+        /// to modify operation of an individual queue.
         /// </summary>
         public List<ControllerConfiguration> Controllers { get; set; }
 
         /// <summary>
-        /// When hosting as a Service you can optionnally 
+        /// The URL where SignalR accepts requests on.
+        /// Typically this will be ~/signalr
+        /// </summary>
+        public string MonitorSignalRHubUrl { get; set; }
+
+        /// <summary>
+        /// The URL to the Monitor's HTML Page that 
+        /// displays the monitor. ~/QueueMonitor.cshtml
+        /// </summary>
+        public string MonitorHtmlUrl { get; set;  }
+
+        /// <summary>
+        /// When self-hosting as a Service you can optionnally 
         /// host the SignalR Service to feed the Monitor Web
-        /// interface from the service
+        /// interface from the service.
+        /// Typically: http://*:8080/ or http://144.12.121.1:8080/
         /// </summary>
         public string MonitorHostUrl { get; set; }
+
 
         /// <summary>
         /// Singleton instance of a Configuration Manager.
         /// Can be used globally to access a single 
         /// Queue Configuration.
+        /// Used only by Client when 
         /// </summary>
         public static QueueMessageManagerConfiguration Current { get; private set; }
         
@@ -65,6 +83,8 @@ namespace Westwind.MessageQueueing
             ControllerThreads = 1;
             QueueName = string.Empty;
             MonitorHostUrl = "http://*:8080/";
+            MonitorSignalRHubUrl = "~/signalR";
+            MonitorHtmlUrl = "~/QueueMonitor.cshtml";
         }
 
 
@@ -90,10 +110,14 @@ namespace Westwind.MessageQueueing
         }
     }
 
+    /// <summary>
+    /// Indidual Controller Configuration Item
+    /// in a multi-controller configuration.        
+    /// </summary>
     public class ControllerConfiguration
     {
         public string ConnectionString { get; set; }
-        public string QueueName { get; set;  }
+        public string QueueName { get; set; }
         public int ControllerThreads { get; set; }
         public int WaitInterval { get; set; }
 

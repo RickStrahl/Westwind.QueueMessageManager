@@ -67,7 +67,7 @@ namespace Westwind.MessageQueueing
             if (configuration == null)
                 configuration = QueueMessageManagerConfiguration.Current;
             if (managerType == null)
-                managerType = typeof(QueueMessageManagerSql);
+                managerType = ManagerType ?? typeof(QueueMessageManagerSql);
 
             if (configuration != null && configuration.Controllers != null)
             {

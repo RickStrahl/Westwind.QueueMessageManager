@@ -52,7 +52,7 @@ namespace Westwind.MessageQueueing
             Submitted = DateTime.UtcNow;
         }
 
-        private static readonly DateTime baseDate = new DateTime(DateTime.UtcNow.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        private static readonly DateTime baseDate = new DateTime(DateTime.UtcNow.Year -1, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         public static string GenerateId()
         {
             return (DateTime.UtcNow - baseDate).Ticks + "_" +

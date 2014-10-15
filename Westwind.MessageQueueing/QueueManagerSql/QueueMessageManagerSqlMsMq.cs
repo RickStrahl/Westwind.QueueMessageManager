@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Messaging;
 
 namespace Westwind.MessageQueueing
@@ -20,14 +21,21 @@ namespace Westwind.MessageQueueing
     {
         public string MsMqQueuePath { get; set; }
 
-        public QueueMessageManagerSqlMsMq() : base()
+        public QueueMessageManagerSqlMsMq()             
         {
             MsMqQueuePath = @".\private$\";
         }
     
-        public QueueMessageManagerSqlMsMq(string connectionString, string queuePath = null) : base(connectionString)
+        public QueueMessageManagerSqlMsMq(string connectionString) 
+            : base(connectionString)
         {            
-             MsMqQueuePath = queuePath ?? @".\private$\";
+             MsMqQueuePath = @".\private$\";            
+        }
+
+        public QueueMessageManagerSqlMsMq(string connectionString, string queuePath)
+            : base(connectionString)
+        {
+            MsMqQueuePath = queuePath ?? @".\private$\";
         }
 
         /// <summary>
@@ -48,9 +56,13 @@ namespace Westwind.MessageQueueing
             else
             {
                 // Create the Queue
-                MessageQueue.Create(queueId);
-                queue = new MessageQueue(queueId);
-                queue.Label = "Queue Message Manager for " + queueName;                
+                queue = MessageQueue.Create(queueId);
+                //queue = new MessageQueue(queueId);
+                queue.Label = "Queue Message Manager for " + queueName;
+                queue.SetPermissions("EVERYONE", MessageQueueAccessRights.FullControl);
+                queue.SetPermissions("SYSTEM", MessageQueueAccessRights.FullControl);
+                queue.SetPermissions("NETWORK SERVICE", MessageQueueAccessRights.FullControl);
+                queue.SetPermissions("Administrators", MessageQueueAccessRights.FullControl);
             }
 
             return queue;
@@ -67,12 +79,20 @@ namespace Westwind.MessageQueueing
         /// <returns></returns>
         public override bool Save(QueueMessageItem item = null)
         {
-            if (!base.Save(item))
-                return false;
-
             if (item == null)
                 item = Item;
 
+            bool isNew = false;
+            if (item!= null)
+                isNew = item.__IsNew;
+
+            if (!base.Save(item))
+                return false;
+
+            if (!isNew)
+                return true;
+
+            // write new entries into the queue
             var queue = GetQueue(item.QueueName);
             if (queue == null)
             {
@@ -82,8 +102,8 @@ namespace Westwind.MessageQueueing
 
             try
             {
-                queue.Formatter = new StringMessageFormatter();
-                queue.Send(Item.Id);
+                    queue.Formatter = new StringMessageFormatter();
+                    queue.Send(Item.Id);             
             }
             catch (Exception ex)
             {
@@ -107,15 +127,25 @@ namespace Westwind.MessageQueueing
 
             var queue = GetQueue(queueName);
             if (queue == null)
-                throw new InvalidOperationException("Unable to access MSMQ queue: " + MsMqQueuePath + "QMM_" + queueName);
+                throw new InvalidOperationException("Unable to access MSMQ queue: " + MsMqQueuePath + "qmm_" + queueName.ToLower());
 
             Message msg = null;
             try
             {
                 msg = queue.Receive(new TimeSpan(1));
             }
-            catch
-            {                                 
+            catch (MessageQueueException ex)
+            {
+                if (ex.MessageQueueErrorCode == MessageQueueErrorCode.IOTimeout)
+                    return null; // not an error - just exit
+
+                SetError("Queue receive error: " + ex.Message);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                SetError("Queue receive error: " + ex.Message);
+                return null;
             }
 
             if (msg == null)
@@ -127,7 +157,16 @@ namespace Westwind.MessageQueueing
                 return null; // invalid key
 
             // now load the item
-            return Load(id.ToString());
+            var item = Load(id.ToString());
+            if (item == null) {
+                SetError("Queue item doesn't exist any longer.");
+                return null;
+            }
+            
+            item.__IsNew = false;
+            item.Status = "Started";
+
+            return item;
         }
 
     }
