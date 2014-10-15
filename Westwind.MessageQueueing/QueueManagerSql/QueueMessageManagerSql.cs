@@ -154,10 +154,11 @@ namespace Westwind.MessageQueueing
                 return null;
 
             Item.__IsNew = false;
+            Item.Started = DateTime.UtcNow;
             Item.Status = "Started";
 
             // load up Properties from XmlProperties field
-            this.GetProperties("XmlProperties", Item);
+            GetProperties("XmlProperties", Item);
 
             return Item;
         }

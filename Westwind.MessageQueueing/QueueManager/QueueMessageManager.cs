@@ -192,6 +192,8 @@ namespace Westwind.MessageQueueing
             item.Status = "Completed";
             item.Completed = DateTime.UtcNow;
             item.IsComplete = true;
+            if (item.Started == null)
+                item.Started = DateTime.UtcNow.AddMilliseconds(-1);
             item.IsCancelled = false;
 
             if (messageText != null)
@@ -217,6 +219,8 @@ namespace Westwind.MessageQueueing
 
             item.Status = "Cancelled";
             item.Completed = DateTime.UtcNow;
+            if (item.Started == null)
+                item.Started = DateTime.UtcNow.AddMilliseconds(-1);
             item.IsComplete = true;
             item.IsCancelled = true;
 

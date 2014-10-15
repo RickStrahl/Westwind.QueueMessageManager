@@ -25,7 +25,7 @@ namespace Westwind.MessageQueueing
             QueueName = string.Empty;
             WaitInterval = 1000;
             ThreadCount = 1; 
-            ManagerType = typeof(QueueMessageManagerSql);                        
+            QueueManagerType = typeof(QueueMessageManagerSql);                        
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace Westwind.MessageQueueing
         public void Initialize(QueueMessageManagerConfiguration configuration = null, Type queueManagerType = null)
         {                        
             if (queueManagerType != null)
-                ManagerType = queueManagerType;
+                QueueManagerType = queueManagerType;
 
             if (configuration == null)
                 configuration = QueueMessageManagerConfiguration.Current;
@@ -94,7 +94,13 @@ namespace Westwind.MessageQueueing
         /// <summary>
         /// The specific type of the message manager class
         /// </summary>
-        public Type ManagerType { get; set; }
+        public Type QueueManagerType { get; set; }
+
+        /// <summary>
+        /// Optional function you can hook to handle creation of the QueueManager
+        /// instance. Use this to create and configure the QUeueManager instance
+        /// </summary>
+        public Func<QueueMessageManager> OnCreateQueueManager { get; set; }
 
         /// <summary>
         /// Synchronous Message Processing routine - will process one message after
@@ -115,11 +121,13 @@ namespace Westwind.MessageQueueing
 
                 // Start by retrieving the next message if any
                 // ALWAYS create a new instance so the events get thread safe object
-                QueueMessageManager manager = null;
-                manager =
-                    ReflectionUtils.CreateInstanceFromType(ManagerType, ConnectionString ?? string.Empty) as
-                        QueueMessageManager;
-                
+                QueueMessageManager manager;
+                if (OnCreateQueueManager != null)
+                    manager = OnCreateQueueManager.Invoke();
+                else
+                    manager =
+                        ReflectionUtils.CreateInstanceFromType(QueueManagerType, ConnectionString ?? string.Empty) 
+                                        as QueueMessageManager;                
 
                 if (manager.GetNextQueueMessage(QueueName) == null)
                 {
@@ -131,13 +139,15 @@ namespace Westwind.MessageQueueing
                     continue;
                 }
 
-                // Fire events to execute the real operations
+                // Fire events to execute the real operation
                 ExecuteSteps(manager);
 
                 // let CPU breathe
                 Thread.Sleep(1);
             }
         }
+
+        
 
         /// <summary>
         /// Shuts down the Message Processing loop

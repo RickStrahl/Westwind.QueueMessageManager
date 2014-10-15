@@ -11,28 +11,43 @@ namespace Westwind.MessageQueueing.WebHost.ControllerHosting
     /// Marvelpress Windows Service implementation that can be called 
     /// by a Windows service that has been launched.
     /// </summary>
-    public class ServiceLauncher : IRegisteredObject
+    public class ServiceLauncher<TController> : IRegisteredObject
+        where TController:  QueueControllerMultiple, new()        
     {
         /// <summary>
         /// Instance of the QueueService controller that is maintained
         /// on this service instance - ensures the controller's lifetime
         /// is tied to the service.
         /// </summary>
-        QueueControllerMultiple Controller { get; set; }       
+        TController Controller { get; set; }
+
+        /// <summary>
+        /// QueueManager Type to instantiate (defaults to QueueManagerSql)
+        /// 
+        /// Use this or OnCreateQueueManager to instantiate the
+        /// appropriate QueueManager type
+        /// </summary>
+        public Type QueueManagerType { get; set;  }
+
+        /// <summary>
+        /// Optional expression used to create a QueueManager Instance
+        /// for each controller.
+        /// </summary>
+        public Func<QueueMessageManager> OnCreateQueueManager { get; set;  }
+
 
         public void Start()
         {    
             try
-            {
-                //Controller = new MarvelPressWorkflowQueueController(controllers.ToArray());
+            {                
+                // Create multiple child controllers from web.config configuration                
+                Controller = new TController()
+                {
+                    QueueManagerType = QueueManagerType,
+                    OnCreateQueueManager = OnCreateQueueManager
+                };
+                Controller.Initialize();                
 
-                // Create multiple child controllers from web.config configuration
-                Controller = new QueueMonitorMultipleQueueController();
-                Controller.ManagerType = typeof(QueueMessageManagerSqlMsMq);
-                
-                Controller.Initialize();
-
-                
                 // *** Spin up n Number of threads to process requests
                 Controller.StartProcessingAsync();
 

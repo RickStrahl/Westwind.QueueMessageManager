@@ -8,7 +8,7 @@ namespace Westwind.MessageQueueing.WebHost
     public class Global : System.Web.HttpApplication
     {
         //private static ApplicationScheduler scheduler;
-        private static ServiceLauncher launcher;
+        private static ServiceLauncher<TestQueueController> launcher;
 
         protected void Application_Start(object sender, EventArgs e)
         {            
@@ -19,7 +19,19 @@ namespace Westwind.MessageQueueing.WebHost
             //};
             //scheduler.Start();            
 
-            launcher = new ServiceLauncher();
+            // QueueMessageManager Configuration
+            launcher = new ServiceLauncher<TestQueueController>();
+
+            // customize how the QueueMessageManager is loaded on each request
+            launcher.OnCreateQueueManager = () =>
+            {
+                //var manager = new QueueMessageManagerSql();                
+                var manager = new QueueMessageManagerSqlMsMq();
+                manager.MsMqQueuePath = @".\private$\";
+
+                return manager;
+            };
+
             launcher.Start();
 
             // register so shutdown is controlled

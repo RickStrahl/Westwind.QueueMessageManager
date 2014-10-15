@@ -158,7 +158,17 @@ namespace Westwind.MessageQueueing
                 return null;
             }
 
-            Item = result.GetModifiedDocumentAs<QueueMessageItem>();
+            var item = result.GetModifiedDocumentAs<QueueMessageItem>();
+
+            item.__IsNew = false;
+            item.Started = DateTime.UtcNow;
+            item.Status = "Started";
+
+            // load up Properties from XmlProperties field
+            GetProperties("XmlProperties", Item);
+            
+            Item = item;            
+
             return Item;
         }
 

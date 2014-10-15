@@ -821,6 +821,7 @@
     <Compile Include="ControllerHosting\QueueMonitorServiceHub.cs" />
     <Compile Include="ControllerHosting\ServiceLauncher.cs" />
     <Compile Include="QueueMonitorQueueController.cs" />
+    <Compile Include="TestQueueController.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Images\OrderLineImages_Originals\" />

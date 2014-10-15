@@ -38,8 +38,9 @@ namespace Westwind.MessageQueueing
             {
                 if (string.IsNullOrEmpty(controller.ConnectionString))
                     controller.ConnectionString = connectionString;
-                if (controller.ManagerType == null)
-                    controller.ManagerType = ManagerType;
+                
+                controller.QueueManagerType = QueueManagerType;
+                controller.OnCreateQueueManager = OnCreateQueueManager;
 
                 Controllers.Add(controller);
             }
@@ -67,10 +68,11 @@ namespace Westwind.MessageQueueing
             if (configuration == null)
                 configuration = QueueMessageManagerConfiguration.Current;
             if (managerType == null)
-                managerType = ManagerType ?? typeof(QueueMessageManagerSql);
+                managerType = QueueManagerType ?? typeof(QueueMessageManagerSql);
 
             if (configuration != null && configuration.Controllers != null)
             {
+                // pass configuration to all the child controllers
                 foreach (var config in configuration.Controllers)
                 {
                     var ctrl = Activator.CreateInstance(GetType()) as QueueController;
@@ -82,7 +84,9 @@ namespace Westwind.MessageQueueing
                     ctrl.QueueName = config.QueueName;
                     ctrl.ThreadCount = config.ControllerThreads;
                     ctrl.WaitInterval = config.WaitInterval;
-                    ctrl.ManagerType = managerType;
+                    ctrl.QueueManagerType = managerType;
+                    ctrl.OnCreateQueueManager = OnCreateQueueManager;
+
                     Controllers.Add(ctrl);
                 }
             }

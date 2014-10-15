@@ -38,6 +38,8 @@ namespace Westwind.MessageQueueing
             MsMqQueuePath = queuePath ?? @".\private$\";
         }
 
+        static object QueueCreateLock = new Object();
+
         /// <summary>
         /// Creates an MSMQ Queue
         /// </summary>
@@ -55,14 +57,22 @@ namespace Westwind.MessageQueueing
                 queue = new MessageQueue(queueId);
             else
             {
-                // Create the Queue
-                queue = MessageQueue.Create(queueId);
-                //queue = new MessageQueue(queueId);
-                queue.Label = "Queue Message Manager for " + queueName;
-                queue.SetPermissions("EVERYONE", MessageQueueAccessRights.FullControl);
-                queue.SetPermissions("SYSTEM", MessageQueueAccessRights.FullControl);
-                queue.SetPermissions("NETWORK SERVICE", MessageQueueAccessRights.FullControl);
-                queue.SetPermissions("Administrators", MessageQueueAccessRights.FullControl);
+                lock (QueueCreateLock)
+                {
+                    if (MessageQueue.Exists(queueId))
+                        queue = new MessageQueue(queueId);
+                    else
+                    {
+                        // Create the Queue
+                        queue = MessageQueue.Create(queueId);
+                        //queue = new MessageQueue(queueId);
+                        queue.Label = "Queue Message Manager for " + queueName;
+                        queue.SetPermissions("EVERYONE", MessageQueueAccessRights.FullControl);
+                        queue.SetPermissions("SYSTEM", MessageQueueAccessRights.FullControl);
+                        queue.SetPermissions("NETWORK SERVICE", MessageQueueAccessRights.FullControl);
+                        queue.SetPermissions("Administrators", MessageQueueAccessRights.FullControl);
+                    }
+                }
             }
 
             return queue;
@@ -159,12 +169,16 @@ namespace Westwind.MessageQueueing
             // now load the item
             var item = Load(id.ToString());
             if (item == null) {
-                SetError("Queue item doesn't exist any longer.");
+                SetError("Queue item no longer exists.");
                 return null;
             }
             
             item.__IsNew = false;
+            item.Started = DateTime.UtcNow;
             item.Status = "Started";
+
+            // load up Properties from XmlProperties field
+            GetProperties("XmlProperties", Item);
 
             return item;
         }

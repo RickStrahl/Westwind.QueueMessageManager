@@ -6,63 +6,63 @@ namespace Westwind.MessageQueueing.WebHost
 {
     public class QueueMonitorMultipleQueueController : QueueControllerMultiple
     {
-        protected override void OnExecuteStart(QueueMessageManager manager)
-        {
-            // write a starting message to QueueMonitor
-            manager.Item.TextInput = DateTime.UtcNow.ToString("u");
-            QueueMonitorServiceHub.WriteMessage(manager.Item);
+        //protected override void OnExecuteStart(QueueMessageManager manager)
+        //{
+        //    // write a starting message to QueueMonitor
+        //    manager.Item.TextInput = DateTime.UtcNow.ToString("u");
+        //    QueueMonitorServiceHub.WriteMessage(manager.Item);
             
-            base.OnExecuteStart(manager);
+        //    base.OnExecuteStart(manager);
             
-            var queueItem = manager.Item;
-            bool result;
+        //    var queueItem = manager.Item;
+        //    bool result;
 
-            try
-            {
-                string action = queueItem.Action;
+        //    try
+        //    {
+        //        string action = queueItem.Action;
 
-                if (!string.IsNullOrEmpty(action))
-                {
-                    //Initialize Anything
-                    action = action.Trim();
-                }
+        //        if (!string.IsNullOrEmpty(action))
+        //        {
+        //            //Initialize Anything
+        //            action = action.Trim();
+        //        }
 
-                switch (action)
-                {
-                    case "HELLOWORLD":
-                    {
-                        Thread.Sleep(2000);
-                        manager.CompleteRequest(messageText: queueItem.Message + " -  completed at " + DateTime.Now, autoSave: true);
-                        break;
-                    }
+        //        switch (action)
+        //        {
+        //            case "HELLOWORLD":
+        //            {
+        //                Thread.Sleep(2000);
+        //                manager.CompleteRequest(messageText: queueItem.Message + " -  completed at " + DateTime.Now, autoSave: true);
+        //                break;
+        //            }
 
-                    default:
-                        // TODO: Remove for production   Random wait for 1-500ms                                           
-                        //Thread.Sleep( (int) (DateTime.Now.Ticks % 500));
+        //            default:
+        //                // TODO: Remove for production   Random wait for 1-500ms                                           
+        //                //Thread.Sleep( (int) (DateTime.Now.Ticks % 500));
 
-                        // All requests that get picked up by the queue get their started properties set,
-                        // so we MUST mark them complete, even if we did not have any local action code here,
-                        // because we cannot leave them in the half-way complete state.
-                        if (
-                            !manager.CompleteRequest(messageText: "Processing complete. Action not supported.",
-                                autoSave: true))
-                        {
-                            // this is pointless - if this save fails it's likely the save you are doing in
-                            // onError will also fail
-                            OnError(manager);
-                            return;
-                        }
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                var ex2 = ex.GetBaseException();
-                OnError(manager, ex2.Message, ex2);
-                //+ "\r\n" + ex.Source + "\r\n" + ex.StackTrace);                
-            }
+        //                // All requests that get picked up by the queue get their started properties set,
+        //                // so we MUST mark them complete, even if we did not have any local action code here,
+        //                // because we cannot leave them in the half-way complete state.
+        //                if (
+        //                    !manager.CompleteRequest(messageText: "Processing complete. Action not supported.",
+        //                        autoSave: true))
+        //                {
+        //                    // this is pointless - if this save fails it's likely the save you are doing in
+        //                    // onError will also fail
+        //                    OnError(manager);
+        //                    return;
+        //                }
+        //                break;
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        var ex2 = ex.GetBaseException();
+        //        OnError(manager, ex2.Message, ex2);
+        //        //+ "\r\n" + ex.Source + "\r\n" + ex.StackTrace);                
+        //    }
 
-        }
+        //}
 
         protected override void OnExecuteComplete(QueueMessageManager manager)
         {
@@ -139,21 +139,6 @@ namespace Westwind.MessageQueueing.WebHost
          int GetWaitingMessageCount(QueueMessageManager manager, int delay = 10)
         {
             return manager.GetWaitingQueueMessageCount(QueueName);
-
-            //int count = 0;
-            //if (WaitingQueueMessageCountLastAccess < DateTime.UtcNow.AddSeconds(delay * -1))
-            //{
-            //    lock (WaitingQueueMessageCountLock)
-            //    {
-            //        if (WaitingQueueMessageCountLastAccess < DateTime.UtcNow.AddSeconds(delay *-1))
-            //        {
-            //            WaitingQueueMessageCountLastAccess = DateTime.UtcNow;
-            //            count = manager.GetWaitingQueueMessageCount(QueueName);
-            //        }
-            //    }                
-            //}
-
-            //return count;
         }
 
     }

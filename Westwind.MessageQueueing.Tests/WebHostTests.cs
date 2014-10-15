@@ -72,6 +72,7 @@ namespace QueueStarter.Tests
         public void AddManyQueueSqlMsMqItems()
         {
             var qm = new QueueMessageManagerSqlMsMq(connectionString);
+            qm.MsMqQueuePath = @".\private$\";
 
             for (int i = 0; i < 10; i++)
             {

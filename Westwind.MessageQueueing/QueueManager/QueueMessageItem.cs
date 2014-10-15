@@ -35,7 +35,7 @@ namespace Westwind.MessageQueueing
 
         public string XmlProperties { get; set; }
 
-        internal bool __IsNew = true;
+        public bool __IsNew = true;
 
         
 
