@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Web.Hosting;
-using Westwind.MessageQueueing.Hosting.ControllerHosting;
-
-
+using Westwind.MessageQueueing.Hosting;
 namespace Westwind.MessageQueueing.WebHostSample
 {
     public class Global : System.Web.HttpApplication
     {
         //private static ApplicationScheduler scheduler;
-        private static ServiceLauncher<WebHostSampleQueueController> launcher;
+        private static AspNetServiceLauncher<WebHostSampleQueueController> launcher;
 
         protected void Application_Start(object sender, EventArgs e)
         {            
@@ -20,7 +18,7 @@ namespace Westwind.MessageQueueing.WebHostSample
             //scheduler.Start();            
 
             // QueueMessageManager Configuration
-            launcher = new ServiceLauncher<WebHostSampleQueueController>();
+            launcher = new AspNetServiceLauncher<WebHostSampleQueueController>();
 
             // customize how the QueueMessageManager is loaded on each request
             launcher.OnCreateQueueManager = () =>
@@ -34,9 +32,6 @@ namespace Westwind.MessageQueueing.WebHostSample
             };
 
             launcher.Start();
-
-            // register so shutdown is controlled
-            HostingEnvironment.RegisterObject(launcher);
         }
 
         public void Application_Error()

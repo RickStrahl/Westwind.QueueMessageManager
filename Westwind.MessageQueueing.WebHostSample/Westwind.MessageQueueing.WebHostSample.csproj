@@ -679,7 +679,8 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WebHostSampleQueueController.cs" />
+    <Compile Include="_Code\oWinStartup.cs" />
+    <Compile Include="_Code\WebHostSampleQueueController.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Westwind.MessageQueueing.Hosting\Westwind.MessageQueueing.Hosting.csproj">

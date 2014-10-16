@@ -4,7 +4,7 @@ using System.Threading;
 using System.Web.Hosting;
 using Westwind.Utilities.Logging;
 
-namespace Westwind.MessageQueueing.Hosting.ControllerHosting
+namespace Westwind.MessageQueueing.Hosting
 {
     /// <summary>
     /// This class is the service bootstrapper that loads up
@@ -17,7 +17,7 @@ namespace Westwind.MessageQueueing.Hosting.ControllerHosting
     /// in Application_Start or in the oWin bootstrap process 
     /// when self hosting.
     /// </summary>
-    public class ServiceLauncher<TController> : IRegisteredObject
+    public class ServiceLauncher<TController>
         where TController:  QueueControllerMultiple, new()        
     {
         /// <summary>
@@ -40,7 +40,6 @@ namespace Westwind.MessageQueueing.Hosting.ControllerHosting
         /// for each controller.
         /// </summary>
         public Func<QueueMessageManager> OnCreateQueueManager { get; set;  }
-
 
         public void Start()
         {    
@@ -78,18 +77,18 @@ namespace Westwind.MessageQueueing.Hosting.ControllerHosting
             }
         }
 
-    
-
-
+        /// <summary>
+        /// Stops the Controllers and shuts down all monitoring/
+        /// processing threads.
+        /// </summary>
+        /// <param name="immediate"></param>
         public void Stop(bool immediate = false)
         {
             LogManager.Current.LogInfo("QueueManager Controller Stopped.");
 
             Controller.StopProcessing();
             Controller.Dispose();
-            Thread.Sleep(1500);
-
-            HostingEnvironment.UnregisterObject(this); 
+            Thread.Sleep(1500);            
         }
 
     }

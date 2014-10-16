@@ -15,6 +15,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
     <title>Queue Message Monitor</title>
+    
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <link rel="apple-touch-icon" href="touch-icon.png" />
+
+    <link rel="icon" href="touch-icon.png" />
+    <meta name="msapplication-TileImage" content="touch-icon.png">
 
     <link href="~/Css/bootstrap/css/bootstrap.css" rel="stylesheet" />
     <link href="~/Css/queuemonitor.css" rel="stylesheet" />
@@ -174,9 +182,11 @@
         };
 
         $(window).resize(_.debounce(resizeMessageContent, 2));
-        setTimeout(resizeMessageContent, 50);
+        setTimeout(resizeMessageContent, 50);        
 
         $("#imgLoader").modalDialog();
+
+        
 
         page.baseUrl = '@baseUrl';
         page.hubUrl = '@(hostUrl)signalr';

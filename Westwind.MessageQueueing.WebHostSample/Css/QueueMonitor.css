@@ -188,6 +188,7 @@
     border-left: 1px #e3e3e3 solid;
     border-left: 1px #e3e3e3 solid;
     overflow-y: scroll;
+    padding: 0;
 }
 
     #MessageContent td {
@@ -195,17 +196,20 @@
     }
 
 .message-item {
-    padding: 5px;
-    border-bottom: dotted 1px lightgray;
+    padding: 6px 10px;
+    border-bottom: solid 1px silver;
     cursor: pointer;
+    transition: background linear 275ms;
 }
 
     .message-item.alternate {
-        background: #fffeee;
+        background: #fafafa;
     }
 
     .message-item:hover {
-        background-color: khaki;
+        background: lightsteelblue;
+        color: white !important;
+        cursor: pointer;
     }
 
 
@@ -218,6 +222,7 @@
     width: 100px;
     padding-left: 0;
     padding-right: 15px;
+    color: steelblue;
 }
 
 .message-time {
@@ -228,30 +233,3 @@
     text-align: right;
 }
 
-[class^="icon-"],
-[class*=" icon-"] {
-    width: 20px;
-    height: 16px;
-    background-repeat: no-repeat;
-    background-position: 0 0;
-}
-
-.icon-ok {
-    background: url("images/ok.png");
-    background-repeat: no-repeat;
-}
-
-.icon-error {
-    background-image: url("images/error.png");
-    background-repeat: no-repeat;
-}
-
-.icon-running {
-    background-image: url("images/running.png");
-    background-repeat: no-repeat;
-}
-
-.icon-info {
-    background-image: url("images/info.png");
-    background-repeat: no-repeat;
-}

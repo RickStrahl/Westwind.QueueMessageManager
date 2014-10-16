@@ -282,6 +282,9 @@
                 vm.waitingMessages = waiting;
                 $scope.$apply();
             }
+
+            $(".message-item").removeClass("alternate");
+            $(".message-item:odd").addClass("alternate");
         };
         
         // let the server push messages to the status bar

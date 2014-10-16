@@ -54,7 +54,7 @@ namespace QueueStarter.Tests
                     Message = "Sql Queue Entry",
                     TextInput = "Process This",
                     QueueName = "MPWF",
-                    Action = "HELLOWORLD",
+                    Action = "GOBIG",
                     Xml = string.Format(@"<doc>
     <company>East Wind</company>
     <name>Rick</name> 
