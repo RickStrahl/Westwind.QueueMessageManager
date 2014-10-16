@@ -2,7 +2,6 @@
 using System.Text;
 using System.Threading;
 using System.Web.Hosting;
-using QueueManagerStarter;
 using Westwind.Utilities.Logging;
 
 namespace Westwind.MessageQueueing.Hosting.ControllerHosting
