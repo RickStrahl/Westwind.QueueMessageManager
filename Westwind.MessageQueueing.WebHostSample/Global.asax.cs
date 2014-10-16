@@ -25,9 +25,10 @@ namespace Westwind.MessageQueueing.WebHostSample
             // customize how the QueueMessageManager is loaded on each request
             launcher.OnCreateQueueManager = () =>
             {
-                //var manager = new QueueMessageManagerSql();                
-                var manager = new QueueMessageManagerSqlMsMq();
-                manager.MsMqQueuePath = @".\private$\";
+                var manager = new QueueMessageManagerSql();   
+             
+                //var manager = new QueueMessageManagerSqlMsMq();
+                //manager.MsMqQueuePath = @".\private$\";
 
                 return manager;
             };

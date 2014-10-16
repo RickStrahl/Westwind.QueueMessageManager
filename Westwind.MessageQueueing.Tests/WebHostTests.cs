@@ -7,7 +7,7 @@ using Westwind.Utilities;
 namespace QueueStarter.Tests
 {
     [TestClass]
-    public class UnitTest1
+    public class WebHostTests
     {
         private string connectionString = "server=.;database=QueueManagerStarter;integrated security=true;";
 

@@ -12,7 +12,6 @@ namespace QueueManagerStarter
     {
         public void Configuration(IAppBuilder app)
         {
-
             app.MapSignalR();
 
             //"/signalr", map =>
