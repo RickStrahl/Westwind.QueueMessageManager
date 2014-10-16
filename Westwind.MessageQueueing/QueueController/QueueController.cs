@@ -118,29 +118,29 @@ namespace Westwind.MessageQueueing
                     Thread.Sleep(WaitInterval);
                     continue;
                 }
-
-                // Start by retrieving the next message if any
-                // ALWAYS create a new instance so the events get thread safe object
+                
                 QueueMessageManager manager;
                 if (OnCreateQueueManager != null)
                     manager = OnCreateQueueManager.Invoke();
                 else
                     manager =
                         ReflectionUtils.CreateInstanceFromType(QueueManagerType, ConnectionString ?? string.Empty) 
-                                        as QueueMessageManager;                
-
-                if (manager.GetNextQueueMessage(QueueName) == null)
+                                        as QueueMessageManager;
+                using (manager)
                 {
-                    if (!string.IsNullOrEmpty(manager.ErrorMessage))
-                        OnNextMessageFailed(manager, new ApplicationException(manager.ErrorMessage));
+                    if (manager.GetNextQueueMessage(QueueName) == null)
+                    {
+                        if (!string.IsNullOrEmpty(manager.ErrorMessage))
+                            OnNextMessageFailed(manager, new ApplicationException(manager.ErrorMessage));
 
-                    // Nothing to do - wait for next poll interval
-                    Thread.Sleep(WaitInterval);
-                    continue;
+                        // Nothing to do - wait for next poll interval
+                        Thread.Sleep(WaitInterval);
+                        continue;
+                    }
+
+                    // Fire events to execute the real operation
+                    ExecuteSteps(manager);
                 }
-
-                // Fire events to execute the real operation
-                ExecuteSteps(manager);
 
                 // let CPU breathe
                 Thread.Sleep(1);

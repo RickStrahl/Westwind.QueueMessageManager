@@ -72,7 +72,7 @@ namespace QueueStarter.Tests
         public void AddManyQueueSqlMsMqItems()
         {
             var qm = new QueueMessageManagerSqlMsMq(connectionString);
-            qm.MsMqQueuePath = @".\private$\";
+            qm.MsMqQueuePath = @".\Private$\";
 
             for (int i = 0; i < 10; i++)
             {
@@ -81,6 +81,26 @@ namespace QueueStarter.Tests
                     Message = "MSMQ New Entry",
                     TextInput = "Process This",
                     QueueName = "MPWF",
+                    Action = "HELLOWORLD",
+                    Xml = string.Format(@"<doc>
+    <company>East Wind</company>
+    <name>Rick</name> 
+    <time>{0}</time>
+</doc>
+", DateTime.Now.ToString("MMM dd - HH:mm:ss"))
+                };
+                Thread.Sleep(300);
+
+                Assert.IsTrue(qm.SubmitRequest(item2, null, true), qm.ErrorMessage);
+            }
+
+            for (int i = 0; i < 10; i++)
+            {
+                var item2 = new QueueMessageItem()
+                {
+                    Message = "MSMQ New Entry",
+                    TextInput = "Process This",
+                    QueueName = "MPWF_VFP",
                     Action = "HELLOWORLD",
                     Xml = string.Format(@"<doc>
     <company>East Wind</company>

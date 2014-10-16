@@ -1,0 +1,203 @@
+﻿@using Westwind.MessageQueueing
+@{
+    // Configuration values
+    var config = QueueMessageManagerConfiguration.Current;
+
+    var hostUrl = VirtualPathUtility.ToAbsolute(config.MonitorSignalRHubUrl);
+    var baseUrl = VirtualPathUtility.ToAbsolute(config.MonitorHtmlUrl);
+    var initialQueue = Request.QueryString["queueName"] ?? config.QueueName;
+    var token = Request.QueryString["token"];
+}
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <title>Queue Message Monitor</title>
+
+    <link href="~/Css/bootstrap/css/bootstrap.css" rel="stylesheet" />
+    <link href="~/Css/queuemonitor.css" rel="stylesheet" />
+    <link href="~/Css/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="~/Css/toastr.min.css" rel="stylesheet" />
+
+</head>
+<body ng-app="app" ng-controller="queueMonitorController as view" ng-cloak>
+
+    <div id="TopNavBar" class="navbar navbar-inverse" role="navigation" >
+        <div class="container">
+            <div class="navbar-header">
+                <span id="LogoText" class="navbar-brand">                    
+                    <img id="LogoImage" src="~/Images/AsyncGears.png" />
+                    Queue Monitor
+                </span>
+            </div>
+            <div class="navbar-collapse">
+                <form class="navbar-form navbar-right" role="form">
+                    <div class="form-group form-group-sm">
+
+                        <select id="lstQueues" name="lstQueues" class="form-control"
+                                ng-model="view.activeQueue"
+                                ng-options="o.value as o.text for o in view.queueNames"
+                                style="height: 30px;padding: 2px;min-width: 180px;"
+                                ng-change="view.getServiceStatus()"></select>
+
+                    </div>
+                    <button id="btnRefresh" class="btn btn-sm btn-default"
+                            ng-click="view.onBtnRefresh()" title="Reload the entire page">
+                        <i class="fa fa-refresh"></i> Reload
+                    </button>
+                    <button id="btnStart" class="btn btn-sm btn-success"
+                            ng-show="view.status.paused"
+                            ng-click="view.startService()"
+                        title="Start all queues"
+                            >
+                        <i class="fa fa-play-circle"></i> Start
+                    </button>
+                    <button id="btnStop" class="btn btn-sm btn-danger"
+                            ng-show="!view.status.paused"
+                            ng-click="view.stopService()" title="Stop all queues">
+                        <i class="fa fa-stop"></i> Stop
+                    </button>
+
+                </form>
+            </div><!--/.navbar-collapse -->
+        </div>
+    </div>
+
+
+    <div id="MessageContainer">
+
+        <div id="Toolbar" class="container well well-sm" 
+             style="margin-bottom: 0; border-bottom-right-radius: 0; border-bottom-left-radius: 0">
+            <div class="row">
+                <div class="col-xs-4">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-addon">
+                            Queue
+                        </span>
+                        <input type="text" name="txtQueueName" value=""
+                               readonly
+                               ng-model="view.status.queueName" class="form-control" />
+
+                    </div>
+                </div>
+                <div class="col-xs-3">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-addon">
+                            Threads
+                        </span>
+
+                        <input type="number" name="txtThreadCount" value=""
+                               class="form-control"
+                               ng-disabled="!view.status.queueName"
+                               ng-model="view.status.threadCount" title="Number of simultaneous queue threads to run" />
+
+                    </div>
+                </div>
+                <div class="col-xs-3">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-addon">
+                            Wait Time
+                        </span>
+                        <input type="number" name="txtWaitTime" value=""
+                               class="form-control"
+                               ng-disabled="!view.status.queueName"
+                               ng-model="view.status.waitInterval" title="Wait interval before checking for next queue message."/>
+                    </div>
+                </div>
+                <div class="col-xs-1">
+                    <button class="btn btn-sm btn-default"
+                            ng-disabled="!view.status.queueName"
+                            ng-click="view.updateControllerStatus()" title="Update settings for this queue">
+                        <i class="fa fa-check"></i> Update
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="MessageContent" class="container">
+
+        </div>
+
+        <div class="container well well-sm" 
+             style="font-size: 0.8em;padding: 7px;border-top-left-radius: 0; border-top-right-radius: 0;">
+            <div class="pull-right">{{view.waitingMessages}} waiting</div>
+            <div>Ready</div>
+        </div>
+
+    </div>
+
+
+    <div id="ItemDetail" class="dialog boxshadow" style="width: 90%;min-height: 350px; display: none;">
+        <div class="dialog-header">
+            Queue item: {{view.queueItem.id}} | status: {{view.queueItem.status}}
+        </div>
+        <div class="dialog-content" style="max-height: 550px;min-height: 200px; overflow: auto">
+            <div class="rightalign small" style="color: steelblue;">
+                {{view.queueItem.date}}
+            </div>
+
+            <div class="control-group">
+                <label>Message:</label>
+                <div>
+                    {{view.queueItem.message}}
+                </div>
+            </div>
+            <div class="control-group">
+                <label>Xml:</label>
+                <pre>{{view.queueItem.xml}}</pre>
+            </div>
+        </div>
+    </div>
+
+    <img id="imgLoader" src="~/Css/Images/loading_black.gif" style="display:none;" />
+
+    <!--Script references. -->
+    <script src="~/Scripts/jquery-1.8.3.min.js"></script>
+    <script src="~/Scripts/ww.jquery.js"></script>
+    <script src="~/Css/bootstrap/js/bootstrap.min.js"></script>
+    <script src="~/Scripts/underscore-min.js"></script>
+    <script src="~/Scripts/toastr.min.js"></script>
+
+    <!--Reference the jQuery library. -->
+    <script src="~/Scripts/jquery.signalR-2.1.2.min.js"></script>
+    <script src="~/scripts/angular/angular.min.js"></script>
+    <script src="~/Scripts/angular/angular-sanitize.min.js"></script>
+    <script>
+        window.page = {};
+
+        window.resizeMessageContent = function () {
+            var height = $(window).height();
+            var navHeight = $("#TopNavBar").height();
+            $("#MessageContent").height(height - 140 - navHeight);
+        };
+
+        $(window).resize(_.debounce(resizeMessageContent, 2));
+        setTimeout(resizeMessageContent, 50);
+
+        $("#imgLoader").modalDialog();
+
+        page.baseUrl = '@baseUrl';
+        page.hubUrl = '@(hostUrl)signalr';
+        page.token = "@token";
+        page.initialQueue = "@initialQueue";
+
+    </script>
+    <script src="~/app/app.js"></script>
+    <script src="~/app/controllers.js"></script>
+
+    <!-- do this later to allow page to load first -->
+    <!--Reference the autogenerated SignalR hub script. -->
+    <script src="@(hostUrl)signalr/hubs"></script>
+    <script>
+        $(function () {
+            //page.startHub();
+            $("#imgLoader").modalDialog("hide");
+        });
+    </script>
+</body>
+
+
+
+</html>
