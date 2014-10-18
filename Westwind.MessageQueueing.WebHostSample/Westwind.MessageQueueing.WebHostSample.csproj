@@ -130,38 +130,12 @@
     <Content Include="Css\font-awesome\css\font-awesome.css" />
     <Content Include="Css\font-awesome\css\font-awesome.min.css" />
     <Content Include="Css\font-awesome\fonts\fontawesome-webfont.svg" />
-    <Content Include="Css\Images\calendar.png" />
     <Content Include="Css\Images\close.png" />
     <Content Include="Css\Images\closeX.png" />
-    <Content Include="Css\Images\DialogHeader.png" />
-    <Content Include="Css\Images\DialogHighlight.png" />
-    <Content Include="Css\Images\DialogSelection.png" />
-    <Content Include="Css\Images\DialogStrip.png" />
-    <Content Include="Css\Images\edit.png" />
-    <Content Include="Css\Images\EditBlue.gif" />
-    <Content Include="Css\Images\EditWhite.gif" />
-    <Content Include="Css\Images\HeaderGradient.png" />
-    <Content Include="Css\Images\help.png" />
-    <Content Include="Css\Images\home.png" />
-    <Content Include="Css\Images\info.png" />
-    <Content Include="Css\Images\LightBlueGradient.png" />
-    <Content Include="Css\Images\LightOrangeGradient.png" />
-    <Content Include="Css\Images\list.png" />
     <Content Include="Css\Images\loading_black.gif" />
-    <Content Include="Css\Images\loading_small.gif" />
-    <Content Include="Css\Images\MenuHighlight.png" />
-    <Content Include="Css\Images\new.png" />
-    <Content Include="Css\Images\next.png" />
-    <Content Include="Css\Images\prev.png" />
-    <Content Include="Css\Images\refresh.png" />
-    <Content Include="Css\Images\remove.png" />
-    <Content Include="Css\Images\sort.png" />
-    <Content Include="Css\Images\TabHover.gif" />
-    <Content Include="Css\Images\TabNormal.gif" />
-    <Content Include="Css\Images\TabSelected.gif" />
-    <Content Include="Css\Images\users.png" />
-    <Content Include="Css\Images\warning.png" />
     <Content Include="Css\QueueMonitor.css" />
+    <Content Include="Css\toastr.css" />
+    <Content Include="Css\toastr.min.css" />
     <Content Include="Global.asax" />
     <Content Include="Images\AsyncGears.png" />
     <Content Include="Ping.aspx" />
@@ -176,8 +150,6 @@
     <Content Include="Scripts\angular\angular.min.js.map" />
     <Content Include="Scripts\angular\errors.json" />
     <Content Include="Scripts\angular\version.json" />
-    <Content Include="Scripts\jquery-1.10.2.min.map" />
-    <Content Include="Scripts\ww.jquery.min.js.map" />
     <Content Include="Css\bootstrap\css\bootstrap-theme.css.map" />
     <Content Include="Css\font-awesome\fonts\fontawesome-webfont.eot" />
     <Content Include="Css\font-awesome\fonts\fontawesome-webfont.ttf" />
@@ -669,7 +641,10 @@
     </Content>
     <Content Include="Scripts\underscore-min.js" />
     <Content Include="Scripts\ww.jquery.js" />
-    <Content Include="Scripts\ww.jquery.min.js" />
+    <Content Include="Scripts\ww.jquery.min.js">
+      <DependentUpon>ww.jquery.js</DependentUpon>
+    </Content>
+    <Content Include="Watcher.html" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>

@@ -408,7 +408,7 @@ namespace Westwind.MessageQueueing
             if (connectionString == null)
                 connectionString = ConnectionString;            
 
-            var db = new SqlDataAccess(connectionString);
+            var db = new SqlDataAccess(connectionString);            
 
             if (AutoCreateDataStore)
             {

@@ -1,7 +1,7 @@
 ﻿/// <reference path="jquery.js" />
 /*
 ww.jQuery.js  
-Version 1.13 - 6/15/2014
+Version 1.14 - 10/17/2014
 West Wind jQuery plug-ins and utilities
 
 (c) 2008-2014 Rick Strahl, West Wind Technologies 
@@ -897,13 +897,20 @@ http://en.wikipedia.org/wiki/MIT_License
         /// when the value changes a function is called.
         /// The function called is called in the context
         /// of the selected element (ie. this)
+        ///
+        /// Uses the MutationObserver API of the DOM and
+        /// falls back to setInterval to poll for changes
+        /// for non-compliant browsers (pre IE 11)
         /// </summary>    
-        /// <param name="prop" type="String">CSS Properties to watch sep. by commas</param>    
+        /// <param name="prop" type="String">CSS Properties to watch sep. by commas
+        /// You can also prefix attr_ to monitor attribute changes. So attr_class
+        /// will detect if the class attribute has changed.
+        /// </param>    
         /// <param name="func" type="Function">
         /// Function called when the value has changed.
         /// </param>    
         /// <param name="interval" type="Number">
-        /// Optional interval for browsers that don't support DOMAttrModified or propertychange events.
+        /// Optional interval for browsers that don't support the MutationObserver API        
         /// Determines the interval used for setInterval calls.
         /// </param>
         /// <param name="id" type="String">A unique ID that identifies this watch instance on this element</param>  
@@ -916,7 +923,9 @@ http://en.wikipedia.org/wiki/MIT_License
         return this.each(function () {
             var _t = this;
             var el$ = $(this);
-            var fnc = function () { __watcher.call(_t, id) };
+            var fnc = function () {                
+                __watcher.call(_t, id);
+            };
 
             var data = {
                 id: id,
@@ -937,17 +946,30 @@ http://en.wikipedia.org/wiki/MIT_License
         });
 
         function hookChange(el$, id, data) {
-            el$.each(function () {
+            el$.each(function() {
                 var el = $(this);
-                if (typeof (el.get(0).onpropertychange) == "object")
+                
+                if (window.MutationObserver) {                    
+                    var observer = el.data("__watcherObserver");
+                    if (observer == null) {
+                        observer = new MutationObserver(data.fnc);
+                        el.data("__watcherObserver", observer);
+                    }
+                    observer.observe(this, {
+                        attributes: true,
+                        subtree: false,
+                        childList: true,
+                        characterData: true                        
+                });
+                }
+                else if (typeof (this.onpropertychange) == "object")
                     el.bind("propertychange." + id, data.fnc);
-                else if ($.browser.mozilla)
-                    el.bind("DOMAttrModified." + id, data.fnc);
                 else
                     data.intervalId = setInterval(data.fnc, interval);
             });
         }
         function __watcher(id) {
+            
             var el$ = $(this);
             var w = el$.data(id);
             if (!w) return;
@@ -956,13 +978,20 @@ http://en.wikipedia.org/wiki/MIT_License
             if (!w.func)
                 return;
 
-            // must unbind or else unwanted recursion may occur
-            el$.unwatch(id);
-
             var changed = false;
             var i = 0;
             for (i; i < w.props.length; i++) {
-                var newVal = el$.css(w.props[i]);
+                var key = w.props[i];
+                
+                var newVal = "";
+                if (key.startsWith('attr_'))
+                    newVal = el$.attr(key.replace('attr_', ''));                
+                else
+                    newVal = el$.css(key);
+
+                if (newVal == undefined)
+                    return;
+
                 if (w.vals[i] != newVal) {
                     w.vals[i] = newVal;
                     changed = true;
@@ -971,20 +1000,20 @@ http://en.wikipedia.org/wiki/MIT_License
             }
             if (changed)
                 w.func.call(_t, w, i);
-
-            // rebind event
-            hookChange(el$, id, w);
         }
     }
     $.fn.unwatch = function (id) {
         this.each(function () {
             var el = $(this);
             var data = el.data(id);
-            try {
-                if (typeof (this.onpropertychange) == "object")
-                    el.unbind("propertychange." + id, data.fnc);
-                else if ($.browser.mozilla)
-                    el.unbind("DOMAttrModified." + id, data.fnc);
+            try {               
+                if (window.MutationObserver) {
+                    var observer = el.data("__watcherObserver");
+                    if (observer) {
+                        observer.disconnect();
+                        el.removeData("__watcherObserver");
+                    }
+                }                
                 else
                     clearInterval(data.intervalId);
             }
@@ -1302,10 +1331,6 @@ http://en.wikipedia.org/wiki/MIT_License
             if (_I.keepCentered)
                 $(window).bind("resize.modal", function () { jEl.centerInClient() })
                          .bind("scroll.modal", function () { jEl.centerInClient() });
-
-            // hide visible IE listboxes and store
-            if ($.browser.msie && $.browser.version < "7")
-                hideLists = $("select:visible").not($(jEl).find("select")).hide();
         }
         this.hide = function () {
             jEl.hide();
@@ -1872,7 +1897,7 @@ http://en.wikipedia.org/wiki/MIT_License
     }
     String.prototype.padR = function (width, pad) {
         if (!width || width < 1)
-            return this;
+            return this; 
 
         if (!pad) pad = " ";
         var length = width - this.length
@@ -1880,10 +1905,42 @@ http://en.wikipedia.org/wiki/MIT_License
 
         return (this + String.repeat(pad, length)).substr(0, width);
     }
-    String.startsWith = function (str) {
-        if (!str) return false;
+    String.prototype.startsWith = function () {
+        var str = this;
+        if (!str.length == 0) return false;
         return this.substr(0, str.length) == str;
     }
+    String.prototype.extract = function(startDelim, endDelim, allowMissingEndDelim, returnDelims) {
+        var str = this;
+        if (str.length == 0)
+            return "";
+
+        var src = str.toLowerCase(); 
+        startDelim = startDelim.toLocaleLowerCase();
+        endDelim = endDelim.toLocaleLowerCase();
+
+        var i1 = src.indexOf(startDelim);
+        if (i1 == -1)
+            return "";
+
+        var i2 = src.indexOf(endDelim,i1+1);
+
+        if (!allowMissingEndDelim && i2 == -1)
+            return "";
+
+        if (allowMissingEndDelim && i2 == -1)
+        {
+            if (returnDelims)
+                return str.substr(i1);
+
+            return str.substr(i1 + startDelim.length);
+        }
+
+        if (returnDelims)
+            return str.substr(i1,i2 - i1 + endDelim.length);
+
+        return str.substr(i1 + startDelim.length,i2 - i1 -1);
+    };
     String.prototype.escapeRegExp = function () {
         return this.replace(/[.*+?^${}()|[\]\/\\]/g, "\\$0");
     };

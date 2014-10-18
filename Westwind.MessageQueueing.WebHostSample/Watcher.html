@@ -1,0 +1,88 @@
+﻿
+<!DOCTYPE html>
+<html>
+<head runat="server">
+    <title>Simple .watcher()Plug-in Example</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        if (typeof (jQuery) == 'undefined')
+            document.write(unescape("%3Cscript src='scripts/jquery.min.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script src="scripts/ww.jquery.js" type="text/javascript"></script>    
+</head>
+<body>
+    <form id="form1" runat="server">
+        <h1>Simple watcher() jQuery Plug-in Sample</h1>
+ 
+
+        <div class="containercontent">
+            <div id="notebox" style="width: 200px; height: 150px;position: absolute; z-index: 20; padding: 20px; background-color: lightsteelblue;">
+                Go ahead drag me around and close me!
+            </div>
+
+            <div id="shadow" 
+                 style="top: 10px; left:10px; background-color: Gray; z-index: 19;position:absolute;display: none;">
+
+            </div>
+        </div>
+        <style>
+            .class_true {
+                color: red;
+            }
+            .class_false {
+                color: yellow;
+            }
+        </style>
+        <script type="text/javascript">
+    $(document).ready(function () {
+        var counter = 0;
+        $("#shadow").show();
+        var el = $("#notebox");
+        showStatus("Testing");
+
+        var state = false;
+        setInterval(function() {
+            //$("#notebox").css("Drag me around " + new Date());
+            $("#notebox").removeClass("class_true");
+            $("#notebox").removeClass("class_false");
+            $("#notebox").addClass("class_" + state);
+            state = !state;
+        },3000);
+        
+
+    el.draggable()
+        .closable()
+        .css("left", 10)
+        .watch("top,left,height,width,opacity,attr_class", function (data, i) {            
+            var el = $(this);
+            var sh = $("#shadow");                
+
+            var propChanged = data.props[i];
+            var valChanged = data.vals[i];
+
+            
+            counter++;
+
+            showStatus("Prop: " + propChanged + "  value: " + valChanged + "  " + counter);
+                
+
+            var pos = el.position();
+            var w = el.outerWidth();
+            var h = el.outerHeight();
+
+            sh.css({
+                width: w,
+                height: h,
+                left: pos.left + 5,
+                top: pos.top + 5,
+                display: el.css("display"),
+                opacity: el.css("opacity")
+            });
+
+        });
+
+});
+        </script>
+    </form>
+</body>
+</html>

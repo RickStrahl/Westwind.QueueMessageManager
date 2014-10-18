@@ -16,7 +16,7 @@
             signalR: {
                 hub: null,
                 hubUrl: 'http://localhost:8080/signalr',
-                baseUrl: "",
+                baseUrl: "QueueMonitor.cshtml",
                 initialQueue: "",
                 token: null,
             },
@@ -43,7 +43,7 @@
         var self = vm;
 
 
-        vm.initialize = function() {
+        vm.initialize = function () {
             // update from parent CSHTML page
             vm.signalR = $.extend(vm.signalR, page);
             
@@ -57,13 +57,7 @@
                 .closable({ cssClass: "closebox-container" })
                 .draggable({ handle: ".dialog-header" });
 
-            $("#btnReconnect").click(function() {
-                if (vm.signalR.hub == null)
-                    toastr.error("Unable to connect. Please refresh the page.");
-                else
-                    $.connection.hub.start();
-            });
-
+            // item clicks
             $(document.body).on("click", ".message-item", vm.getQueueMessage);
             
             // get waiting count every 4 secs
@@ -82,11 +76,14 @@
                     vm.getInitialMessages(vm.signalR.initialQueue);
 
                     setTimeout(vm.getServiceStatus, 200);
+
+                    $("#imgLoader").modalDialog("hide");
                 });
         };
 
 
-        vm.startHub = function() {
+        vm.startHub = function () {           
+
             //jQuery.support.cors = true;
             $.connection.hub.url = vm.signalR.hubUrl; // ie. "http://rasxps/signalR";
 
@@ -189,7 +186,7 @@
             if ((vm.activeQueue && queueName) && queueName != vm.activeQueue)
                 return;
 
-            // TODO: move to knockout template
+            // TODO: move to Angular template - complex
             if (!id) {
                 // display the message in the ID field
                 id = message;

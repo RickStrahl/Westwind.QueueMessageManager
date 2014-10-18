@@ -18,4 +18,4 @@ Queue request processing in real time.
 Add a method to resubmit a message to the queue for re-processing.
 This method clears all process dates and flags and sets status
 back to Submitted. For MSMQ it also generates a new MSMQ Id
-entry.
+entry. 
