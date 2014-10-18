@@ -74,7 +74,7 @@ namespace Westwind.MessageQueueing
             else
             {
                 // load up Properties from XmlProperties field
-                this.GetProperties("XmlProperties", Item);
+                GetProperties("XmlProperties", Item);
                 Item.__IsNew = false;
             }
 
@@ -360,7 +360,7 @@ namespace Westwind.MessageQueueing
             if (maxCount == 0)
                 maxCount = INT_maxCount;
 
-            DateTime dt = DateTime.UtcNow.Subtract(this.MessageTimeout);
+            DateTime dt = DateTime.UtcNow.Subtract(MessageTimeout);
 
             IEnumerable<QueueMessageItem> items;
             items = Db.Query<QueueMessageItem>("select TOP " + maxCount + " * from QueueMessageItems " +

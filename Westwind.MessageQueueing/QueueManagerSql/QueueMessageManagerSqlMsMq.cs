@@ -80,7 +80,10 @@ namespace Westwind.MessageQueueing
 
         /// <summary>
         /// Saves the passed message item or the attached item
-        /// to the database. Call this after updating properties
+        /// to the database and creates a MSMQ message for the ID
+        /// to be picked up. 
+        /// 
+        /// Call this after updating properties
         /// or individual values.
         /// 
         /// Inserts or updates based on whether the ID exists
@@ -96,11 +99,26 @@ namespace Westwind.MessageQueueing
             if (item!= null)
                 isNew = item.__IsNew;
 
+            // first write the SQL record
             if (!base.Save(item))
                 return false;
 
             if (!isNew)
                 return true;
+
+            // now write the MSMQ entry - if it fails
+            // the queue item is removed
+            return InsertIdIntoQueue(item);            
+        }
+
+        /// <summary>
+        /// Helper method that inserts the 
+        /// </summary>
+        /// <returns></returns>
+        public bool InsertIdIntoQueue(QueueMessageItem item = null)
+        {
+            if (item == null)
+                item = Item;
 
             // write new entries into the queue
             var queue = GetQueue(item.QueueName);
@@ -112,8 +130,8 @@ namespace Westwind.MessageQueueing
 
             try
             {
-                    queue.Formatter = new StringMessageFormatter();
-                    queue.Send(Item.Id);             
+                queue.Formatter = new StringMessageFormatter();
+                queue.Send(Item.Id);
             }
             catch (Exception ex)
             {
@@ -181,6 +199,24 @@ namespace Westwind.MessageQueueing
             GetProperties("XmlProperties", Item);
 
             return item;
+        }
+
+        /// <summary>
+        /// Resubmit message into the queue as a cleared and message
+        /// to be reprocessed. All date flags are cleared.
+        /// 
+        /// This method immediately writes the queue item to disk
+        /// immediately. This version also writes an MSMQ item for
+        /// the ID.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public override bool ResubmitMessage(QueueMessageItem item = null)
+        {
+            if (!base.ResubmitMessage(item))
+                return false;
+
+            return InsertIdIntoQueue(item);
         }
 
     }

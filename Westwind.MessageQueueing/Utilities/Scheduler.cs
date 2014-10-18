@@ -87,8 +87,8 @@ namespace Westwind.MessageQueueing
             // Ensure that any waiting instances are shut down
             //this.WaitHandle.Set();
 
-            this.CheckFrequency = checkFrequency;
-            this.Cancelled = false;
+            CheckFrequency = checkFrequency;
+            Cancelled = false;
 
             Thread t = new Thread(Run);
             t.Start();
@@ -98,7 +98,7 @@ namespace Westwind.MessageQueueing
         /// </summary>
         public void Start()
         { 
-            this.Start(this.CheckFrequency); 
+            Start(CheckFrequency); 
         }
 
         /// <summary>
@@ -108,13 +108,13 @@ namespace Westwind.MessageQueueing
         /// </summary>
         public void Stop()
         {
-            lock (this._SyncLock)
+            lock (_SyncLock)
             {
                 if (Cancelled)
                     return;
 
-                this.Cancelled = true;
-                this._WaitHandle.Set();
+                Cancelled = true;
+                _WaitHandle.Set();
             }
         }
 
@@ -125,31 +125,31 @@ namespace Westwind.MessageQueueing
         {
             // Start out waiting for the timeout period defined 
             // on the scheduler
-            this._WaitHandle.WaitOne(this.CheckFrequency * 1000, true);
+            _WaitHandle.WaitOne(CheckFrequency * 1000, true);
 
             while (!Cancelled)
             {
                 try
                 {
                     // Call whatever logic is attached to the scheduler
-                    this.OnExecuteScheduledEvent();
+                    OnExecuteScheduledEvent();
                 }
                 // always eat the exception and notify listener
                 catch (Exception ex)
                 {
-                    this.OnError(ex);
+                    OnError(ex);
                 }
                 
                 // If execution caused cancelling we want exit now
-                if (this.Cancelled)
+                if (Cancelled)
                     break;
 
                 // if a keep alive ping is required fire it
-                if (!string.IsNullOrEmpty(this.WebServerPingUrl))
-                    this.PingServer();                
+                if (!string.IsNullOrEmpty(WebServerPingUrl))
+                    PingServer();                
 
                 // Wait for the specified time out
-                this._WaitHandle.WaitOne(this.CheckFrequency * 1000, true);
+                _WaitHandle.WaitOne(CheckFrequency * 1000, true);
             }
         }
 
@@ -162,8 +162,8 @@ namespace Westwind.MessageQueueing
         /// </summary>
         protected virtual void OnExecuteScheduledEvent()
         {
-            if (this.ExecuteScheduledEvent != null)
-                this.ExecuteScheduledEvent(this,EventArgs.Empty);
+            if (ExecuteScheduledEvent != null)
+                ExecuteScheduledEvent(this,EventArgs.Empty);
         }
 
         /// <summary>
@@ -191,15 +191,15 @@ namespace Westwind.MessageQueueing
         /// <param name="item"></param>
         public void AddItem(object item)
         {
-            lock (this._SyncLock)
+            lock (_SyncLock)
             {
-                this.Items.Enqueue(item);
+                Items.Enqueue(item);
             }        
         }
 
         public void AddItem(SchedulerItem item)
         {
-            this.AddItem(item);
+            AddItem(item);
         }
 
         public void AddItem(string textData, string type)
@@ -207,7 +207,7 @@ namespace Westwind.MessageQueueing
            SchedulerItem item = new SchedulerItem();
             item.TextData = textData;
             item.Type = type;
-            this.AddItem(item as object);
+            AddItem(item as object);
         }
 
         public void AddItem(byte[] data, string type)
@@ -215,7 +215,7 @@ namespace Westwind.MessageQueueing
            SchedulerItem item = new SchedulerItem();
             item.Data = data;
             item.Type = type;
-            this.AddItem(item as object);
+            AddItem(item as object);
         }
 
         /// <summary>
@@ -224,10 +224,10 @@ namespace Westwind.MessageQueueing
         /// <returns></returns>
         public object GetNextItem()
         {
-            lock (this._SyncLock)
+            lock (_SyncLock)
             {
-                if (this.Items.Count > 0)
-                    return this.Items.Dequeue();
+                if (Items.Count > 0)
+                    return Items.Dequeue();
             }
 
             return null;
@@ -241,7 +241,7 @@ namespace Westwind.MessageQueueing
         /// </summary>
         public void PingServer()
         {
-            string Url = this.WebServerPingUrl;
+            string Url = WebServerPingUrl;
 
             //if (Url.StartsWith("~") && HttpContext.Current != null)
             //    Url = wwUtils.ResolveUrl(Url);
@@ -262,7 +262,7 @@ namespace Westwind.MessageQueueing
 
         public void Dispose()
         {
-            this.Stop();
+            Stop();
         }
 
         #endregion
