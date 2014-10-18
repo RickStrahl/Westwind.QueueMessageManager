@@ -122,6 +122,22 @@ namespace Westwind.MessageQueueing
 
 
         /// <summary>
+        /// Resubmits an existing message by clearing out all
+        /// completion/date settings and then resubmitting the
+        /// entry.
+        /// 
+        /// This method calls Save() and actually saves the message
+        /// to disk.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public virtual bool ResubmitMessage(QueueMessageItem item = null)
+        {
+            SubmitRequest(item);
+            return Save(item);
+        }
+
+        /// <summary>
         /// Saves the passed item or the attached item
         /// to the database. Call this after updating properties
         /// or individual values.
@@ -162,7 +178,7 @@ namespace Westwind.MessageQueueing
             item.IsCancelled = false;
 
             if (item.QueueName == null)
-                item.QueueName = this.DefaultQueue;
+                item.QueueName = DefaultQueue;
 
             if (messageText != null)
                 item.Message = messageText;
@@ -345,7 +361,7 @@ namespace Westwind.MessageQueueing
         /// </summary>
         public void SetError()
         {
-            this.SetError("CLEAR");
+            SetError("CLEAR");
         }
 
 
@@ -439,7 +455,7 @@ namespace Westwind.MessageQueueing
             Properties = null;
 
             if (entity == null)
-                entity = this.Item;
+                entity = Item;
 
             // Always create a new property bag
             Properties = new PropertyBag();

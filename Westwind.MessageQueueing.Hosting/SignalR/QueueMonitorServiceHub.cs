@@ -60,6 +60,9 @@ namespace Westwind.MessageQueueing.Hosting
             var queue = new QueueMessageManagerSql();
             var msgs = queue.GetRecentQueueItems(queueName, 10);
 
+            if (msgs == null)
+                return;
+
             foreach (var msg in msgs.Reverse())
             {
                 int elapsed = 0;
