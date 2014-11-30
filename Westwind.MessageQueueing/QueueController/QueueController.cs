@@ -128,7 +128,8 @@ namespace Westwind.MessageQueueing
                                         as QueueMessageManager;
                 using (manager)
                 {
-                    if (manager.GetNextQueueMessage(QueueName) == null)
+                    if (this.OnGetNextQueueMessage(manager, QueueName) == null)                    
+                    //if (manager.GetNextQueueMessage(QueueName) == null)
                     {
                         if (!string.IsNullOrEmpty(manager.ErrorMessage))
                             OnNextMessageFailed(manager, new ApplicationException(manager.ErrorMessage));
@@ -173,6 +174,10 @@ namespace Westwind.MessageQueueing
         public virtual void StartProcessingAsync(int threads = -1)
         {
             if (!OnStartProcessing())
+                return;
+
+            // threads are marked as 0 - don't start any threads
+            if (threads < 1 && ThreadCount < 1)
                 return;
 
             if (threads < 0)
@@ -249,6 +254,8 @@ namespace Westwind.MessageQueueing
         /// </summary>
         public virtual event Action<QueueMessageManager> ExecuteComplete;
 
+        
+
         /// <summary>
         /// Override this method to do any post processing that needs to happen
         /// after each async operation has successfully completed. Optional - use
@@ -268,6 +275,20 @@ namespace Westwind.MessageQueueing
         /// was thrown during processing). Implement for logging or notifications.
         /// </summary>
         public event Action<QueueMessageManager, Exception> ExecuteFailed;
+
+        /// <summary>
+        /// Message hook that's responsible for retrieving the next message.
+        /// The base version pulls the next message for the given queue.    
+        /// You can override this method to conditionally override this 
+        /// behavior such as filter when and how messages are read.
+        /// </summary>
+        /// <param name="manager">A manager instance that can retrieve</param>
+        /// <param name="queueName">The queue to check</param>
+        /// <returns></returns>
+        protected virtual QueueMessageItem OnGetNextQueueMessage(QueueMessageManager manager, string queueName)
+        {            
+            return manager.GetNextQueueMessage(queueName);
+        }
 
         /// <summary>
         /// Override this method to handle any errors that occured during processing
