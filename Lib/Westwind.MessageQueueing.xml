@@ -77,6 +77,17 @@
             QueueManager instance. Use its Item property to get access to the current method
             </param>
         </member>
+        <member name="M:Westwind.MessageQueueing.QueueController.OnGetNextQueueMessage(Westwind.MessageQueueing.QueueMessageManager,System.String)">
+            <summary>
+            Message hook that's responsible for retrieving the next message.
+            The base version pulls the next message for the given queue.    
+            You can override this method to conditionally override this 
+            behavior such as filter when and how messages are read.
+            </summary>
+            <param name="manager">A manager instance that can retrieve</param>
+            <param name="queueName">The queue to check</param>
+            <returns></returns>
+        </member>
         <member name="M:Westwind.MessageQueueing.QueueController.OnExecuteFailed(Westwind.MessageQueueing.QueueMessageManager,System.Exception)">
             <summary>
             Override this method to handle any errors that occured during processing
@@ -164,9 +175,15 @@
             Sets the types of messages that this controller is looking for
             </summary>
         </member>
-        <member name="P:Westwind.MessageQueueing.QueueController.ManagerType">
+        <member name="P:Westwind.MessageQueueing.QueueController.QueueManagerType">
             <summary>
             The specific type of the message manager class
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.QueueController.OnCreateQueueManager">
+            <summary>
+            Optional function you can hook to handle creation of the QueueManager
+            instance. Use this to create and configure the QUeueManager instance
             </summary>
         </member>
         <member name="E:Westwind.MessageQueueing.QueueController.ExecuteStart">
@@ -316,6 +333,18 @@
             Creates a new item instance and properly
             initializes the instance's values.
             </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManager.ResubmitMessage(Westwind.MessageQueueing.QueueMessageItem)">
+            <summary>
+            Resubmits an existing message by clearing out all
+            completion/date settings and then resubmitting the
+            entry.
+            
+            This method calls Save() and actually saves the message
+            to disk.
+            </summary>
+            <param name="item"></param>
             <returns></returns>
         </member>
         <member name="M:Westwind.MessageQueueing.QueueMessageManager.Save(Westwind.MessageQueueing.QueueMessageItem)">
@@ -680,12 +709,21 @@
         <member name="M:Westwind.MessageQueueing.QueueMessageManagerSqlMsMq.Save(Westwind.MessageQueueing.QueueMessageItem)">
             <summary>
             Saves the passed message item or the attached item
-            to the database. Call this after updating properties
+            to the database and creates a MSMQ message for the ID
+            to be picked up. 
+            
+            Call this after updating properties
             or individual values.
             
             Inserts or updates based on whether the ID exists
             </summary>
             <param name="item"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManagerSqlMsMq.InsertIdIntoQueue(Westwind.MessageQueueing.QueueMessageItem)">
+            <summary>
+            Helper method that inserts the 
+            </summary>
             <returns></returns>
         </member>
         <member name="M:Westwind.MessageQueueing.QueueMessageManagerSqlMsMq.GetNextQueueMessage(System.String)">
@@ -694,6 +732,18 @@
             </summary>
             <param name="queueName"></param>
             <returns>item or null. Null can be returned when there are no items or when there is an error</returns>
+        </member>
+        <member name="M:Westwind.MessageQueueing.QueueMessageManagerSqlMsMq.ResubmitMessage(Westwind.MessageQueueing.QueueMessageItem)">
+            <summary>
+            Resubmit message into the queue as a cleared and message
+            to be reprocessed. All date flags are cleared.
+            
+            This method immediately writes the queue item to disk
+            immediately. This version also writes an MSMQ item for
+            the ID.
+            </summary>
+            <param name="item"></param>
+            <returns></returns>
         </member>
         <member name="T:Westwind.MessageQueueing.Properties.Resources">
             <summary>
@@ -788,14 +838,36 @@
         <member name="P:Westwind.MessageQueueing.QueueMessageManagerConfiguration.Controllers">
             <summary>
             A list of controllers that can be launched automatically
-            when QueueControllerMultiple is started
+            when QueueControllerMultiple is started. Note this
+            property is available only to the multi-controller implementation.
+            Otherwise use the QueueName and WaitInterval properties
+            to modify operation of an individual queue.
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.QueueMessageManagerConfiguration.MonitorSignalRHubUrl">
+            <summary>
+            The URL where SignalR accepts requests on.
+            Typically this will be ~/signalr
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.QueueMessageManagerConfiguration.MonitorHtmlUrl">
+            <summary>
+            The URL to the Monitor's HTML Page that 
+            displays the monitor. ~/QueueMonitor.cshtml
             </summary>
         </member>
         <member name="P:Westwind.MessageQueueing.QueueMessageManagerConfiguration.MonitorHostUrl">
             <summary>
-            When hosting as a Service you can optionnally 
+            When self-hosting as a Service you can optionnally 
             host the SignalR Service to feed the Monitor Web
-            interface from the service
+            interface from the service.
+            Typically: http://*:8080/ or http://144.12.121.1:8080/
+            </summary>
+        </member>
+        <member name="P:Westwind.MessageQueueing.QueueMessageManagerConfiguration.MonitorReferringSiteUrl">
+            <summary>
+            Link displayed on the Queue Monitor page that links
+            back to an external URL on the Host site.
             </summary>
         </member>
         <member name="P:Westwind.MessageQueueing.QueueMessageManagerConfiguration.Current">
@@ -803,6 +875,13 @@
             Singleton instance of a Configuration Manager.
             Can be used globally to access a single 
             Queue Configuration.
+            Used only by Client when 
+            </summary>
+        </member>
+        <member name="T:Westwind.MessageQueueing.ControllerConfiguration">
+            <summary>
+            Indidual Controller Configuration Item
+            in a multi-controller configuration.        
             </summary>
         </member>
         <member name="M:Westwind.MessageQueueing.ControllerConfiguration.FromString(System.String)">

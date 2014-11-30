@@ -1,4 +1,6 @@
-﻿using Microsoft.Owin;
+﻿using Microsoft.AspNet.SignalR;
+using Microsoft.Owin;
+using Microsoft.Owin.Cors;
 using Owin;
 using QueueManagerStarter;
 
@@ -10,19 +12,20 @@ namespace QueueManagerStarter
     {
         public void Configuration(IAppBuilder app)
         {
-            app.MapSignalR();
+            // Default local Site only configuration
+            //app.MapSignalR();
 
-            //"/signalr", map =>
-            //{
-            //    map.UseCors(CorsOptions.AllowAll);
+            app.Map("/signalr", map =>
+            {
+                // Add Cors Behavior
+                map.UseCors(CorsOptions.AllowAll);
 
-            //    var hubConfiguration = new HubConfiguration
-            //    {
-            //        EnableDetailedErrors = true                    
-            //    };
-
-            //    map.Map("/signalr",hubConfiguration);
-            //});
+                var hubConfiguration = new HubConfiguration
+                {
+                    EnableDetailedErrors = true
+                };
+                map.RunSignalR(hubConfiguration);
+            });
 
         }
     }

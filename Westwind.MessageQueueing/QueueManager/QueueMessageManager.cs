@@ -403,7 +403,7 @@ namespace Westwind.MessageQueueing
             if (checkInner)
                 e = e.GetBaseException();
 
-            ErrorMessage = e.Message;
+            ErrorMessage = e.Message;            
         }
         #endregion
 

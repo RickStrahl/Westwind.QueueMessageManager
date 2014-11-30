@@ -66,17 +66,17 @@ namespace Westwind.MessageQueueing.Tests
                 var msg = new QueueMessageItem()
                 {
                     QueueName = "MPWF",
-                    Message = "Xml Message #" + i.ToString() + " @ " + DateTime.Now.ToString("t"),
-                    Action = "NEWXMLORDER"                 
-                };                
-
+                    Message = "Xml Message #" + i + " @ " + 
+                              DateTime.Now.ToString("t"),
+                    Action = "NEWXMLORDER"                                 
+                };
+                
                 manager.SubmitRequest(msg);
 
                 res = manager.Save(msg);
                 if (!res)
                     break;
-            }
-            
+            }            
         }
 
 

@@ -68,6 +68,13 @@ namespace Westwind.MessageQueueing
 
 
         /// <summary>
+        /// Link displayed on the Queue Monitor page that links
+        /// back to an external URL on the Host site.
+        /// </summary>
+        public string MonitorReferringSiteUrl { get; set; }
+
+
+        /// <summary>
         /// Singleton instance of a Configuration Manager.
         /// Can be used globally to access a single 
         /// Queue Configuration.

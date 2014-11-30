@@ -291,7 +291,7 @@ namespace Westwind.MessageQueueing
                     "started is null", queueName);
             if (result == null)
             {
-                SetError(Db.ErrorMessage);
+                SetError(Db.ErrorMessage);                
                 return -1;
             }
 

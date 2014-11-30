@@ -40,14 +40,25 @@ namespace Westwind.MessageQueueing.WebHostSample
 
                         // always either complete or cancel the request
                         manager.CompleteRequest(messageText: queueItem.Message +
-                                                             " - NEW completed at " + DateTime.Now,
+                                                             " - HELLOWORLD completed at " + DateTime.Now,
                             autoSave: true);
                         break;                    
+                    }
+                    case "NEWXMLORDER":
+                    {
+                        // call whatever long running operations you need to run
+                        Thread.Sleep(2000);
+
+                        // always either complete or cancel the request
+                        manager.CompleteRequest(messageText: queueItem.Message +
+                                                             " - NEWXMLORDER completed at " + DateTime.Now,
+                            autoSave: true);
+                        break;
                     }
                     case "GOBIG":
                     {
                         // call whatever long running operations you need to run
-                        Thread.Sleep(2000);
+                        Thread.Sleep(4000);
 
                         // always either complete or cancel the request
                         manager.CompleteRequest(messageText: queueItem.Message +

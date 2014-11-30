@@ -147,12 +147,14 @@ namespace Westwind.MessageQueueing.Hosting
             
             controller.WaitInterval = status.waitInterval;
             controller.QueueName = status.queueName;
+
+            // Max 50 threads
             controller.ThreadCount = status.threadCount;
 
-            if (controller.ThreadCount > 20)
+            if (controller.ThreadCount > 50)
             {
-                controller.ThreadCount = 20;
-                status.threadCount = 20;
+                controller.ThreadCount = 50;
+                status.threadCount = 50;
             }
 
             var config = QueueMessageManagerConfiguration.Current;
@@ -181,6 +183,11 @@ namespace Westwind.MessageQueueing.Hosting
             Clients.All.updateControllerStatusCallback(status);
         }
 
+        /// <summary>
+        /// Returns a count of messages that is waiting for a given queue or
+        /// all queues
+        /// </summary>
+        /// <param name="queueName"></param>
         public void GetWaitingQueueMessageCount(string queueName = null)
         {
             if (string.IsNullOrEmpty(queueName))
@@ -296,8 +303,6 @@ namespace Westwind.MessageQueueing.Hosting
             StatusMessage(message);
             throw new ApplicationException(message);
         }
-
-
     }
 
     public class QueueControllerStatus
