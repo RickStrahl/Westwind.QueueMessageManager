@@ -1,5 +1,5 @@
-#Westwind.QueueMessaging
-####.NET Library to provide a simple, two-way messaging queue for enabling offloading of long running operations to other processes/machines####
+# Westwind.QueueMessaging
+#### .NET Library to provide a simple, two-way messaging queue for enabling offloading of long running operations to other processes/machines####
 The purpose of this library is to simplify async processing where long running processes
 need to be offloaded to background operations (say in an ASP.NET application) on
 seperate threads, external processes or to remote machines. 
@@ -34,7 +34,7 @@ in the background.
 
 ![Westwind.MessageQueueing](https://raw.github.com/RickStrahl/Westwind.QueueMessageManager/master/QueueManager_Diagram.png)
 
-###Data Providers###
+### Data Providers
 The implementation of this library is based on replacable data providers using
 the QueueMessageManager abstract class. The following providers are provided:
 

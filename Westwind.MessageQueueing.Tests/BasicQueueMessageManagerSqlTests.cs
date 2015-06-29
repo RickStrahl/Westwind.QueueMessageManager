@@ -17,7 +17,7 @@ namespace Westwind.MessageQueueing.Tests
     [TestClass]
     public class BasicQueueMessageManagerSqlTests
     {
-        public const string CONNECTION_STRING = "TestContext";
+        public const string CONNECTION_STRING = "QueueMessageManager";
 
         /// <summary>
         /// Checks to see whether connection strings are set
@@ -58,7 +58,7 @@ namespace Westwind.MessageQueueing.Tests
         public void SubmitRequestsToQueueTest()
         {
             var manager = new QueueMessageManagerSql();
-            int queueCount = 10;
+            int queueCount = 30;
 
             bool res = true;
             for (int i = 0; i < queueCount; i++)
@@ -71,7 +71,8 @@ namespace Westwind.MessageQueueing.Tests
                     Action = "NEWXMLORDER"                                 
                 };
                 
-                manager.SubmitRequest(msg);
+                if (!manager.SubmitRequest(msg))
+                    Console.WriteLine(manager.ErrorMessage);
 
                 res = manager.Save(msg);
                 if (!res)
@@ -367,6 +368,14 @@ namespace Westwind.MessageQueueing.Tests
         {
             var manager = new QueueMessageManagerSql();
             Assert.IsTrue(manager.ClearMessages(), manager.ErrorMessage);            
+        }
+
+        [TestMethod]
+        public void CreateTable()
+        {
+            var manager = new QueueMessageManagerSql();
+            Assert.IsTrue(manager.CreateDatastore(), manager.ErrorMessage);
+
         }
 
         /// <summary>

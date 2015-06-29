@@ -15,7 +15,7 @@
         vm = $.extend(vm, {
             signalR: {
                 hub: null,
-                hubUrl: 'http://localhost:8080/signalr',
+                hubUrl: window.page.hubUrl, // '/signalR/hubs',
                 baseUrl: "QueueMonitor.cshtml",
                 initialQueue: "",
                 token: null,
@@ -24,19 +24,20 @@
                 queueName: "",
                 threadCount: 0,
                 waitInterval: 0,
-                paused: false,                
+                paused: false,
                 serviceStatus: "Running"
             },
             queueItem: {
                 id: "",
                 date: new Date(),
-                status: "",                
+                status: "",
                 message: "",
                 xml: ""
             },
             queueNames: [],
             connectionStatus: "Not connected.",
             waitingMessages: 0,
+            waitingMessagesLast: 0,
             queueMessages: [],
             activeQueue: ""
         });
@@ -61,7 +62,7 @@
             $(document.body).on("click", ".message-item", vm.getQueueMessage);
             
             // get waiting count every 4 secs
-            //setInterval(self.getWaitingQueueMessageCount, 3000);
+            //setInterval(vm.getWaitingQueueMessageCount, 4000);
 
             vm.startHub()
                 .done(function() {
@@ -280,8 +281,11 @@
                 $scope.$apply();
             }
 
+            // restripe
             $(".message-item").removeClass("alternate");
             $(".message-item:odd").addClass("alternate");
+
+            vm.getWaitingQueueMessageCount();
         };
         
         // let the server push messages to the status bar
@@ -352,7 +356,12 @@
             $scope.$apply(); // must force SignalR
         };
 
-        vm.getWaitingQueueMessageCount = function() {
+        vm.getWaitingQueueMessageCount = function () {
+            var d = new Date().getDate();
+            //if (vm.waitingMessagesLast > d - 1000)
+            //    return;
+
+            vm.waitingMessagesLast = d;
             vm.signalR.hub.server.getWaitingQueueMessageCount(vm.activeQueue);
         };
         vm.getWaitingQueueMessageCountCallback = function(count) {

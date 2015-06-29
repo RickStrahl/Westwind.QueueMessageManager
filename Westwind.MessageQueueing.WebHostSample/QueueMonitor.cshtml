@@ -150,18 +150,16 @@
             Queue item: {{view.queueItem.id}} | status: {{view.queueItem.status}}
         </div>
         <div class="dialog-content" style="max-height: 550px;min-height: 200px; overflow: auto">
-            <div class="rightalign small" style="color: steelblue;">
+            <div class="pull-right small" style="color: steelblue; padding: 0 0  10px 15px; ">
                 {{view.queueItem.date}}
             </div>
 
-            <div class="control-group">
-                <label>Message:</label>
+            <div class="control-group" style="margin: 0 0 15px; color: #535353">                
                 <div>
-                    {{view.queueItem.message}}
+                    <b>{{view.queueItem.message}}</b>
                 </div>
             </div>
-            <div class="control-group">
-                <label>Xml:</label>
+            <div class="control-group">                
                 <pre>{{view.queueItem.xml}}</pre>
             </div>
         </div>
@@ -176,7 +174,6 @@
             document.write(unescape("%3Cscript src='scripts/jquery.min.js' type='text/javascript'%3E%3C/script%3E"));
     </script>
     <!--Script references. -->
-    @*<script src="~/Scripts/jquery-1.8.3.min.js"></script>*@
     <script src="~/Scripts/ww.jquery.js"></script>
     <script>$("#imgLoader").modalDialog();</script>
     <script src="~/Css/bootstrap/js/bootstrap.min.js"></script>
@@ -184,7 +181,7 @@
     <script src="~/Scripts/toastr.min.js"></script>
 
     <!--Reference the jQuery library. -->
-    <script src="~/Scripts/jquery.signalR-2.1.2.min.js"></script>
+    <script src="~/Scripts/jquery.signalR-2.2.0.min.js"></script>
     <script src="~/scripts/angular/angular.min.js"></script>
     <script src="~/Scripts/angular/angular-sanitize.min.js"></script>
     <script>
