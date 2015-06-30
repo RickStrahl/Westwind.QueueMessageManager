@@ -123,7 +123,8 @@
 
 
             // map client callbacks
-            hub.client.writeMessage = vm.writeMessage;            
+            hub.client.writeMessage = vm.writeMessage;
+            hub.client.clearMessages = vm.clearMessages;
             hub.client.statusMessage = vm.statusMessage;
             hub.client.getServiceStatusCallback = vm.getServiceStatusCallback;
             hub.client.updateControllerStatusCallback = vm.updateControllerStatusCallback;
@@ -287,6 +288,10 @@
 
             vm.getWaitingQueueMessageCount();
         };
+
+        vm.clearMessages = function () {            
+            $("#MessageContent").empty();
+        }
         
         // let the server push messages to the status bar
         vm.statusMessage = function(msg) {

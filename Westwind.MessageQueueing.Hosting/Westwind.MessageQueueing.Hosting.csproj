@@ -91,6 +91,12 @@
   <ItemGroup>
     <None Include="app.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Westwind.MessageQueueing\Westwind.MessageQueueing.csproj">
+      <Project>{3aebd7c2-cc6e-416b-a45b-b7a04c173d0f}</Project>
+      <Name>Westwind.MessageQueueing</Name>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

@@ -58,12 +58,19 @@ namespace Westwind.MessageQueueing.Hosting
                 queueName = null;
             
             var queue = new QueueMessageManagerSql();
-            var msgs = queue.GetRecentQueueItems(queueName, 10);
+            List<QueueMessageItem> msgs = queue.GetRecentQueueItems(queueName, 10).Reverse().ToList();
 
-            if (msgs == null)
-                return;
+            if ( msgs.Count < 1)
+            {
+                if (!string.IsNullOrEmpty(queue.ErrorMessage))
+                    throw new ApplicationException("Message retrieval failed: " + queue.ErrorMessage);
 
-            foreach (var msg in msgs.Reverse())
+                // no msgs = just clear the list
+                Clients.All.ClearMessages();
+            }
+
+            
+            foreach (var msg in msgs)
             {
                 int elapsed = 0;
                 DateTime time = DateTime.UtcNow;
