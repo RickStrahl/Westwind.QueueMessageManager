@@ -86,7 +86,7 @@
         vm.startHub = function () {           
 
             //jQuery.support.cors = true;
-            $.connection.hub.url = vm.signalR.hubUrl; // ie. "http://rasxps/signalR";
+            $.connection.hub.url = vm.signalR.hubUrl; // ie. "http://rasxps/signalR/hubs";
 
             // Pass security token
             $.connection.hub.qs = { "token": vm.signalR.token };
@@ -250,7 +250,7 @@
                 td = $("<td>").attr("colspan", "1");
                 td.appendTo(tr);
 
-                message = "<pre style='font-size: 8pt;padding: 3px 5px;margin: 0'>" + message.trim() + "</pre>";
+                message = "<pre class='message-pre'>" + message.trim() + "</pre>";
                 td = $("<td>").attr("colspan","3").css("text-overflow","clip");
                 if (message.indexOf("/>") > 0 || message.indexOf("</") > 0)
                     td.html(message);
