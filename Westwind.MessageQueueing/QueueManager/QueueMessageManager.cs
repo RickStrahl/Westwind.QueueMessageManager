@@ -70,7 +70,7 @@ namespace Westwind.MessageQueueing
             // 2 hours
             MessageTimeout = new TimeSpan(2, 0, 0);
 
-            Serialization = new QueueMessageManagerSerializationHelper(this);                       
+            Serialization = new QueueMessageManagerSerializationHelper(this);
             ConnectionString = QueueMessageManagerConfiguration.Current.ConnectionString;
         }
 

@@ -55,6 +55,17 @@ namespace Westwind.MessageQueueing.WebHostSample
                             autoSave: true);
                         break;
                     }
+                    case "MPWF":
+                    {
+                        Thread.Sleep(1000);
+
+                            // always either complete or cancel the request
+                            manager.CompleteRequest(messageText: queueItem.Message +
+                                                                 " - completed at " + DateTime.Now,
+                                autoSave: true);
+                            break;
+                        }
+
                     case "GOBIG":
                     {
                         // call whatever long running operations you need to run
