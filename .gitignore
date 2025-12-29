@@ -31,3 +31,6 @@ $tf*/
 /Westwind.ApplicationConfiguration.WebSample/Properties/PublishProfiles/*.pubxml
 /Westwind.ApplicationConfiguration.WebSample/Properties/PublishProfiles/*.pubxml
 /Lib/Postbuild.bat
+
+.vs/
+.nuget/
