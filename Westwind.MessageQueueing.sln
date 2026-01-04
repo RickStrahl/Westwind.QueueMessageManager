@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11312.210 d18.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{677C6049-14C0-497C-89FA-5207CFC4DAE6}"
 	ProjectSection(SolutionItems) = preProject
@@ -31,6 +31,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Westwind.MessageQueueing.Hosting", "Westwind.MessageQueueing.Hosting\Westwind.MessageQueueing.Hosting.csproj", "{E91D3F46-34F9-4A61-AD90-2B33A8F32B9F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Westwind.MessageQueueing.WebHostSample", "Westwind.MessageQueueing.WebHostSample\Westwind.MessageQueueing.WebHostSample.csproj", "{22C15686-EAC6-4AEB-8BF3-42C2C303164D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Westwind.Utilities", "..\..\Westwind.Utilities\Westwind.Utilities\Westwind.Utilities.csproj", "{7813D94A-5E05-C80C-F587-1DFA95DACB14}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -96,6 +98,14 @@ Global
 		{22C15686-EAC6-4AEB-8BF3-42C2C303164D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{22C15686-EAC6-4AEB-8BF3-42C2C303164D}.SandBox|Any CPU.ActiveCfg = Release|Any CPU
 		{22C15686-EAC6-4AEB-8BF3-42C2C303164D}.SandBox|Any CPU.Build.0 = Release|Any CPU
+		{7813D94A-5E05-C80C-F587-1DFA95DACB14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7813D94A-5E05-C80C-F587-1DFA95DACB14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7813D94A-5E05-C80C-F587-1DFA95DACB14}.Deploy|Any CPU.ActiveCfg = Release|Any CPU
+		{7813D94A-5E05-C80C-F587-1DFA95DACB14}.Deploy|Any CPU.Build.0 = Release|Any CPU
+		{7813D94A-5E05-C80C-F587-1DFA95DACB14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7813D94A-5E05-C80C-F587-1DFA95DACB14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7813D94A-5E05-C80C-F587-1DFA95DACB14}.SandBox|Any CPU.ActiveCfg = Release|Any CPU
+		{7813D94A-5E05-C80C-F587-1DFA95DACB14}.SandBox|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -26,12 +26,7 @@ namespace Westwind.MessageQueueing
         /// The frequency in how often the main method is executed.
         /// Given in seconds.
         /// </summary>
-        public int CheckFrequency
-        {
-            get { return _CheckFrequency; }
-            set { _CheckFrequency = value; }
-        }
-        private int _CheckFrequency = 60;
+        public int CheckFrequency { get; set; } = 60;
 
         /// <summary>
         /// Optional URL that is pinged occasionally to
@@ -39,18 +34,14 @@ namespace Westwind.MessageQueueing
         /// 
         /// If empty hits root web page (~/yourapp/)
         /// </summary>
-        public string WebServerPingUrl
-        {
-            get { return _WebServerPingUrl; }
-            set { _WebServerPingUrl = value; }
-        }
-        private string _WebServerPingUrl = "";
-    
-        
+        public string WebServerPingUrl { get; set; } 
+
+
         /// <summary>
         /// Event that is fired when
         /// </summary>
-        public event EventHandler ExecuteScheduledEvent;
+        public Action<Scheduler> ExecuteScheduledEvent;
+
 
         AutoResetEvent _WaitHandle = new AutoResetEvent(false);
 
@@ -162,8 +153,7 @@ namespace Westwind.MessageQueueing
         /// </summary>
         protected virtual void OnExecuteScheduledEvent()
         {
-            if (ExecuteScheduledEvent != null)
-                ExecuteScheduledEvent(this,EventArgs.Empty);
+            ExecuteScheduledEvent?.Invoke(this);
         }
 
         /// <summary>

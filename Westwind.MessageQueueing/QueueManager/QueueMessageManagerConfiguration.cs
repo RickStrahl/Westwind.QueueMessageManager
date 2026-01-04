@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -85,20 +86,21 @@ namespace Westwind.MessageQueueing
 
         public QueueMessageManagerConfiguration()
         {
-            ConnectionString = "QueueMessageManager";
+            ConnectionString =  "Server=.;Database=QueueMessageManager;integrated security=true;Enlist=True;MultipleActiveResultSets=True;Encrypt=False";
             WaitInterval = 1000;
             ControllerThreads = 1;
             QueueName = string.Empty;
             MonitorHostUrl = "http://*:8080/";
             MonitorSignalRHubUrl = "~/signalR";
             MonitorHtmlUrl = "~/QueueMonitor.cshtml";
+            
         }
 
 
         static QueueMessageManagerConfiguration()
         {
             Current = new QueueMessageManagerConfiguration();
-            Current.Initialize(sectionName: "QueueManagerConfiguration");
+            Current.Initialize();
         }
 
         /// <summary>
@@ -114,6 +116,18 @@ namespace Westwind.MessageQueueing
             var manager = new QueueMessageManagerConfiguration();
             DataUtils.CopyObjectData(Current, manager);
             return manager;
+        }
+
+        protected override IConfigurationProvider OnCreateDefaultProvider(string fileName, object configData)
+        {
+
+           var jsonFile = "qmm-config.json";
+            
+            var provider = new JsonFileConfigurationProvider<QueueMessageManagerConfiguration>()
+            {
+                JsonConfigurationFile = jsonFile,                                   
+            };            
+            return provider;
         }
     }
 

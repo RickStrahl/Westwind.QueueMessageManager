@@ -59,5 +59,26 @@ namespace Westwind.MessageQueueing
                  DataUtils.GenerateUniqueId(8);
         }
         
+        /// <summary>
+        /// Sets the Json property from an object
+        /// </summary>
+        /// <param name="obj">object to serialize into Json properation</param>
+        /// <param name="formatted">if true pretty formats the JSON</param>
+        /// <param name="toCamelCase">if true uses camelCase formatting</param>
+        /// <returns>true on success false on failure to serialize</returns>
+        public bool SetJson(object obj, bool formatted = false, bool toCamelCase =false)
+        {
+            if (obj == null)
+            {
+                Json = null;
+                return true;
+            }
+
+            Json = JsonSerializationUtils.Serialize(obj, false, formatted, toCamelCase);
+            if (Json == null)
+                return false; // serialization failed
+            
+            return true;
+        }
     }
 }

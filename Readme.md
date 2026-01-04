@@ -1,12 +1,12 @@
 # Westwind.QueueMessaging
-#### .NET Library to provide a simple, two-way messaging queue for enabling offloading of long running operations to other processes/machines####
-The purpose of this library is to simplify async processing where long running processes
-need to be offloaded to background operations (say in an ASP.NET application) on
-seperate threads, external processes or to remote machines. 
+#### .NET Library to provide a simple, two-way messaging queue for enabling offloading of long running operations to other processes/machines
+
+The purpose of this library is to simplify async processing where long running processes need to be offloaded to background operations (say in an ASP.NET application) on
+separate threads, external processes or to remote machines. 
 
 Unlike traditional First In First Out queue services this messaging solution allows 
 for two-way messaging between the client and the async processing server, to allow for 
-progress information, cancelation and completion information between the client and
+progress information, cancellation and completion information between the client and
 server doing the async processing. 
 
 This library provides a simple queue message manager that can be used to read and write
@@ -35,7 +35,7 @@ in the background.
 ![Westwind.MessageQueueing](https://raw.github.com/RickStrahl/Westwind.QueueMessageManager/master/QueueManager_Diagram.png)
 
 ### Data Providers
-The implementation of this library is based on replacable data providers using
+The implementation of this library is based on replaceable data providers using
 the QueueMessageManager abstract class. The following providers are provided:
 
 * **QueueMessageManagerSql**
@@ -47,7 +47,7 @@ A MongoDb based implementation that is appropriate for high volume of message it
 *(~5000 msg/sec for pickups)*
 
 * **QueueMessageManagerSqlMsMq**
-A hybrid implementation that uses MSMQ for actual ID value queueing and data storage
+A hybrid implementation that uses MSMQ for actual ID value queuing and data storage
 of messages in SQL Server. Uses the same data model used for the QueueMessageManagerSql
 but provides much better scalability to avoid locked message retrieval bottlenecks.
 Appropriate for high volume of message items.
@@ -77,7 +77,7 @@ Currently only supports SQL Server, SQL Compact and MongoDb and a hybrid SQL Ser
 as data stores.
 
 ###Typical Processing###
-A typical messaging process with the Queueing components goes like this:
+A typical messaging process with the Queuing components goes like this:
 
 * Client creates a message object and sets its properties to pass data in
   for processing. Typically you set the 'Action' property and one of the
@@ -116,12 +116,12 @@ manager to provide progress and status information to the client.
 
 ###Creating and interacting with Messages via QueueMessageManager###
 The QueueMessageManager class provides methods for creating new queue entries and
-submitting them to the queue, for updating them and then cancelling or 
+submitting them to the queue, for updating them and then canceling or 
 completing messages.
 
 Typical client submission code looks like this:
 
-```C#
+```cs
 var manager = new QueueMessageManagerSql();
 
 string imageId = "10";
@@ -161,7 +161,7 @@ access in process properties like PercentComplete or Message or even some
 of the data fields to retrieve progress information or potentially in 
 progress update data.
 
-```C#
+```csharp
 var manager = new QueueMessageManagerSql();
 
 // assume you have held on to the queueId
@@ -207,7 +207,7 @@ to notify of new incoming messages to process. The customized code can then exam
 the QueueMessageItem for its properties to determine how to process the message.
 Typically an Action can be set on the QueueMessageItem to route processing.
 
-**QueueController is optional**<br/>
+**QueueController is optional**
 Although QueueController is recommended to handle the polling for messages and firing
 requests into the event handlers automatically, it's not required. You can also have
 two applications pushing and pulling out queue messages on a peer to peer basis and
@@ -234,7 +234,7 @@ application is ready to terminate.
 
 Here's what this looks like:
 
-```C#
+```csharp
 [TestMethod]
 public void QueueControllerTest()
 {
@@ -339,7 +339,7 @@ this class. You can override the OnExecuteStart, OnExecuteFailed, OnExecuteCompl
 handlers the same as above and then add all your processing logic in methods of
 this class. This is the recommended approach.
 
-```C#
+```csharp
 public class MyController : QueueController
 {
     protected override OnExecuteStart(QueueMessageManager manager)
@@ -370,12 +370,12 @@ public class MyController : QueueController
 
 You can then just instantiate and call this custom controller instead.
 
-```C#
+```csharp
 var controller = new MyQueueController();
 controller.StartProcessingAsync();
 ```
 
-###Multiple QueueControllers###
+### Multiple QueueControllers
 You can also run multiplate QueueControllers simultaneously, simply
 by configuring multiple QueueController instances pointing at separate
 queue names. This allows you to handle multiple operations to run at
@@ -385,7 +385,7 @@ another queue that processes very short but quick requests. In order for
 the long requests to not hold up slower requests you can have two separate
 queues that isolate each from each other.
 
-```C#
+```csharp
 var controller = new MyQueueController(){
    QueueName = "Queue1"
 };
@@ -411,7 +411,7 @@ multiple queues that are handled by the same event handlers and which
 simplify controlling multiple queues through singular queue start and stop
 operations.
 
-```C#
+```csharp
 var controller = new QueueControllerMultiple(
     new List<MyQueueController>() {
         new MyQueueController() {
@@ -434,11 +434,12 @@ controller.StopProcessing();
 This starts two separate controllers that use the QueueMessageManager 
 connection string to access their respective queues.
 
-###Configuration###
+### Configuration
 The QueueMessageManager works with a database data store to handle queue messaging. 
 Currently Sql Server is supported and we're working on a MongoDb version.
+
 By default the QueueMessageManager uses configuration settings that are stored 
-in the configuration file where you specify relevant settings:
+in a Json configuration file where you specify relevant settings:
 
 ```xml
 <QueueManagerConfiguration>
@@ -447,14 +448,14 @@ in the configuration file where you specify relevant settings:
 	<add key="QueueName" value="DefaultQueue" />
 	<add key="ControllerThreads" value="2" />
 </QueueManagerConfiguration>
- ```
+```
 
 By default settings are read out of the config file and settings are auto-created
 if they don't exist (assuming the application has rights to write). But you can also 
 explicitly set these values by passing a QueueMessageManagerConfiguration()
 object with configuration settings preset into the constructor:  
 
- ```c#
+ ```csharp
 var config = new QueueMessageManagerConfiguration()
 {                 
     ConnectionString = "MyApplicationConnectionString",
@@ -473,7 +474,7 @@ Here's what values are available on the configuration:
 The only required value for these settings is the connection string that 
 points at the SQL Server instance to hold the data. This value can be
 a raw SQL connection string, or - as used above - a ConnectionString
-entry in the config <connectionStrings> section. Applies both to 
+entry in the config connectionStrings AppSettings section. Applies both to 
 the manager and controller (via Controller.Initialize()).
 
 *QueueName*

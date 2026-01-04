@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using Westwind.Utilities;
-using Westwind.Utilities.Logging;
 
 namespace Westwind.MessageQueueing
 {

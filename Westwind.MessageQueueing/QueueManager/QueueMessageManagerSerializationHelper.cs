@@ -21,6 +21,9 @@ namespace Westwind.MessageQueueing
             Manager = manager;
         }
 
+        /// Binary serialization is not available in .NET Core 
+        
+#if false
         /// <summary>
         /// Serializes an object into the BinData field
         /// </summary>
@@ -40,6 +43,7 @@ namespace Westwind.MessageQueueing
             byte[] result = null;
             try
             {
+                
                 result = SerializationUtils.SerializeObjectToByteArray(objectInstance, true);
             }
             catch (Exception ex)
@@ -52,8 +56,6 @@ namespace Westwind.MessageQueueing
 
             return true;
         }
-
-
 
 
         /// <summary>
@@ -86,6 +88,7 @@ namespace Westwind.MessageQueueing
 
             return (T)result;
         }
+#endif
 
         /// <summary>
         /// Serializes an object to the current or passed queue item's XML property

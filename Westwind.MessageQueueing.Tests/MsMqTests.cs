@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if false
+using System;
 using System.Collections.Generic;
 using System.Messaging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -72,3 +73,4 @@ namespace Westwind.MessageQueueing.Tests
         }
     }
 }
+#endif

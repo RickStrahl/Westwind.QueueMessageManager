@@ -30,16 +30,16 @@ namespace QueueStarter.Tests
             {
                 Message = "Single SQL Entry",
                 TextInput = "Process This",
-                QueueName="MPWF",
-                Action="HELLOWORLD",
+                QueueName = "MPWF",
+                Action = "HELLOWORLD",
                 Xml = @"<doc>
     <company>West Wind</company>
     <name>Rick</name>    
 </doc>
-" 
+"
             };
             Assert.IsTrue(qm.SubmitRequest(item, null, true), qm.ErrorMessage);
-            
+
         }
 
         [TestMethod]
@@ -60,7 +60,7 @@ namespace QueueStarter.Tests
     <name>Rick</name> 
     <time>{0}</time>
 </doc>
-",DateTime.Now.ToString("MMM dd - HH:mm:ss"))
+", DateTime.Now.ToString("MMM dd - HH:mm:ss"))
                 };
                 Thread.Sleep(300);
 
@@ -68,6 +68,7 @@ namespace QueueStarter.Tests
             }
         }
 
+#if false
         [TestMethod]
         public void AddManyQueueSqlMsMqItems()
         {
@@ -124,5 +125,7 @@ namespace QueueStarter.Tests
           Console.WriteLine(qm.ErrorMessage);
           Console.WriteLine(JsonSerializationUtils.Serialize(item, true));
       }
+#endif
     }
+
 }

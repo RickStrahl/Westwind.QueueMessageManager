@@ -462,7 +462,10 @@ namespace Westwind.MessageQueueing
         /// requires that a database exists already and uses the same connection string
         /// that is used for the main application.
         /// </summary>
-        /// <returns></returns>        
+        /// <remarks>
+        /// Make sure the database exists before running this routine.
+        /// </remarks>
+        /// <returns>true on success, ErrorMessage set on false</returns>        
         public override bool CreateDatastore()
         {
             SetError();

@@ -358,10 +358,8 @@ namespace Westwind.MessageQueueing
             // is it a connection string name?
             if (!connectionString.Contains("://"))
             {
-                var conn = ConfigurationManager.ConnectionStrings[connectionString];
-                if (conn != null)
-                    connectionString = conn.ConnectionString;
-                else
+                var conn = QueueMessageManagerConfiguration.Current.ConnectionString;
+                if (string.IsNullOrEmpty(conn))
                     connectionString = "mongodb://localhost";                
             }
 

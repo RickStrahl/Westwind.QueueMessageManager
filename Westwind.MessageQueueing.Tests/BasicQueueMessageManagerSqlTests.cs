@@ -17,7 +17,15 @@ namespace Westwind.MessageQueueing.Tests
     [TestClass]
     public class BasicQueueMessageManagerSqlTests
     {
-        public const string CONNECTION_STRING = "QueueMessageManager";
+        string ConnectionString;
+
+        QueueMessageManagerConfiguration Configuration { get; }
+
+        public BasicQueueMessageManagerSqlTests()
+        {
+            Configuration = QueueMessageManagerConfiguration.Current;
+            ConnectionString = QueueMessageManagerConfiguration.Current.ConnectionString;               
+        }
 
         /// <summary>
         /// Checks to see whether connection strings are set
@@ -27,9 +35,9 @@ namespace Westwind.MessageQueueing.Tests
         public void ConstructorOverrideTest()
         {
 
-            var manager = new QueueMessageManagerSql(CONNECTION_STRING);
+            var manager = new QueueMessageManagerSql(ConnectionString);
             Console.WriteLine(manager.ConnectionString);
-            Assert.IsTrue(manager.ConnectionString == CONNECTION_STRING,"ConnectionString is not set");
+            Assert.IsTrue(manager.ConnectionString == ConnectionString,"ConnectionString is not set");
 
 
             manager = new QueueMessageManagerSql("MyApplicationConnectionString");
@@ -41,18 +49,38 @@ namespace Westwind.MessageQueueing.Tests
         public void SubmitRequestWithPresetObjectTest()
         {
             string xml = "<doc><value>Hello</value></doc>";
-            var manager = new QueueMessageManagerSql();
+            var manager = new QueueMessageManagerSql() { AutoCreateDataStore = true };
 
                 var msg = new QueueMessageItem()
                 {
                     QueueName="MPWF",
                     Message = "Xml Message  @ " + DateTime.Now.ToString("t"),
-                    Action = "NEWXMLORDER",                    
+                    Action = "NEWXMLORDER",    // Some Application specific Action Id`         
                     Xml = xml
                 };
                 manager.SubmitRequest(msg);
                 Assert.IsTrue(manager.Save(), manager.ErrorMessage);
         }
+
+        [TestMethod]
+        public void SubmitRequestWithJsonObjectTest()
+        {
+            var data = new { message = "Hello World", timestamp = DateTime.Now };
+
+            var manager = new QueueMessageManagerSql() { AutoCreateDataStore = true };
+
+            var msg = new QueueMessageItem()
+            {
+                QueueName = "MPWF",
+                Message = "Json Message  @ " + DateTime.Now.ToString("t"),
+                Action = "NEWJSONMESSAGE",   // Some Application specific Action Id                  
+            };
+            msg.SetJson(data, formatted: true);
+
+            manager.SubmitRequest(msg);
+            Assert.IsTrue(manager.Save(), manager.ErrorMessage);
+        }
+
 
         [TestMethod]
         public void SubmitRequestsToQueueTest()
