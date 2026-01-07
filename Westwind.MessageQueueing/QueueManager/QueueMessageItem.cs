@@ -4,19 +4,102 @@ using Westwind.Utilities;
 namespace Westwind.MessageQueueing
 {
     public partial class QueueMessageItem
-    {        
-        public string Id { get; set; }        
-        public string QueueName { get; set; } 
-       
+    {
+        public string Id { get; set; }
+        public string QueueName { get; set; }
+
+
+        /// <summary>
+        /// User defined status
+        /// Common values are: 
+        /// * Submitted
+        /// * Started
+        /// * Completed         
+        /// * Cancelled
+        /// * Failed
+        /// </summary>
         public string Status { get; set; }
+
+        /// <summary>
+        /// A user defined action that can be used to
+        /// group operations to perform when messages are
+        /// pulled out of the queue. 
+        ///
+        /// Essentially this is an operation identifier.
+        /// </summary>
         public string Action { get; set; }
-        
+
+
+        /// <summary>
+        /// Time when a message is first submitted
+        /// </summary>
         public DateTime Submitted { get; set; }
+
+        /// <summary>
+        /// Time when the message starts processing (optional)
+        /// </summary>
         public DateTime? Started { get; set; }
+
+        /// <summary>
+        /// Time when the message is completed (optional)
+        /// </summary>
         public DateTime? Completed { get; set; }
 
-        public bool IsComplete { get; set; }
+        /// <summary>
+        /// Determines whether a message is complete
+        /// </summary>
+        public bool IsComplete
+        {
+            get
+            {
+                if (Completed != null && Completed > DateTime.MinValue)
+                {
+                    field = true;
+                    return field;
+                }
+                field = false;
+                return field;
+            }
+            set
+            {
+                field = value;
+                if (field)
+                {
+                    Completed ??= DateTime.UtcNow;
+                }
+                else
+                {
+                    Completed = null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Flag that indicates whether a message is cancelled
+        /// </summary>
         public bool IsCancelled { get; set; }
+
+        /// <summary>
+        /// Flag that is set when the message has failed
+        /// </summary>
+        public bool IsFailed { get; set; }
+
+        /// <summary>
+        /// Determines whether a message is currently running:
+        /// * Started
+        /// * Not completed or cancelled
+        /// </summary>
+        /// <remarks>Calculated field - not stored in the data store</remarks>
+        /// <returns>true or false</returns>        
+        public bool IsRunning
+        {
+            get
+            {
+                if (IsComplete || IsCancelled) return false;
+                return Started is not null;
+            }
+        }
+
 
         public int Expire { get; set; }
         public string Message { get; set; }
@@ -79,6 +162,44 @@ namespace Westwind.MessageQueueing
                 return false; // serialization failed
             
             return true;
+        }
+
+        /// <summary>
+        /// Sets the Started property and sets Status to Started
+        /// </summary>
+        /// <exception cref="NotImplementedException"></exception>
+        public void Start()
+        {
+            Started = DateTime.UtcNow;            
+            Status = "Started";
+        }
+
+        public void Complete()
+        {
+            Completed = DateTime.UtcNow;
+            IsComplete = true;
+            Status = "Completed";
+        }
+
+        public void Cancel()
+        {
+            IsCancelled = true;
+            Status = "Cancelled";
+            Completed = DateTime.UtcNow;
+        }
+
+        public void Fail(string message = null)
+        {
+            IsFailed = true;
+            Status = "Failed";
+            if (!string.IsNullOrEmpty(message))
+                Message = message;
+            Completed = DateTime.UtcNow;
+        }
+
+        public override string ToString()
+        {
+            return $"{Id} - {Submitted:HH:mm:ss} - {Status} - {Completed:HH:mm:ss}";
         }
     }
 }

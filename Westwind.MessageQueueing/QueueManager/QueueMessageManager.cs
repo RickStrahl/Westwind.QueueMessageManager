@@ -100,14 +100,16 @@ namespace Westwind.MessageQueueing
         /// <summary>
         /// Creates a new item instance and properly
         /// initializes the instance's values.
+        /// 
+        /// Submits the item, but doesn't start it.
         /// </summary>
-        /// <returns></returns>
-        public QueueMessageItem CreateItem(QueueMessageItem entity = null)
+        /// <returns>The item passed in or that was created</returns>
+        public QueueMessageItem CreateItem(QueueMessageItem message = null)
         {
-            if (entity == null)
+            if (message == null)
                 Item = new QueueMessageItem();
             else
-                Item = entity;
+                Item = message;
 
             Item.__IsNew = true;
 
@@ -157,13 +159,18 @@ namespace Westwind.MessageQueueing
         /// <param name="id"></param>
         /// <returns></returns>
         public abstract bool IsCompleted(string id = null);
-        
+
 
         /// <summary>
         /// Sets the message properties for starting a new message request operation.
-        /// Note the record is not written to the database use Save explicitly
+        /// Note the record is not written to the database use Save explicitly unless
+        /// `autoSave: true`.
+        /// 
+        /// Sets the `.Item` property`.
         /// </summary>
         /// <param name="item">An existing item instance</param>
+        /// <param name="messageText">Optional message text to assign to the created or passed item</param>
+        /// <param name="autoSave">If true Save() is called automatically other wise the item data is updated onlyt</param>
         public bool SubmitRequest(QueueMessageItem item = null, string messageText = null, bool autoSave = false)
         {
             if (item == null)
@@ -250,12 +257,44 @@ namespace Westwind.MessageQueueing
         }
 
         /// <summary>
-        /// Updates the QueueMessageStatus and or messages
+        /// Sets the Item record with the required settings
+        /// to complete and cancel a request. Not saved to database
+        /// call Save() explicitly.
         /// </summary>
-        /// <param name="manager"></param>
+        public bool FailRequest(QueueMessageItem item = null, string messageText = null, bool autoSave = false)
+        {
+            if (item == null)
+                item = Item;
+            if (item == null)
+                item = CreateItem();
+
+            item.Status = "Failed";
+            item.Completed = DateTime.UtcNow;
+            if (item.Started == null)
+                item.Started = DateTime.UtcNow.AddMilliseconds(-1);
+            item.IsComplete = true;
+            item.IsFailed = true;
+
+            if (messageText != null)
+                item.Message = messageText;
+
+            if (autoSave)
+                return Save();
+
+            return true;
+        }
+
+        /// <summary>
+        /// Updates the QueueMessageStatus and or messages.
+        /// 
+        /// Does not save the message unless `autoSave: true` is set 
+        /// otherwise explicitly call `Save()`.         
+        /// </summary>
+        /// <param name="item">Message item</param>
         /// <param name="status"></param>
         /// <param name="messageText"></param>
         /// <param name="percentComplete"></param>
+        /// <param name="autoSave">If true Save() is called automatically other wise the item data is updated onlyt</param>
         public bool UpdateQueueMessageStatus(QueueMessageItem item = null, string status = null, string messageText = null, int percentComplete = -1, bool autoSave = false)
         {
             if (item == null)

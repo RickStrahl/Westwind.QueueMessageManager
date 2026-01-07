@@ -14,82 +14,66 @@ namespace Westwind.MessageQueueing
         /// </summary>
         public List<QueueController> Controllers;
 
-        public QueueControllerMultiple()
-        {
-            Controllers = new List<QueueController>();            
-        }
 
         /// <summary>
-        /// Pass in a list of controllers and their configuration to
-        /// start all of the controllers processing simultaneously
+        /// 
         /// </summary>
-        /// <param name="controllers">List of pre-configured controllers</param>
-        public QueueControllerMultiple(IEnumerable<QueueController> controllers, string connectionString = null)
-        {
-            Controllers = new List<QueueController>();            
-
-            if (controllers == null)
-                return;
-
-            if (connectionString == null)
-                connectionString = QueueMessageManagerConfiguration.Current.ConnectionString;
-
-            foreach (var controller in controllers)
-            {
-                if (string.IsNullOrEmpty(controller.ConnectionString))
-                    controller.ConnectionString = connectionString;
-                
-                controller.QueueManagerType = QueueManagerType;
-                controller.OnCreateQueueManager = OnCreateQueueManager;
-
-                Controllers.Add(controller);
-            }
-            Controllers.AddRange(controllers);            
+        /// <param name="config">Queue Manager Configuration </param>
+        /// <param name="connectionString">Optional Connection String to override config value</param>
+        /// <param name="controllers">Optional already configured list of controllers for processing</param>
+        /// <param name="managerType">Optional manager type</param>
+        public QueueControllerMultiple(QueueMessageManagerConfiguration config = null, 
+            string connectionString = null, IEnumerable<QueueController> controllers = null, 
+            Type managerType = null)
+        {                        
+            Initialize(config, connectionString, managerType, controllers);
         }
+
 
         /// <summary>
         /// Loads configuration settings from configuration file and loads up
         /// the Controllers list.
         /// </summary>
-        /// <param name="configuration"></param>
+        /// <param name="configuration">Optional but recommended Configuration instance</param>
+        /// <param name="connectionString">A connection string to override the config connection string</param>
         /// <param name="managerType"></param>
-        public void Initialize(QueueMessageManagerConfiguration configuration = null, Type managerType = null)
+        /// <param name="controllers"></param>
+        public void Initialize(QueueMessageManagerConfiguration configuration = null, string connectionString = null,
+                               Type managerType = null, IEnumerable<QueueController> controllers = null)
         {            
-            base.Initialize(configuration, managerType);
+            base.Initialize(configuration, connectionString, managerType);
+
+            if (controllers != null)
+                Controllers = controllers.ToList();
+                
 
             // ignore controller list if controllers have been 
             // explicitly set
             if (Controllers != null && Controllers.Count > 0)
                 return;
 
-            // load up the controllers
-            Controllers = new List<QueueController>();
-
+            
             if (configuration == null)
                 configuration = QueueMessageManagerConfiguration.Current;
             if (managerType == null)
                 managerType = QueueManagerType ?? typeof(QueueMessageManagerSql);
 
+
+            // load up the controllers and create a single default controller
+            Controllers = new List<QueueController>();
+            
             if (configuration != null && configuration.Controllers != null)
             {
                 // pass configuration to all the child controllers
                 foreach (var config in configuration.Controllers)
                 {
-                    var ctrl = Activator.CreateInstance(GetType()) as QueueController;
-
-                    ctrl.ConnectionString = string.IsNullOrEmpty(config.ConnectionString)
-                        ? ConnectionString ?? ""
-                        : config.ConnectionString;
-
-                    ctrl.QueueName = config.QueueName;
-                    ctrl.ThreadCount = config.ControllerThreads;
-                    ctrl.WaitInterval = config.WaitInterval;
-                    ctrl.QueueManagerType = managerType;
+                    var ctrl = Activator.CreateInstance(QueueManagerType) as QueueController;
+                    ctrl.Initialize(configuration, ConnectionString, QueueManagerType);
                     ctrl.OnCreateQueueManager = OnCreateQueueManager;
 
                     Controllers.Add(ctrl);
                 }
-            }
+            }         
         }
 
 
@@ -121,24 +105,24 @@ namespace Westwind.MessageQueueing
         /// Your user code can attach to this event and start processing
         /// with the message information.
         /// </summary>        
-        public event Action<QueueMessageManager> ExecuteStart;
+        public virtual event Action<QueueMessageManager> ExecuteStart;
 
         /// <summary>
         /// Event fired when the asynch operation has successfully completed
         /// </summary>
-        public event Action<QueueMessageManager> ExecuteComplete;
-
+        public virtual event Action<QueueMessageManager> ExecuteComplete;
+         
         /// <summary>
         /// Event fired when the asynch operation has failed to complete (an exception
         /// was thrown during processing). Implement for logging or notifications.
         /// </summary>
-        public event Action<QueueMessageManager, Exception> ExecuteFailed;
+        public virtual event Action<QueueMessageManager, Exception> ExecuteFailed;
         
         /// <summary>
         /// Event fired when the read operation to retrieve the next message from
         /// the database has failed. Allows for error handling or logging.
         /// </summary>
-        public event Action<QueueMessageManager, Exception> NextMessageFailed;
+        public virtual event Action<QueueMessageManager, Exception> NextMessageFailed;
 
 
         /// <summary>

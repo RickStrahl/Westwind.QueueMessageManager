@@ -33,7 +33,7 @@ namespace Westwind.MessageQueueing
         /// </summary>
         /// <param name="configuration"></param>
         /// <param name="queueManagerType"></param>
-        public void Initialize(QueueMessageManagerConfiguration configuration = null, Type queueManagerType = null)
+        public void Initialize(QueueMessageManagerConfiguration configuration = null,  string connectionString = null, Type queueManagerType = null)
         {                        
             if (queueManagerType != null)
                 QueueManagerType = queueManagerType;
@@ -44,7 +44,7 @@ namespace Westwind.MessageQueueing
             if (configuration == null)
                 return;
                     
-            ConnectionString = configuration.ConnectionString;
+            ConnectionString = connectionString ?? configuration.ConnectionString;
             ThreadCount = configuration.ControllerThreads;
             QueueName = configuration.QueueName ?? string.Empty;
             WaitInterval = configuration.WaitInterval;
@@ -122,9 +122,8 @@ namespace Westwind.MessageQueueing
                 if (OnCreateQueueManager != null)
                     manager = OnCreateQueueManager.Invoke();
                 else
-                    manager =
-                        ReflectionUtils.CreateInstanceFromType(QueueManagerType, ConnectionString ?? string.Empty) 
-                                        as QueueMessageManager;
+                    manager = Activator.CreateInstance(QueueManagerType, [ ConnectionString ?? string.Empty ]) as QueueMessageManager;
+                
                 using (manager)
                 {
                     if (this.OnGetNextQueueMessage(manager, QueueName) == null)                    
@@ -134,6 +133,7 @@ namespace Westwind.MessageQueueing
                             OnNextMessageFailed(manager, new ApplicationException(manager.ErrorMessage));
 
                         // Nothing to do - wait for next poll interval
+                        
                         Thread.Sleep(WaitInterval);
                         continue;
                     }
@@ -162,6 +162,16 @@ namespace Westwind.MessageQueueing
 
             // allow threads some time to shut down
             Thread.Sleep(1000);
+        }
+
+        /// <summary>
+        /// Pauses processing by keeping the thread alive
+        /// and waiting until the pause is unset
+        /// </summary>
+        /// <param name="pause"></param>
+        public virtual void PauseProcessing(bool pause = true)
+        {
+            Paused = pause;
         }
 
         /// <summary>
@@ -276,20 +286,6 @@ namespace Westwind.MessageQueueing
         public event Action<QueueMessageManager, Exception> ExecuteFailed;
 
         /// <summary>
-        /// Message hook that's responsible for retrieving the next message.
-        /// The base version pulls the next message for the given queue.    
-        /// You can override this method to conditionally override this 
-        /// behavior such as filter when and how messages are read.
-        /// </summary>
-        /// <param name="manager">A manager instance that can retrieve</param>
-        /// <param name="queueName">The queue to check</param>
-        /// <returns></returns>
-        protected virtual QueueMessageItem OnGetNextQueueMessage(QueueMessageManager manager, string queueName)
-        {            
-            return manager.GetNextQueueMessage(queueName);
-        }
-
-        /// <summary>
         /// Override this method to handle any errors that occured during processing
         /// of the async task. Optional - implement for logging or notifications.
         /// </summary>
@@ -303,6 +299,24 @@ namespace Westwind.MessageQueueing
         {
             if (ExecuteFailed != null)
                 ExecuteFailed(manager, ex);
+            else
+            {
+                manager.FailRequest(messageText: ex.Message, autoSave: true);                
+            }
+        }
+
+        /// <summary>
+        /// Message hook that's responsible for retrieving the next message.
+        /// The base version pulls the next message for the given queue.    
+        /// You can override this method to conditionally override this 
+        /// behavior such as filter when and how messages are read.
+        /// </summary>
+        /// <param name="manager">A manager instance that can retrieve</param>
+        /// <param name="queueName">The queue to check</param>
+        /// <returns></returns>
+        protected virtual QueueMessageItem OnGetNextQueueMessage(QueueMessageManager manager, string queueName)
+        {            
+            return manager.GetNextQueueMessage(queueName);
         }
 
         /// <summary>
@@ -351,16 +365,6 @@ namespace Westwind.MessageQueueing
         protected virtual bool OnStartProcessing()
         {
             return true;
-        }
-
-        /// <summary>
-        /// Pauses processing by keeping the thread alive
-        /// and waiting until the pause is unset
-        /// </summary>
-        /// <param name="pause"></param>
-        public virtual void PauseProcessing(bool pause = true)
-        {
-            Paused = pause;
         }
 
 

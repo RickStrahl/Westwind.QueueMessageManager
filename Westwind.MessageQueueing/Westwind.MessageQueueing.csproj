@@ -8,7 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup> 
-    <PackageReference Include="Westwind.Utilities.Data" Version="5.*" />
+    <!--<PackageReference Include="Westwind.Utilities.Data" Version="5.*" />-->
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Westwind.Utilities\Westwind.Utilities.Data\Westwind.Utilities.Data.csproj" />
+    <ProjectReference Include="..\..\..\Westwind.Utilities\Westwind.Utilities\Westwind.Utilities.csproj" />
   </ItemGroup>
 
   <ItemGroup>

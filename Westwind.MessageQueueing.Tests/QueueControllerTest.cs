@@ -11,11 +11,19 @@ namespace Westwind.MessageQueueing.Tests
     public class QueueControllerTests
     {
 
+        string ConnectionString;
+
+        QueueMessageManagerConfiguration Configuration { get; }
+        public QueueControllerTests()
+        {             
+            Configuration = QueueMessageManagerConfiguration.Current;
+            ConnectionString = QueueMessageManagerConfiguration.Current.ConnectionString;
+        }
 
         [TestMethod]
         public void SingleQueueControllerTest()
         {
-            var manager = new QueueMessageManagerSql();
+            var manager = new QueueMessageManagerSql(ConnectionString);
 
             // sample - create 3 message
             for (int i = 0; i < 3; i++)
@@ -42,7 +50,7 @@ namespace Westwind.MessageQueueing.Tests
             // on separate threads
             var controller = new QueueController()
             {
-                ConnectionString = "QueueMessageManager",
+                ConnectionString = ConnectionString,
                 ThreadCount = 2,
                 WaitInterval = 200,
                 QueueName = "Queue1"
@@ -76,27 +84,9 @@ namespace Westwind.MessageQueueing.Tests
 
 
         [TestMethod]
-        public void MultipleQueueControllerConfigTest()
+        public void MultipleSingleControllerTest2()
         {
-            var master = new QueueControllerMultiple()
-            {
-                ConnectionString = "QueueMessageManager"
-            };
-            master.Initialize();   // read configuration values
-
-            Assert.IsNotNull(master);
-            Assert.IsTrue(master.Controllers.Count > 0);
-
-            foreach (var controller in master.Controllers)
-            {               
-                Console.WriteLine(controller.QueueName + ", " + controller.ThreadCount + ", " + controller.WaitInterval);
-            }
-        }
-
-        [TestMethod]
-        public void MultiQueueControllerTest()
-        {
-            var manager = new QueueMessageManagerSql();
+            using var manager = new QueueMessageManagerSql();
 
             // sample - create 3 message in 'default' queue
             for (int i = 0; i < 3; i++)
@@ -140,7 +130,7 @@ namespace Westwind.MessageQueueing.Tests
 
             // create a new Controller to process in the background
             // on separate threads
-            var controller = new QueueController()
+            using var controller = new QueueController()
             {
                 ConnectionString = "QueueMessageManager",
                 QueueName = "Queue1"
@@ -200,7 +190,7 @@ namespace Westwind.MessageQueueing.Tests
         /// and start them running simultaneously side by side.
         /// </summary>
         [TestMethod]
-        public void QueueControllerMultipleTest()
+        public void MultipleSingleControllersTest()
         {
             var manager = new QueueMessageManagerSql();
 
@@ -246,7 +236,7 @@ namespace Westwind.MessageQueueing.Tests
 
             // create a new Controller to process in the background
             // on separate threads
-            var controller = new QueueControllerMultiple(new List<QueueController>()
+            var controller = new QueueControllerMultiple( controllers: new List<QueueController>()
             {
                 new QueueControllerMultiple()
                 {
@@ -291,6 +281,104 @@ namespace Westwind.MessageQueueing.Tests
             Console.WriteLine("Processed: " + controller.MessagesProcessed);
         }
 
+        [TestMethod]
+        public void MultipleQueueControllerConfigTest()
+        {
+            var master = new QueueControllerMultiple(Configuration);
+            var controller = new QueueController();            
+            controller.Initialize(Configuration);  // initialize from config file
+            master.Controllers.Add(controller);
+
+
+            controller = new QueueController() // manually config
+            {
+                ConnectionString = Configuration.ConnectionString,
+                QueueName = "Queue2",
+                ThreadCount = 3,
+                WaitInterval = 500
+            };
+            master.Controllers.Add(controller);
+                        
+            Assert.IsTrue(master.Controllers.Count > 0);
+
+            Console.WriteLine("Loaded Controllers: " + master.Controllers.Count);
+            foreach (var ctl in master.Controllers)
+            {               
+                Console.WriteLine(ctl.QueueName + ", " + ctl.ThreadCount + ", " + ctl.WaitInterval);
+            }
+        }
+
+        [TestMethod]
+        public void MultipleQueueControllersTest()
+        {
+            // Set up Controllers
+            using var master = new QueueControllerMultiple(Configuration);
+            var controller = new QueueController();
+            controller.Initialize(Configuration);  // initialize from config file
+            master.Controllers.Add(controller);
+
+
+            controller = new QueueController() // manually config
+            {
+                ConnectionString = Configuration.ConnectionString,
+                QueueName = "Queue2",
+                ThreadCount = 1,
+                WaitInterval = 500
+            };
+            master.Controllers.Add(controller);
+
+            Assert.IsTrue(master.Controllers.Count > 0);
+
+            Console.WriteLine("Loaded Controllers: " + master.Controllers.Count);
+            foreach (var ctl in master.Controllers)
+            {
+                Console.WriteLine(ctl.QueueName + ", " + ctl.ThreadCount + ", " + ctl.WaitInterval);
+            }
+
+
+            // Add Messages
+            using var manager = new QueueMessageManagerSql();
+
+            // sample - create 3 message in 'default' queue
+            for (int i = 0; i < 3; i++)
+            {
+                var queueName = "Queue" + ((i % 2) + 1);
+                var item = new QueueMessageItem()
+                {
+                    Message = "Print Image " + DataUtils.GenerateUniqueId(),
+                    Action = "PRINTIMAGE",
+                    TextInput = "4334333", // image Id
+                    QueueName = queueName
+                };
+
+                // sets appropriate settings for submit on item
+                manager.SubmitRequest(item);
+
+                // item has to be saved
+                Assert.IsTrue(manager.Save(), manager.ErrorMessage);
+                Console.WriteLine("added to " + queueName + ":" + manager.Item.Id);
+            }
+
+            // Process Messages
+            master.ExecuteStart += controller_ExecuteStart;
+            master.ExecuteComplete += controller_ExecuteComplete;
+            master.ExecuteFailed += controller_ExecuteFailed;
+
+            master.StartProcessingAsync();
+
+            Thread.Sleep(2000);
+
+            master.StopProcessing();
+
+            Thread.Sleep(100);
+
+            Console.WriteLine("Stopping... Async Manager Processing");
+            Assert.IsTrue(true);
+
+            Console.WriteLine("Processed: " + controller.MessagesProcessed);
+        }
+
+
         public int RequestCount = 0;
 
         /// <summary>
@@ -305,12 +393,18 @@ namespace Westwind.MessageQueueing.Tests
             // Typically perform tasks based on some Action/request
             if (item.Action == "PRINTIMAGE")
             {
+                Console.WriteLine("Execute Start PrintImage");
                 // recommend you offload processing
                 //PrintImage(manager);                
             }
             else if (item.Action == "RESIZETHUMBNAIL")
             {
+                Console.WriteLine("Execute Start ResizeThumbnail");
                 //ResizeThumbnail(manager);
+            }
+            else
+            {
+                Console.WriteLine("Execute Start without Action " + item);
             }
 
             // just for kicks
@@ -321,15 +415,19 @@ namespace Westwind.MessageQueueing.Tests
             {
                 // Execption:
                 object obj = null;
-                obj.ToString();
+                obj.ToString();   // Exception should fire OnExecuteFailed
             }
 
-            // Complete request 
-            manager.CompleteRequest(messageText: "Completed request " + DateTime.Now,
-                                    autoSave: true);            
+           
+            
         }
         private void controller_ExecuteComplete(QueueMessageManager manager)
         {
+
+            // Complete request 
+            manager.CompleteRequest(messageText: "Completed request " + manager.Item.Id + " at " + DateTime.Now,
+                autoSave: true);
+
             // grab the active queue item
             var item = manager.Item;
 
@@ -338,6 +436,7 @@ namespace Westwind.MessageQueueing.Tests
         }
         private void controller_ExecuteFailed(QueueMessageManager manager, Exception ex)
         {
+            manager.FailRequest(messageText: ex.Message, autoSave: true);
             Console.WriteLine("Failed (on purpose): " + manager.Item.QueueName + " - " +  manager.Item.Id + " - " + ex.Message);
         }
     }

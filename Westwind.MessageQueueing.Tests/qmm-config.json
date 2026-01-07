@@ -1,9 +1,9 @@
 {
   "ConnectionString": "Server=.;Database=QueueMessageManager;integrated security=true;Enlist=True;MultipleActiveResultSets=True;Encrypt=False",
   "WaitInterval": 1000,
-  "QueueName": "",
-  "ControllerThreads": 1,
-  "Controllers": null,
+  "QueueName": "Queue1",
+  "ControllerThreads": 2,
+  "Controllers": [],
   "MonitorSignalRHubUrl": "~/signalR",
   "MonitorHtmlUrl": "~/QueueMonitor.cshtml",
   "MonitorHostUrl": "http://*:8080/",

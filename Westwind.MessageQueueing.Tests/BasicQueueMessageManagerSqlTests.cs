@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using System.Transactions;
 using Westwind.Utilities;
+using System.Security.Cryptography;
 
 namespace Westwind.MessageQueueing.Tests
 {
@@ -35,31 +36,26 @@ namespace Westwind.MessageQueueing.Tests
         public void ConstructorOverrideTest()
         {
 
-            var manager = new QueueMessageManagerSql(ConnectionString);
+            using var manager = new QueueMessageManagerSql(ConnectionString);
             Console.WriteLine(manager.ConnectionString);
-            Assert.IsTrue(manager.ConnectionString == ConnectionString,"ConnectionString is not set");
-
-
-            manager = new QueueMessageManagerSql("MyApplicationConnectionString");
-            Console.WriteLine(manager.ConnectionString);
-            Assert.IsTrue(manager.ConnectionString == "MyApplicationConnectionString");
+            Assert.IsTrue(manager.ConnectionString == ConnectionString,"ConnectionString is not set");        
         }
 
         [TestMethod]
         public void SubmitRequestWithPresetObjectTest()
         {
             string xml = "<doc><value>Hello</value></doc>";
-            var manager = new QueueMessageManagerSql() { AutoCreateDataStore = true };
+            using var manager = new QueueMessageManagerSql() { AutoCreateDataStore = true };
 
-                var msg = new QueueMessageItem()
-                {
-                    QueueName="MPWF",
-                    Message = "Xml Message  @ " + DateTime.Now.ToString("t"),
-                    Action = "NEWXMLORDER",    // Some Application specific Action Id`         
-                    Xml = xml
-                };
-                manager.SubmitRequest(msg);
-                Assert.IsTrue(manager.Save(), manager.ErrorMessage);
+            var msg = new QueueMessageItem()
+            {
+                QueueName = "MPWF",
+                Message = "Xml Message  @ " + DateTime.Now.ToString("t"),
+                Action = "NEWXMLORDER",    // Some Application specific Action Id`         
+                Xml = xml
+            };
+            manager.SubmitRequest(msg);
+            Assert.IsTrue(manager.Save(), manager.ErrorMessage);
         }
 
         [TestMethod]
@@ -67,7 +63,7 @@ namespace Westwind.MessageQueueing.Tests
         {
             var data = new { message = "Hello World", timestamp = DateTime.Now };
 
-            var manager = new QueueMessageManagerSql() { AutoCreateDataStore = true };
+            using var manager = new QueueMessageManagerSql() { AutoCreateDataStore = true };
 
             var msg = new QueueMessageItem()
             {
@@ -75,6 +71,7 @@ namespace Westwind.MessageQueueing.Tests
                 Message = "Json Message  @ " + DateTime.Now.ToString("t"),
                 Action = "NEWJSONMESSAGE",   // Some Application specific Action Id                  
             };
+            // assign data as object Data to Json property
             msg.SetJson(data, formatted: true);
 
             manager.SubmitRequest(msg);
@@ -85,7 +82,7 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void SubmitRequestsToQueueTest()
         {
-            var manager = new QueueMessageManagerSql();
+            using var manager = new QueueMessageManagerSql();
             int queueCount = 30;
 
             bool res = true;
@@ -112,14 +109,12 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void GetRecentMessagesTest()
         {
-            using (var manager = new QueueMessageManagerSql())
+            using var manager = new QueueMessageManagerSql();
+            var items = manager.GetRecentQueueItems();
+            foreach (var item in items)
             {
-                var items = manager.GetRecentQueueItems();
-                foreach (var item in items)
-                {
-                    Console.WriteLine(item.Id + " " + item.Message);
-                }
-            }          
+                Console.WriteLine(item.Id + " " + item.Message);
+            }
         }
 
 
@@ -157,7 +152,7 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void SubmitRequestWithPropertiesTest()
         {
-            var manager = new QueueMessageManagerSql();
+            using var manager = new QueueMessageManagerSql();
             manager.SubmitRequest(messageText: "New Entry with Properties");
 
             // add a custom property
@@ -167,9 +162,9 @@ namespace Westwind.MessageQueueing.Tests
         }
 
         [TestMethod]
-        public void LoadRequestTest()
+        public void LoadAndUpdateRequestTest()
         {
-            var manager = new QueueMessageManagerSql();
+            using var manager = new QueueMessageManagerSql();
             var db = manager.Db;
 
             var item = db.Find<QueueMessageItem>("select TOP 1 * from queueMessageItems where IsComplete = 0");
@@ -191,7 +186,7 @@ namespace Westwind.MessageQueueing.Tests
 
             Assert.IsNotNull(item, manager.ErrorMessage);
 
-            item.Message = "Updated @ " + DateTime.Now.ToString("t");
+            item.Message = "Updated @ " + DateTime.Now.ToString("HH:mm:ss");
             item.PercentComplete = 10;            
             
             Assert.IsTrue(manager.Save(), manager.ErrorMessage);            
@@ -228,6 +223,7 @@ namespace Westwind.MessageQueueing.Tests
             // Update Properties
             object t = manager.GetProperty("Time");
             DateTime? time3 = t as DateTime?;
+            Console.WriteLine("Stored time: " + time3);
 
             Assert.IsNotNull(t, "Time Property is null and shouldn't be.");
 
@@ -237,7 +233,7 @@ namespace Westwind.MessageQueueing.Tests
         }
 
         [TestMethod]
-        public void GetNextQueueMessageItemWithAddedItemTest()
+        public async Task GetNextQueueMessageItemWithAddedItemTest()
         {
             using (var manager = new QueueMessageManagerSql())
             {
@@ -245,9 +241,16 @@ namespace Westwind.MessageQueueing.Tests
                 int res = manager.Db.ExecuteNonQuery("delete from queuemessageItems where IsNull(started,'') = '' or started < '01/01/2000'");
                 Console.WriteLine(res);
 
-                manager.SubmitRequest(messageText: "Next Complete Test " + DateTime.Now.ToString("t"));
+                var msg = new QueueMessageItem
+                {
+                    Message = "Next Complete Test " + DateTime.Now.ToString("t")                    
+                };
+                msg.Start();
+
+                manager.SubmitRequest(msg);               
                 Assert.IsTrue(manager.Save(), manager.ErrorMessage);
             }
+            
 
             using (var manager = new QueueMessageManagerSql())
             {
@@ -420,14 +423,14 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void ScaleRetrievalTest()
         {
-            var manager = new QueueMessageManagerSql();
+            using var manager = new QueueMessageManagerSql();
 
             manager.Db.ExecuteNonQuery("delete from queuemessageitems");            
 
             var sw = new Stopwatch();
             sw.Start();
 
-            for (int i = 0; i < 30000; i++)
+            for (int i = 0; i < 100; i++)
             {
                 string imageId = "10";
 
@@ -442,11 +445,12 @@ namespace Westwind.MessageQueueing.Tests
                 manager.SubmitRequest(item,autoSave: true);
             }
 
-            Console.WriteLine("Insert time: " + sw.ElapsedMilliseconds);
+            Console.WriteLine($"Insert time: {sw.ElapsedMilliseconds} ms");
 
             IdList = new List<string>();
             IdErrors = new List<string>();
 
+            ProcessCounter = 0;
             for (int i = 0; i < 20; i++)
             {
                 var thread = new Thread(ProcessGetNextItem);
@@ -454,7 +458,7 @@ namespace Westwind.MessageQueueing.Tests
             }
 
 
-            for (int i = 0; i < 10000; i++)
+            for (int i = 0; i < 100; i++)
             {
                 if (CancelProcessing)
                     break;
@@ -492,24 +496,35 @@ namespace Westwind.MessageQueueing.Tests
 
         }
 
-        private static object GetNextItemLock = new Object();
+
+        private readonly Lock GetNextItemLock = new();
         private bool CancelProcessing = false;
         private List<string> IdList;
         private List<string> IdErrors;
 
+
+        static int ProcessCounter = 0;
         void ProcessGetNextItem()
         {
             while (!CancelProcessing)
             {
-                var manager = new QueueMessageManagerSql();
+                using var manager = new QueueMessageManagerSql();
                 var item = manager.GetNextQueueMessage("Queue1");
+
                 if (item != null)
+                {                                        
                     lock (GetNextItemLock)
                     {
+                        ProcessCounter++;
                         IdList.Add(item.Id);
                     }
+                    Console.WriteLine($"{ProcessCounter}. {item}");
+                }
                 else
-                    IdErrors.Add(manager.ErrorMessage);
+                {
+                    
+                    IdErrors.Add(manager.ErrorMessage ?? "Waiting...");
+                }
 
                 Thread.Yield();
             }

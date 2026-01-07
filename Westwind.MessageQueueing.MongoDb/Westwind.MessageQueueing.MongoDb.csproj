@@ -9,7 +9,6 @@
 
   <ItemGroup>
     <PackageReference Include="mongocsharpdriver" Version="1.9.2" />
-    <PackageReference Include="Westwind.Utilities" Version="5.2.1" />
   </ItemGroup>
 
   <ItemGroup>

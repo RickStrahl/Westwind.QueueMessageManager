@@ -239,8 +239,14 @@ namespace Westwind.MessageQueueing
                 sql += " where QueueName=@0 ";
 
             sql += "order by submitted desc";
-            
-            var items = Db.Query<QueueMessageItem>(sql, queueName);
+                        
+
+            IEnumerable<QueueMessageItem> items;
+            //if (queueName == null)
+            //    items = Db.Query<QueueMessageItem>(sql);
+            //else
+                items = Db.Query<QueueMessageItem>(sql, queueName);
+
             if (items == null)
             {
                 SetError(Db.ErrorMessage);
@@ -504,6 +510,7 @@ CREATE TABLE [dbo].[QueueMessageItems](
 	[Completed] [datetime] NULL,
 	[IsComplete] [bit] NOT NULL,
 	[IsCancelled] [bit] NOT NULL,
+    [IsFailed] [bit] NULL,
 	[Expire] [int] NOT NULL,
 	[Message] [nvarchar](max) NULL,
     [TextInput] [nvarchar](max) NULL,	
@@ -525,6 +532,7 @@ CREATE TABLE [dbo].[QueueMessageItems](
     ALTER TABLE [dbo].[QueueMessageItems] ADD  CONSTRAINT [DF_QueueMessageItems_Id]  DEFAULT (CONVERT([nvarchar](36),newid())) FOR [Id]
     ALTER TABLE [dbo].[QueueMessageItems] ADD  CONSTRAINT [DF_QueueMessageItems_IsComplete]  DEFAULT ((0)) FOR [IsComplete]
     ALTER TABLE [dbo].[QueueMessageItems] ADD  CONSTRAINT [DF_QueueMessageItems_IsCancelled]  DEFAULT ((0)) FOR [IsCancelled]
+    ALTER TABLE [dbo].[QueueMessageItems] ADD  CONSTRAINT [DF_QueueMessageItems_IsFailed]  DEFAULT ((0)) FOR [IsFailed]
     ALTER TABLE [dbo].[QueueMessageItems] ADD  CONSTRAINT [DF_QueueMessageItems_Expire]  DEFAULT ((0)) FOR [Expire]
     ALTER TABLE [dbo].[QueueMessageItems] ADD  CONSTRAINT [DF_QueueMessageItems_NumberResult]  DEFAULT ((0)) FOR [NumberResult]
     ALTER TABLE [dbo].[QueueMessageItems] ADD  CONSTRAINT [DF_QueueMessageItems_PercentComplete]  DEFAULT ((0)) FOR [PercentComplete]
