@@ -126,15 +126,13 @@ namespace Westwind.MessageQueueing
                 
                 using (manager)
                 {
-                    if (this.OnGetNextQueueMessage(manager, QueueName) == null)                    
-                    //if (manager.GetNextQueueMessage(QueueName) == null)
+                    if (OnGetNextQueueMessage(manager, QueueName) == null)                                        
                     {
                         if (!string.IsNullOrEmpty(manager.ErrorMessage))
                             OnNextMessageFailed(manager, new ApplicationException(manager.ErrorMessage));
-
-                        // Nothing to do - wait for next poll interval
                         
                         Thread.Sleep(WaitInterval);
+
                         continue;
                     }
 
