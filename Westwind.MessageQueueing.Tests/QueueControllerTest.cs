@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading;
@@ -149,7 +149,7 @@ namespace Westwind.MessageQueueing.Tests
 
             // second configuration for second queue
             var config = QueueMessageManagerConfiguration.CreateConfiguration();
-            config.QueueName = "Queue2";
+            config.DefaultControllerQueueName = "Queue2";
 
             var controller2 = new QueueController()
             {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Text;
 using System.Collections.Generic;
@@ -82,8 +82,8 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void SubmitRequestsToQueueTest()
         {
-            using var manager = new QueueMessageManagerSql();
-            int queueCount = 30;
+            using var manager = new QueueMessageManagerSql() { AutoCreateDataStore = true };
+            int queueCount = 10;
 
             bool res = true;
             for (int i = 0; i < queueCount; i++)
@@ -95,14 +95,19 @@ namespace Westwind.MessageQueueing.Tests
                               DateTime.Now.ToString("t"),
                     Action = "NEWXMLORDER"                                 
                 };
-                
-                if (!manager.SubmitRequest(msg))
-                    Console.WriteLine(manager.ErrorMessage);
 
-                res = manager.Save(msg);
-                if (!res)
+                if (!manager.SubmitRequest(msg, autoSave: true))
+                {
+                    Console.WriteLine(manager.ErrorMessage);
                     break;
-            }            
+                }
+
+            }
+
+            if (!manager.SubmitRequest( messageText: "LAST NEWXMLORDER", autoSave: true))
+            {
+                Console.WriteLine(manager.ErrorMessage);                
+            }
         }
 
 
@@ -235,15 +240,16 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public async Task GetNextQueueMessageItemWithAddedItemTest()
         {
-            using (var manager = new QueueMessageManagerSql())
+            using (var manager = new QueueMessageManagerSql() {  AutoCreateDataStore = true, DefaultQueue = "TestQueue" })
             {
                 // delete all pending requests
-                int res = manager.Db.ExecuteNonQuery("delete from queuemessageItems where IsNull(started,'') = '' or started < '01/01/2000'");
+                int res = manager.Db.ExecuteNonQuery("delete from QueuemessageItems where IsNull(started,'') = '' or started < '01/01/2000'");
                 Console.WriteLine(res);
 
                 var msg = new QueueMessageItem
                 {
-                    Message = "Next Complete Test " + DateTime.Now.ToString("t")                    
+                    Message = "Next Complete Test " + DateTime.Now.ToString("t"),
+                    Action = "TEST"
                 };
                 msg.Start();
 
