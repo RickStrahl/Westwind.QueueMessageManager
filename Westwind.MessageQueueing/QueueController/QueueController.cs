@@ -102,8 +102,46 @@ namespace Westwind.MessageQueueing
         public Func<QueueMessageManager> OnCreateQueueManager { get; set; }
 
         /// <summary>
-        /// Synchronous Message Processing routine - will process one message after
-        /// another
+        /// Starts queue processing in the background and returns immediately.
+        /// 
+        /// It starts the controller asynchronously on the specified number of threads.
+        /// Multiple threads are allowed to allow for simultanous processing of messages.
+        /// 
+        /// 
+        /// This is a common scenario for Windows Forms interfaces so the UI
+        /// stays active while the application monitors and processes the
+        /// queue on a separate non-ui thread
+        /// </summary>
+        public virtual void StartProcessingAsync(int threads = -1)
+        {
+            if (!OnStartProcessing())
+                return;
+
+            // threads are marked as 0 - don't start any threads
+            if (threads < 1 && ThreadCount < 1)
+                return;
+
+            if (threads < 0)
+                threads = ThreadCount;
+
+            if (threads < 1)
+                threads = 1;
+
+            ThreadCount = threads;
+
+            for (int x = 0; x < threads; x++)
+            {
+                Thread th = new Thread(StartProcessing);
+                th.Start();
+            }
+        }
+
+        /// <summary>
+        /// Starts processing the controller's queue on the current thread.
+        /// and runs until `Active` is set to false.
+        ///         
+        /// This method is meant to run on a non-UI thread as it will
+        /// block and wait for messages to arrive in the queue.              
         /// </summary>        
         public virtual void StartProcessing()
         {
@@ -170,36 +208,6 @@ namespace Westwind.MessageQueueing
         public virtual void PauseProcessing(bool pause = true)
         {
             Paused = pause;
-        }
-
-        /// <summary>
-        /// Starts queue processing asynchronously on the specified number of threads.
-        /// This is a common scenario for Windows Forms interfaces so the UI
-        /// stays active while the application monitors and processes the
-        /// queue on a separate non-ui thread
-        /// </summary>
-        public virtual void StartProcessingAsync(int threads = -1)
-        {
-            if (!OnStartProcessing())
-                return;
-
-            // threads are marked as 0 - don't start any threads
-            if (threads < 1 && ThreadCount < 1)
-                return;
-
-            if (threads < 0)
-                threads = ThreadCount;
-
-            if (threads < 1)
-                threads = 1;
-
-            ThreadCount = threads;
-
-            for (int x = 0; x < threads; x++)
-            {
-                Thread th = new Thread(StartProcessing);
-                th.Start();
-            }
         }
 
 

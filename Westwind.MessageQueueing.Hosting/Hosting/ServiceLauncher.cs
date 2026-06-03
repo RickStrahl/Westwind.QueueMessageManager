@@ -1,4 +1,5 @@
-﻿using System;
+#if false
+using System;
 using System.Text;
 using System.Threading;
 using System.Web.Hosting;
@@ -93,3 +94,4 @@ namespace Westwind.MessageQueueing.Hosting
 
     }
 }
+#endif

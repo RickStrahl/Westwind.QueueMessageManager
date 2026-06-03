@@ -1,8 +1,9 @@
-﻿using System;
+#if false
+
+using System;
 using System.Text;
 using System.Threading;
 using System.Web.Hosting;
-using Westwind.Utilities.Logging;
 
 namespace Westwind.MessageQueueing.Hosting
 {
@@ -36,3 +37,4 @@ namespace Westwind.MessageQueueing.Hosting
         }
     }
 }
+#endif

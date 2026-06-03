@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.3.11312.210 d18.3
+VisualStudioVersion = 18.3.11312.210
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{677C6049-14C0-497C-89FA-5207CFC4DAE6}"
 	ProjectSection(SolutionItems) = preProject
@@ -24,8 +24,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{8ABD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LongRunningSignalRWeb", "..\Samples\Westwind.QueueMessageManager\LongRunningSignalRWeb\LongRunningSignalRWeb.csproj", "{3ED33A01-53EE-4858-AA0F-6A1B02AB5F62}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Westwind.MessageQueueing.MongoDb", "Westwind.MessageQueueing.MongoDb\Westwind.MessageQueueing.MongoDb.csproj", "{90BF54F7-C038-4695-9494-429F4676598C}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Westwind.Data.MongoDb", "..\..\WestwindToolkit\Westwind.Data.MongoDb\Westwind.Data.MongoDb.csproj", "{0CE58260-3B66-480C-8394-35BA649F77D6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Westwind.MessageQueueing.Hosting", "Westwind.MessageQueueing.Hosting\Westwind.MessageQueueing.Hosting.csproj", "{E91D3F46-34F9-4A61-AD90-2B33A8F32B9F}"
@@ -35,6 +33,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Westwind.Utilities", "..\..\Westwind.Utilities\Westwind.Utilities\Westwind.Utilities.csproj", "{7813D94A-5E05-C80C-F587-1DFA95DACB14}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Westwind.Utilities.Data", "..\..\Westwind.Utilities\Westwind.Utilities.Data\Westwind.Utilities.Data.csproj", "{EFDB7C4B-0590-0BDA-CBC1-47333DC63FB5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Westwind.QueueMessageManager.CoreWebSample", "Westwind.QueueMessageManager.CoreWebSample\Westwind.QueueMessageManager.CoreWebSample.csproj", "{EACB5513-DE0F-48C2-B441-C837C9207816}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -68,14 +68,6 @@ Global
 		{3ED33A01-53EE-4858-AA0F-6A1B02AB5F62}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3ED33A01-53EE-4858-AA0F-6A1B02AB5F62}.SandBox|Any CPU.ActiveCfg = Release|Any CPU
 		{3ED33A01-53EE-4858-AA0F-6A1B02AB5F62}.SandBox|Any CPU.Build.0 = Release|Any CPU
-		{90BF54F7-C038-4695-9494-429F4676598C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{90BF54F7-C038-4695-9494-429F4676598C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{90BF54F7-C038-4695-9494-429F4676598C}.Deploy|Any CPU.ActiveCfg = Debug|Any CPU
-		{90BF54F7-C038-4695-9494-429F4676598C}.Deploy|Any CPU.Build.0 = Debug|Any CPU
-		{90BF54F7-C038-4695-9494-429F4676598C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{90BF54F7-C038-4695-9494-429F4676598C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{90BF54F7-C038-4695-9494-429F4676598C}.SandBox|Any CPU.ActiveCfg = Release|Any CPU
-		{90BF54F7-C038-4695-9494-429F4676598C}.SandBox|Any CPU.Build.0 = Release|Any CPU
 		{0CE58260-3B66-480C-8394-35BA649F77D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0CE58260-3B66-480C-8394-35BA649F77D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0CE58260-3B66-480C-8394-35BA649F77D6}.Deploy|Any CPU.ActiveCfg = Debug|Any CPU
@@ -116,6 +108,14 @@ Global
 		{EFDB7C4B-0590-0BDA-CBC1-47333DC63FB5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EFDB7C4B-0590-0BDA-CBC1-47333DC63FB5}.SandBox|Any CPU.ActiveCfg = Release|Any CPU
 		{EFDB7C4B-0590-0BDA-CBC1-47333DC63FB5}.SandBox|Any CPU.Build.0 = Release|Any CPU
+		{EACB5513-DE0F-48C2-B441-C837C9207816}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EACB5513-DE0F-48C2-B441-C837C9207816}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EACB5513-DE0F-48C2-B441-C837C9207816}.Deploy|Any CPU.ActiveCfg = Release|Any CPU
+		{EACB5513-DE0F-48C2-B441-C837C9207816}.Deploy|Any CPU.Build.0 = Release|Any CPU
+		{EACB5513-DE0F-48C2-B441-C837C9207816}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EACB5513-DE0F-48C2-B441-C837C9207816}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EACB5513-DE0F-48C2-B441-C837C9207816}.SandBox|Any CPU.ActiveCfg = Release|Any CPU
+		{EACB5513-DE0F-48C2-B441-C837C9207816}.SandBox|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

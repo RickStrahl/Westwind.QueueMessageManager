@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNet.SignalR;
-using Microsoft.AspNet.SignalR.Hubs;
+#if false
+using Microsoft.AspNetCore.Authorization;
 
 namespace QueueManagerStarter
 {
@@ -41,3 +41,5 @@ namespace QueueManagerStarter
         }
     }
 }
+
+#endif

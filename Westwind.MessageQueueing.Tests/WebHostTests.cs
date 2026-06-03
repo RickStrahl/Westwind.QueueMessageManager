@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Westwind.MessageQueueing;
@@ -14,7 +14,7 @@ namespace QueueStarter.Tests
         [TestMethod]
         public void CreateQmmTableTest()
         {
-            var qm = new QueueMessageManagerSql(connectionString);
+            var qm = new QueueMessageManagerSql(connectionString) { AutoCreateDataStore = true };
 
             Assert.IsNotNull(qm);
 
