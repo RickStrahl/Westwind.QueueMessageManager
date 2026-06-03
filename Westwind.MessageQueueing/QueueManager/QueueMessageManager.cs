@@ -65,7 +65,7 @@ namespace Westwind.MessageQueueing
 
         public QueueMessageManager()
         {
-            DefaultQueue = string.Empty;
+            DefaultQueue = QueueMessageManagerConfiguration.Current?.DefaultQueueName ?? string.Empty;
 
             // 2 hours
             MessageTimeout = new TimeSpan(2, 0, 0);
@@ -168,7 +168,7 @@ namespace Westwind.MessageQueueing
         /// 
         /// Sets the `.Item` property`.
         /// </summary>
-        /// <param name="item">An existing item instance</param>
+        /// <param name="item">An existing item instance - if not passed an item is created</param>
         /// <param name="messageText">Optional message text to assign to the created or passed item</param>
         /// <param name="autoSave">If true Save() is called automatically other wise the item data is updated onlyt</param>
         public bool SubmitRequest(QueueMessageItem item = null, string messageText = null, bool autoSave = false)

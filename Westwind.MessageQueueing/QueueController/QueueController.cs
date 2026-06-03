@@ -46,7 +46,7 @@ namespace Westwind.MessageQueueing
                     
             ConnectionString = connectionString ?? configuration.ConnectionString;
             ThreadCount = configuration.ControllerThreads;
-            QueueName = configuration.QueueName ?? string.Empty;
+            QueueName = configuration.DefaultControllerQueueName ?? string.Empty;
             WaitInterval = configuration.WaitInterval;
         }
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -27,9 +27,18 @@ namespace Westwind.MessageQueueing
         public int WaitInterval { get; set; }
 
         /// <summary>
+        /// The default queue name that is assigned to queues if 
+        /// no value is assigned. Defaults to null/empty (ie. no name)
+        /// 
+        /// This value is assigned to the QueueName property of the manager
+        /// </summary>
+        public string DefaultQueueName { get; set; }
+
+
+        /// <summary>
         /// Specifies the default queue to look for
         /// </summary>
-        public string QueueName { get; set; }
+        public string DefaultControllerQueueName { get; set; }
 
         /// <summary>
         /// The number of threads that the Queue controller
@@ -37,6 +46,7 @@ namespace Westwind.MessageQueueing
         /// </summary>
         public int ControllerThreads { get; set; }
 
+       
 
         /// <summary>
         /// A list of controllers that can be launched automatically
@@ -89,7 +99,7 @@ namespace Westwind.MessageQueueing
             ConnectionString =  "Server=.;Database=QueueMessageManager;integrated security=true;Enlist=True;MultipleActiveResultSets=True;Encrypt=False";
             WaitInterval = 1000;
             ControllerThreads = 1;
-            QueueName = string.Empty;
+            DefaultControllerQueueName = string.Empty;
             MonitorHostUrl = "http://*:8080/";
             MonitorSignalRHubUrl = "~/signalR";
             MonitorHtmlUrl = "~/QueueMonitor.cshtml";

@@ -21,74 +21,58 @@ namespace Westwind.MessageQueueing
             Manager = manager;
         }
 
-        /// Binary serialization is not available in .NET Core 
-        
-#if false
-        /// <summary>
-        /// Serializes an object into the BinData field
-        /// </summary>
-        /// <param name="objectInstance"></param>
-        /// <returns></returns>
-        public bool SerializeToBinResult(object objectInstance, QueueMessageItem item = null)
+
+        public bool SerializeToJson(object value, QueueMessageItem item = null, bool formatted = false)
         {
             if (item == null)
                 item = Manager.Item;
-
             if (item == null)
-            {
-                Manager.SetError(Resources.NoEntityAvailable);
                 return false;
-            }
-
-            byte[] result = null;
-            try
-            {
-                
-                result = SerializationUtils.SerializeObjectToByteArray(objectInstance, true);
-            }
-            catch (Exception ex)
-            {
-                Manager.SetError(ex.Message);
+            string json = JsonSerializationUtils.Serialize(value, false, formatted);
+            if (string.IsNullOrEmpty(json))
                 return false;
-            }
 
-            item.BinData = result;
-
+            item.Json = json;
             return true;
         }
 
+        /// <summary>
+        /// Deserializes the Json field of the current or passed entity back into 
+        /// a value
+        /// </summary>        
+        /// <param name="xml">The XML to parse into an object</param>
+        /// <param name="item">the QueueMessageItem to parse into or the current entity</param>
+        /// <returns>object or null on failure</returns>
+        public T DeserializeFromJson<T>(string json, Type type, QueueMessageItem item = null)
+        {
+            if (json == null)
+                json = item.Json;
+            if (string.IsNullOrEmpty(json))
+                return default(T);
+
+            object val = JsonSerializationUtils.Deserialize(json, typeof(T), false);            
+            return (T)val;
+        }
+
 
         /// <summary>
-        /// Deserializes an object out of the 
+        /// Deserializes the Json field of the current or passed entity back into 
+        /// a value
         /// </summary>        
-        /// <returns></returns>
-        public T DeSerializeFromBinResult<T>(QueueMessageItem item = null)
+        /// <param name="xml">The XML to parse into an object</param>
+        /// <param name="item">the QueueMessageItem to parse into or the current entity</param>
+        /// <returns>object or null on failure</returns>
+        public object DeserializeFromJson(string json, Type type, QueueMessageItem item = null)
         {
-            if (item == null)
-                item = Manager.Item;
-
-            if (item == null)
-            {
-                Manager.SetError(Resources.NoEntityIsLoaded);
-                return default(T);
-            }
-            if (item.BinData == null)
-                return default(T);
-
-            object result = null;
-            try
-            {
-                result = SerializationUtils.DeSerializeObject(item.BinData, typeof(T));
-            }
-            catch (Exception ex)
-            {
-                Manager.SetError(ex.Message);
-                return default(T);
-            }
-
-            return (T)result;
+            if (json == null)
+                json = item.Json;
+            if (string.IsNullOrEmpty(json))
+                return null;
+                           
+            return JsonSerializationUtils.Deserialize(json, type, false);
         }
-#endif
+
+
 
         /// <summary>
         /// Serializes an object to the current or passed queue item's XML property
@@ -139,17 +123,17 @@ namespace Westwind.MessageQueueing
         /// <returns>object or null on failure</returns>
         public object DeSerializeFromXml(string xml, Type type, QueueMessageItem item = null)
         {
-            if (item == null)
-                item = Manager.Item;
-
-            if (item == null)
+            if (xml == null)
+                xml = item.Xml;
+            if (string.IsNullOrEmpty(xml))
                 return null;
 
             return SerializationUtils.DeSerializeObject(xml, type);
         }
 
 
-      
+
+
 
     }
 }
