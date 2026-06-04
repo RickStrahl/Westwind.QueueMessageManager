@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using Westwind.MessageQueueing;
 
@@ -19,34 +19,36 @@ namespace Westwind.MessageQueueing.Hosting
         /// Below is a commented simple example
         /// </summary>
         /// <param name="manager"></param>
-        //protected override void OnExecuteStart(QueueMessageManager manager)
-        //{
-        //    base.OnExecuteStart(manager);            
-        //
-        //    string action = manager.Item.Action;
-        //    try
-        //    {
-        //        switch (action)
-        //        {
-        //            case "HelloWorld":
-        //            {
-        //                Thread.Sleep(2000);
-        //                manager.CompleteRequest(messageText: queueItem.Message + " - NEW completed at " + DateTime.Now,
-        //                    autoSave: true);
-        //                break;
-        //            }
-        //            default:
-        //            {
-        //                manager.CancelRequest(messageText: "Failed: No matching action", autoSave: true);
-        //                break;
-        //            }
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        manager.CancelRequest(messageText: "Failed: " + ex.Message, autoSave: true);
-        //    }
-        //}
+        protected override void OnExecuteStart(QueueMessageManager manager)
+        {
+            base.OnExecuteStart(manager);
+            
+            var queueItem = manager.Item;
+
+            string action = manager.Item.Action;
+            try
+            {
+                switch (action)
+                {
+                    case "HelloWorld":
+                        {
+                            Thread.Sleep(2000);
+                            manager.CompleteRequest(messageText: queueItem.Message + " - NEW completed at " + DateTime.Now,
+                                autoSave: true);
+                            break;
+                        }
+                    default:
+                        {
+                            manager.CancelRequest(messageText: "Failed: No matching action", autoSave: true);
+                            break;
+                        }
+                }
+            }
+            catch (Exception ex)
+            {
+                manager.CancelRequest(messageText: "Failed: " + ex.Message, autoSave: true);
+            }
+        }
 
         protected override void OnExecuteComplete(QueueMessageManager manager)
         {

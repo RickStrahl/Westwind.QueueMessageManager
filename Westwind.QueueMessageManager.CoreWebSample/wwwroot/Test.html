@@ -4,7 +4,7 @@
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<title>Queue Monitor SignalR Test</title>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+	<script src="https://unpkg.com/@microsoft/signalr@10.0.0/dist/browser/signalr.min.js"></script>
 	<style>
 		:root {
 			--bg: #0f172a;
@@ -18,7 +18,7 @@
 		}
 
 		* {
-			box-sizing: border-box;	
+			box-sizing: border-box;
 		}
 
 		body {
@@ -75,22 +75,22 @@
 			border-color: #0d667d;
 		}
 
-		button:hover {
-			background: #0f5266;
-		}
+			button:hover {
+				background: #0f5266;
+			}
 
 		#status {
 			margin: 0.5rem 0 1rem;
 			color: var(--muted);
 		}
 
-		#status.ok {
-			color: var(--ok);
-		}
+			#status.ok {
+				color: var(--ok);
+			}
 
-		#status.error {
-			color: var(--error);
-		}
+			#status.error {
+				color: var(--error);
+			}
 
 		#events {
 			border: 1px solid var(--line);
@@ -119,14 +119,14 @@
     <h1>SignalR Multi-Browser Test (WriteMessage)</h1>
 
     <div class="row">
-        <input id="hubUrl" value="https://localhost:5001/queueMonitorServiceHub" />
+        <input id="hubUrl" value="https://localhost:5001/queueMonitorServiceHub" placeholder="SignalR Hub URL" title="SignalR Hub URL" />
         <button id="connectBtn">Connect</button>
         <button id="disconnectBtn">Disconnect</button>
     </div>
 
     <div class="row">
-        <input id="apiUrl" value="https://localhost:5001/api/test/write-message" />
-        <input id="clientName" value="BrowserA" />
+        <input id="apiUrl" value="https://localhost:5001/api/qmm/write-message" placeholder="Api Url" title="Api Url" />
+        <input id="queueName" value="Queue1" placeholder="Queue name" title="Queue name"/>
     </div>
 
     <div class="row">
@@ -135,12 +135,12 @@
 
     <div class="row">
         <input id="messageId" placeholder="Optional ID (leave empty to use message as ID)" />
-        <select id="icon">
-            <option value="Info" selected>Info</option>
-            <option value="Success">Success</option>
-            <option value="Warning">Warning</option>
-            <option value="Error">Error</option>
-        </select>
+		<select id="icon">
+			<option value="Submitted">Submitted</option>
+			<option value="Completed">Completed</option>
+			<option value="Failed">Failed</option>
+			<option value="Cancelled">Cancelled</option>
+		</select>
         <button id="sendBtn">Send WriteMessage</button>
         <button id="clearBtn">Clear Log</button>
     </div>
@@ -157,7 +157,7 @@
 
 	const hubUrlEl = document.getElementById("hubUrl");
 	const apiUrlEl = document.getElementById("apiUrl");
-	const clientNameEl = document.getElementById("clientName");
+	const queueNameEl = document.getElementById("queueName");
 	const messageEl = document.getElementById("message");
 	const messageIdEl = document.getElementById("messageId");
 	const iconEl = document.getElementById("icon");
@@ -195,7 +195,7 @@
 				" | elapsed=" + (elapsed || "") +
 				" | waiting=" + (waiting ?? "") +
 				" | queue=" + (queueName || "") +
-				" | viewer=" + clientNameEl.value;
+				" | viewer=" + queueNameEl.value;
 			log("writeMessage", details);
 		});
 
@@ -229,9 +229,10 @@
 
 	async function sendWriteMessage() {
 		const payload = {
-			message: "[" + clientNameEl.value + "] " + messageEl.value,
+			message: "[" + queueNameEl.value + "] " + messageEl.value,
 			id: messageIdEl.value || null,
-			icon: iconEl.value
+			status: iconEl.value,
+            queueName: queueNameEl.value.trim() || null
 		};
 
 		const response = await fetch(apiUrlEl.value.trim(), {
@@ -249,7 +250,7 @@
 			return;
 		}
 
-		log("invoke", "POST /api/test/write-message sent");
+		log("invoke", "POST /api/qmm/write-message sent");
 	}
 
 	document.getElementById("connectBtn").addEventListener("click", async () => {

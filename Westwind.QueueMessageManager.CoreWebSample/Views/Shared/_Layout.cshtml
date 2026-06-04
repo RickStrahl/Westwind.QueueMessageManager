@@ -202,11 +202,12 @@
             @RenderBody()
 
             <footer>
-                <a href="http://www.west-wind.com/" class="float-end">
-                    <img src="/images/WestwindText.png"/>
+                <a href="https://www.west-wind.com/" class="float-end">
+                    <img src="/images/WestwindText.png"/>                    
                 </a>
                 <div class="hidable-xs">
-                    &copy; West Wind Technologies, @DateTime.Now.Year
+                    &copy; West Wind Technologies, @DateTime.Now.Year<br/>
+                        <small>@System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription</small>
                 </div>
             </footer>
         </div> <!-- #MainView -->

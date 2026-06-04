@@ -23,18 +23,15 @@ public class QmmWebController : Controller
     }
 
     [HttpPost("/api/qmm/write-message")]
-    public async Task<IActionResult> WriteTestMessage([FromBody] TestWriteMessageRequest request)
+    public async Task<IActionResult> WriteTestMessage([FromBody] QueueMessageItem item)
     {
-        if (string.IsNullOrWhiteSpace(request.Item?.Message))
+        if (string.IsNullOrWhiteSpace(item?.Message))
             return BadRequest(new { error = "Message is required." });
 
-        await QueueMonitorServiceHub.WriteMessage(
-            request.Item.Message,
-            request.Item.Id,
-            string.IsNullOrWhiteSpace(request.Icon) ? "Info" : request.Icon);
+        await QueueMonitorServiceHub.WriteMessage(item);
 
         return Ok(new { success = true, sentAt = DateTime.UtcNow });
-    }    
+    } 
 }
 
 public class TestWriteMessageRequest
