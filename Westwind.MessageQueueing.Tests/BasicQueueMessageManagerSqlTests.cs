@@ -49,13 +49,41 @@ namespace Westwind.MessageQueueing.Tests
 
             var msg = new QueueMessageItem()
             {
-                QueueName = "MPWF",
+                QueueName = "Queue1",
                 Message = "Xml Message  @ " + DateTime.Now.ToString("t"),
                 Action = "NEWXMLORDER",    // Some Application specific Action Id`         
                 Xml = xml
             };
             manager.SubmitRequest(msg);
             Assert.IsTrue(manager.Save(), manager.ErrorMessage);
+        }
+
+        [TestMethod]
+        public void SubmitAndCompleteRequestWithPresetObjectTest()
+        {
+            string xml = "<doc><value>Hello</value></doc>";
+            using var manager = new QueueMessageManagerSql() { AutoCreateDataStore = true };
+
+            var msg = new QueueMessageItem()
+            {
+                QueueName = "Queue1",
+                Message = "Xml Message  @ " + DateTime.Now.ToString("t"),
+                Action = "NEWXMLORDER",    // Some Application specific Action Id`         
+                Xml = xml
+            };
+            manager.SubmitRequest(msg);
+            Assert.IsTrue(manager.Save(), manager.ErrorMessage);
+
+            var msgId = msg.Id;
+
+            // reload the message to simulate a different process picking it up
+            msg = manager.Load(msgId);
+
+            Thread.Sleep(1500);
+            manager.CompleteRequest(msg,"Completed @ " + DateTime.Now.ToString("t"));
+            Console.WriteLine(msg.Id);
+            Assert.IsTrue(manager.Save(), manager.ErrorMessage);
+
         }
 
         [TestMethod]

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Queue Monitor SignalR Test</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+	<style>
+		:root {
+			--bg: #0f172a;
+			--panel: #111827;
+			--accent: #22d3ee;
+			--text: #e5e7eb;
+			--muted: #94a3b8;
+			--line: #334155;
+			--ok: #10b981;
+			--error: #ef4444;
+		}
+
+		* {
+			box-sizing: border-box;	
+		}
+
+		body {
+			margin: 0;
+			padding: 1rem;
+			font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+			background: radial-gradient(circle at top right, #1e293b, var(--bg));
+			color: var(--text);
+		}
+
+		main {
+			max-width: 980px;
+			margin: 0 auto;
+			background: color-mix(in srgb, var(--panel) 92%, black 8%);
+			border: 1px solid var(--line);
+			border-radius: 12px;
+			padding: 1rem;
+		}
+
+		h1 {
+			margin-top: 0;
+			font-size: 1.25rem;
+		}
+
+		.row {
+			display: flex;
+			gap: 0.6rem;
+			flex-wrap: wrap;
+			margin-bottom: 0.6rem;
+		}
+
+		input, select, button, textarea {
+			background: #0b1220;
+			color: var(--text);
+			border: 1px solid var(--line);
+			border-radius: 8px;
+			padding: 0.55rem 0.65rem;
+			font-size: 0.95rem;
+		}
+
+		input, textarea {
+			flex: 1;
+			min-width: 220px;
+		}
+
+		textarea {
+			min-height: 70px;
+			resize: vertical;
+		}
+
+		button {
+			cursor: pointer;
+			background: #0b3b4a;
+			border-color: #0d667d;
+		}
+
+		button:hover {
+			background: #0f5266;
+		}
+
+		#status {
+			margin: 0.5rem 0 1rem;
+			color: var(--muted);
+		}
+
+		#status.ok {
+			color: var(--ok);
+		}
+
+		#status.error {
+			color: var(--error);
+		}
+
+		#events {
+			border: 1px solid var(--line);
+			border-radius: 8px;
+			padding: 0.5rem;
+			height: 340px;
+			overflow: auto;
+			background: #0a1322;
+		}
+
+		.log-line {
+			font-family: Consolas, "Courier New", monospace;
+			font-size: 0.88rem;
+			line-height: 1.42;
+			padding: 0.2rem 0.1rem;
+			border-bottom: 1px dashed #1f2a3a;
+		}
+
+		.tag {
+			color: var(--accent);
+		}
+	</style>
+</head>
+<body>
+<main>
+    <h1>SignalR Multi-Browser Test (WriteMessage)</h1>
+
+    <div class="row">
+        <input id="hubUrl" value="https://localhost:5001/queueMonitorServiceHub" />
+        <button id="connectBtn">Connect</button>
+        <button id="disconnectBtn">Disconnect</button>
+    </div>
+
+    <div class="row">
+        <input id="apiUrl" value="https://localhost:5001/api/test/write-message" />
+        <input id="clientName" value="BrowserA" />
+    </div>
+
+    <div class="row">
+        <textarea id="message">Hello from browser test</textarea>
+    </div>
+
+    <div class="row">
+        <input id="messageId" placeholder="Optional ID (leave empty to use message as ID)" />
+        <select id="icon">
+            <option value="Info" selected>Info</option>
+            <option value="Success">Success</option>
+            <option value="Warning">Warning</option>
+            <option value="Error">Error</option>
+        </select>
+        <button id="sendBtn">Send WriteMessage</button>
+        <button id="clearBtn">Clear Log</button>
+    </div>
+
+    <div id="status">Disconnected</div>
+    <div id="events"></div>
+</main>
+
+<script>
+	let connection = null;
+
+	const statusEl = document.getElementById("status");
+	const eventsEl = document.getElementById("events");
+
+	const hubUrlEl = document.getElementById("hubUrl");
+	const apiUrlEl = document.getElementById("apiUrl");
+	const clientNameEl = document.getElementById("clientName");
+	const messageEl = document.getElementById("message");
+	const messageIdEl = document.getElementById("messageId");
+	const iconEl = document.getElementById("icon");
+
+	function setStatus(text, mode) {
+		statusEl.textContent = text;
+		statusEl.classList.remove("ok", "error");
+		if (mode) statusEl.classList.add(mode);
+	}
+
+	function log(eventName, details) {
+		const line = document.createElement("div");
+		line.className = "log-line";
+		line.innerHTML = "<span class='tag'>" + eventName + "</span> " + details;
+		eventsEl.prepend(line);
+	}
+
+	async function connect() {
+		if (connection && connection.state !== signalR.HubConnectionState.Disconnected) {
+			return;
+		}
+
+		connection = new signalR.HubConnectionBuilder()
+			.withUrl(hubUrlEl.value.trim())
+			.configureLogging(signalR.LogLevel.Information)
+			.withAutomaticReconnect()
+			.build();
+
+		connection.on("writeMessage", (message, icon, time, id, elapsed, waiting, queueName) => {
+			const details =
+				"time=" + (time || "") +
+				" | icon=" + (icon || "") +
+				" | id=" + (id || "") +
+				" | message=" + (message || "") +
+				" | elapsed=" + (elapsed || "") +
+				" | waiting=" + (waiting ?? "") +
+				" | queue=" + (queueName || "") +
+				" | viewer=" + clientNameEl.value;
+			log("writeMessage", details);
+		});
+
+		connection.on("statusMessage", message => {
+			log("statusMessage", "message=" + message);
+		});
+
+		connection.onreconnecting(err => {
+			setStatus("Reconnecting... " + (err ? err.message : ""), "error");
+		});
+
+		connection.onreconnected(() => {
+			setStatus("Connected (reconnected)", "ok");
+		});
+
+		connection.onclose(err => {
+			setStatus("Disconnected" + (err ? ": " + err.message : ""), err ? "error" : "");
+		});
+
+		await connection.start();
+		setStatus("Connected", "ok");
+		log("connected", "Hub connection established");
+	}
+
+	async function disconnect() {
+		if (!connection) return;
+		await connection.stop();
+		setStatus("Disconnected", "");
+		log("disconnected", "Hub connection stopped by user");
+	}
+
+	async function sendWriteMessage() {
+		const payload = {
+			message: "[" + clientNameEl.value + "] " + messageEl.value,
+			id: messageIdEl.value || null,
+			icon: iconEl.value
+		};
+
+		const response = await fetch(apiUrlEl.value.trim(), {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(payload)
+		});
+
+		if (!response.ok) {
+			const text = await response.text();
+			log("error", "WriteMessage call failed: " + text);
+			setStatus("WriteMessage failed", "error");
+			return;
+		}
+
+		log("invoke", "POST /api/test/write-message sent");
+	}
+
+	document.getElementById("connectBtn").addEventListener("click", async () => {
+		try {
+			await connect();
+		} catch (err) {
+			setStatus("Connect failed: " + err.message, "error");
+			log("error", "Connect failed: " + err.message);
+		}
+	});
+
+	document.getElementById("disconnectBtn").addEventListener("click", async () => {
+		try {
+			await disconnect();
+		} catch (err) {
+			log("error", "Disconnect failed: " + err.message);
+		}
+	});
+
+	document.getElementById("sendBtn").addEventListener("click", async () => {
+		try {
+			await sendWriteMessage();
+		} catch (err) {
+			setStatus("WriteMessage call failed", "error");
+			log("error", "WriteMessage call failed: " + err.message);
+		}
+	});
+
+	document.getElementById("clearBtn").addEventListener("click", () => {
+		eventsEl.innerHTML = "";
+	});
+
+	connect().catch(err => {
+		setStatus("Auto-connect failed: " + err.message, "error");
+		log("error", "Auto-connect failed: " + err.message);
+	});
+</script>
+</body>
+</html>

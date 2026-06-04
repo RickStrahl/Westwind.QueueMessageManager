@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -8,11 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Westwind.MessageQueueing.Hosting\Westwind.MessageQueueing.Hosting.csproj" />
+    <None Include="wwwroot\css\QueueMonitor.css" />
   </ItemGroup>
 
+
   <ItemGroup>
-    <Folder Include="wwwroot\" />
+    <ProjectReference Include="..\Westwind.MessageQueueing.Hosting\Westwind.MessageQueueing.Hosting.csproj" />
   </ItemGroup>
 
 </Project>

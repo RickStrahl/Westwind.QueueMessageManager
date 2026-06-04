@@ -219,8 +219,10 @@ namespace Westwind.MessageQueueing
                 item.Started = DateTime.UtcNow.AddMilliseconds(-1);
             item.IsCancelled = false;
 
-            if (messageText != null)
+            if (!string.IsNullOrEmpty(messageText))
                 item.Message = messageText;
+
+            Item = item;
 
             if (autoSave)
                 return Save();

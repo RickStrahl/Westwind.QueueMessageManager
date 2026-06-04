@@ -34,19 +34,19 @@ namespace Westwind.MessageQueueing.Hosting
         public async Task StartService()
         {
             // unpause the QueueController to start processing again
-            Globals.Controller.PauseProcessing(false);
+            QmmGlobals.Controller.PauseProcessing(false);
 
             await Clients.All.SendAsync("startServiceCallback", true);
 
             await Clients.All.SendAsync("writeMessage",
-                "Queues starting with " + Globals.Controller.ThreadCount.ToString() + " threads.",
+                "Queues starting with " + QmmGlobals.Controller.ThreadCount.ToString() + " threads.",
                 "Info", DateTime.Now.ToString("HH:mm:ss"));
         }
 
         public async Task StopService()
         {
             // Pause - we can't stop service because that'll exit the server            
-            Globals.Controller.PauseProcessing(true);
+            QmmGlobals.Controller.PauseProcessing(true);
 
             await Clients.All.SendAsync("stopServiceCallback", true);
 
@@ -98,7 +98,7 @@ namespace Westwind.MessageQueueing.Hosting
         public async Task getQueueNames()
         {
             var queues = new List<string>();
-            foreach (var controller in Globals.Controller.Controllers)
+            foreach (var controller in QmmGlobals.Controller.Controllers)
             {
                 queues.Add(controller.QueueName);
             }
@@ -115,7 +115,7 @@ namespace Westwind.MessageQueueing.Hosting
 
         public async Task GetServiceStatus(string queueName)
         {
-            var controller = Globals.Controller;
+            var controller = QmmGlobals.Controller;
             if (controller.Controllers == null || string.IsNullOrEmpty(queueName))
                 controller = null;
 
@@ -151,7 +151,7 @@ namespace Westwind.MessageQueueing.Hosting
                 return;
             }
 
-            var controller = Globals.Controller.Controllers
+            var controller = QmmGlobals.Controller.Controllers
                 .FirstOrDefault(ct => ct.QueueName == status.queueName);
 
             if (controller == null)
@@ -257,11 +257,11 @@ namespace Westwind.MessageQueueing.Hosting
 
             // if no id is passed write the message in the ID area
             // and show no message
-            if (string.IsNullOrEmpty(id))
-            {
-                id = message;
-                message = string.Empty;
-            }
+            //if (string.IsNullOrEmpty(id))
+            //{
+            //    id = message;
+            //    message = string.Empty;
+            //}
 
             if (time == null)
                 time = DateTime.UtcNow;

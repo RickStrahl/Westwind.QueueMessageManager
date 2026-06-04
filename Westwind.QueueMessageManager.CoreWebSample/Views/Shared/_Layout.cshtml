@@ -1,50 +1,230 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+
+@using Westwind.QueueManager.CoreWebSample
+@{
+    var config = qmmApp.Configuration;
+    var title = ViewData["Title"] ?? config.ApplicationName;
+    bool noSearchBar = true;
+    // var vd = ViewData["NoSearchBar"];
+    // if (vd != null)
+    // {
+    //     noSearchBar = true;
+    // }
+}
+<!DOCTYPE html>
+<html>
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Westwind.QueueMessageManager.CoreWebSample</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/Westwind.QueueMessageManager.CoreWebSample.styles.css" asp-append-version="true" />
+    <title>@title</title>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="">
+
+    <link rel="shortcut icon" href="/touch-icon.png" type="image/x-icon" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <link rel="apple-touch-icon" href="/touch-icon.png" />
+    <link rel="icon" href="/touch-icon.png" />
+    <meta name="msapplication-TileImage" content="touch-icon.png">
+    
+    <link href="/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/lib/fontawesome/css/all.min.css" rel="stylesheet" />
+    
+    @RenderSection("HeadersTop", required: false)
+    
+    <link href="/css/application.css?v=@qmmApp.Version" rel="stylesheet" />
+    <link href="/css/store.css?v=@qmmApp.Version" rel="stylesheet" />
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+
+    @RenderSection("Headers", required: false)
+    <link href="/css/themes/@config.Theme/theme.css" rel="stylesheet" />
+    <style>
+       .slide-menu .header {
+           color: rgb(121, 169, 210);
+           font-weight: 600;
+           font-size: 1.2em;
+           margin-top: 1em;
+           margin-bottom: 0.3em;
+           padding-left: 10px;
+           padding-bottom: 5px;
+           border-bottom: 1px solid #999;
+       }
+       .main-view-container {
+           position: absolute;
+           top: 60px;
+           left: 0;
+           right: 0;
+           bottom: 0;
+           display: flex;
+       }
+       .badge-super {
+           font-size: 0.6em !important;
+       }
+       .banner .dropdown-menu .active {
+           background: steelblue;  
+       }
+       .banner .dropdown-menu { 
+            background:  #444;                
+            padding: 0;
+       }        
+       .banner .dropdown-item, .banner .dropdown-item strong {
+          color:  #eee;          
+       }       
+       .banner .dropdown-item strong
+       {
+            font-weight:  700;
+            color:  white;
+       }
+   </style>
+    
+    @RenderSection("HeadersBottom", required: false)
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Westwind.QueueMessageManager.CoreWebSample</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+
+    <div class="banner">
+	    @* <a class="slide-menu-toggle-open"
+           title="Web Store Menu">
+            <i class="fas fa-bars"></i>
+        </a> *@
+
+        <div class="title-bar">
+
+            <a href="/">
+                <img src="/images/icon.png"
+                     style="height: 28px; float: left; margin-top: 0.2em"/>
+                <div style="float: left; margin: 4px 5px; line-height: 1.0">
+                    @* <i style="color: #00b4ff; font-size: 0.9em; font-weight: bold;">@config.ApplicationShortName</i><br/> *@
+                    <i style="color: whitesmoke; font-size: 1.5em; font-weight: 600;">
+                        @config.ApplicationName
+                    </i>
+                </div>
+            </a>
+        </div>
+
+        @* <nav class="banner-menu-top float-end">
+            
+            @if (!Model.UserState.IsAuthenticated())
+            {
+                <a href="/account/signin">
+                    <i class="fad fa-sign-in"></i>
+                    Sign in
+                </a>
+            }
+            else
+            {
+                <div class="dropdown" style="display: inline-block;"
+                     id="ProfileMenuLink">
+                    <span role="button"  data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fad fa-user"></i>
+                        @Model.UserState.Name
+                        <i class="fas fa-caret-down ps-1"></i>
+                    </span>
+               
+                    <ul class="dropdown-menu" aria-labelledby="ProfileMenuLink" style="margin-top: 0">
+                        <li><a class="dropdown-item" href="/account/profile">My Profile</a></li>
+                        <li><a class="dropdown-item" href="/account/signout">Sign out</a></li>
+                        @if (Model.UserState.IsAdmin)
+                        {
+                            <li class="separator"></li>
+                            <li><a class="dropdown-item" href="/admin">Administration</a></li>
+                            <li><a class="dropdown-item" href="/admin/ordermanager">Order Manager</a></li>
+                            <li><a class="dropdown-item" href="/admin/productmanager">Product Manager</a></li>
+                        }
                     </ul>
                 </div>
+            }
+        </nav> *@
+        
+        
+        <style>
+
+        </style>
+        <div style="clear: both"></div>
+        
+        @if(!noSearchBar)
+        {
+            <div id="SearchBar" class="search-bar clearfix">
+                <div class="input-group input-group-sm">
+                    <div class="input-group-text">
+                        <i class="far fa-search"></i>
+                    </div>
+                    <input id="ProductSearchBox" 
+                           class="form-control" type="text"
+                           placeholder="search products..."
+                           autocomplete="off"
+                           autocorrect="off"/>
+
+                    <button type="button" class="input-group-text text-info" onclick="webstore.clearSearchProducts()" title="clear search text">
+                        <i class="fas fa-times fa-fw"></i>
+                    </button>
+                </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+        }
+        
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - Westwind.QueueMessageManager.CoreWebSample - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+<div style="display: flex; flex-direction: column;">
+
+
+    <div class="main-view-container" style="flex: 1; flex-grow: initial">
+
+
+@*         <nav class="slide-menu @(noSearchBar ? "nosearchbar" : "")"
+             style="padding: 10px 0 10px 0; overflow-y: auto" >
+
+                <a href="/">
+                    <i class="fad fa-home-lg fa-fw"></i>
+                    Home
+                </a>
+
+
+                @if (!Model.UserState.IsAuthenticated())
+                {
+                    <a href="/account/signin">
+                        <i class="fad fa-sign-in fa-fw"></i>
+                        Sign in
+                    </a>
+                }
+                else
+                {
+                    <a href="/account/profile">
+                        <i class="fad fa-user fa-fw"></i>
+                        @Model.UserState.Name
+                    </a>
+                    <a href="/account/signout">
+                        <i class="fad fa-sign-out fa-fw"></i>
+                        Sign out
+                    </a>
+
+                }
+        </nav> *@
+        <div id="MainView">
+            @RenderBody()
+
+            <footer>
+                <a href="http://www.west-wind.com/" class="float-end">
+                    <img src="/images/WestwindText.png"/>
+                </a>
+                <div class="hidable-xs">
+                    &copy; West Wind Technologies, @DateTime.Now.Year
+                </div>
+            </footer>
+        </div> <!-- #MainView -->
+    </div>
+</div>
+
+@RenderSection("BottomOfBody", required: false);
+
+
+<script src="/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/lib/bootstrap3-typeahead/bootstrap3-typeahead.js" ></script>
+<script src="/lib/westwind.jquery.js"></script>
+<script src="/scripts/webstore.js?v=@qmmApp.Version"></script>
+<script src="/lib/toastr/build/toastr.min.js" async></script>
+<link href="/lib/toastr/build/toastr.css" rel="stylesheet" />
+<script>
+    
+</script>
+@RenderSection("Scripts", required: false)
 </body>
 </html>

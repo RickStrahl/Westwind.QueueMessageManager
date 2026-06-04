@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc.Razor;
 using Westwind.Utilities.Configuration;
 using IConfigurationProvider = Westwind.Utilities.Configuration.IConfigurationProvider;
 
@@ -21,7 +22,14 @@ public class qmmAppConfiguration : AppConfiguration
 
     public SecurityConfiguration Security { get; set; } = new();
 
+    public string ApplicationName { get; set; } = "Queue Message Manager";
+
+    public string ApplicationShortName { get; set; } = "QMM";
+
+    public string Theme { get; set; } = "Light";
+    
     public SystemConfiguration System { get; set; } = new();
+    
 
     protected override IConfigurationProvider OnCreateDefaultProvider(string sectionName, object configData)
     {

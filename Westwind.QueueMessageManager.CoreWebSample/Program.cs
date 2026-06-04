@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.FileProviders;
 using System.Runtime.InteropServices;
+using Westwind.MessageQueueing;
 using Westwind.MessageQueueing.Hosting;
 using Westwind.QueueManager.CoreWebSample;
 using Westwind.Utilities;
@@ -34,7 +35,6 @@ if (noConfig)
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-
 // Authorization builder related
 builder.Services.AddSingleton<
     IAuthorizationHandler,
@@ -51,6 +51,25 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.AddSignalR();
+
+
+// create a new Controller to process in the background
+// on separate threads
+QmmGlobals.Controller  = new QueueControllerMultiple(controllers: new List<QueueController>()
+{
+    new QueueControllerMultiple()
+    {
+        QueueName = "Queue1",
+        WaitInterval = 300,
+        ThreadCount = 5
+    },
+    new QueueControllerMultiple()
+    {
+        QueueName = "Queue2",
+        WaitInterval = 500,
+        ThreadCount = 3
+    }
+});
 
 //builder.Services.AddQueueHubAuthorization();
 

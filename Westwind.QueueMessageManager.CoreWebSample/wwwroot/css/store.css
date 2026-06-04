@@ -1,0 +1,110 @@
+﻿/* Store specific CSS Markup */
+
+
+/*Shopping Cart*/
+#LineItemTable tbody tr:nth-child(odd) {
+    
+}
+
+.lineitem-delete {
+    font-size: 0.8em;
+}
+
+#LineItemTable tbody tr td {
+    vertical-align: top;
+}
+
+
+#LineItemTable td:nth-child(2),
+#LineItemTable th:nth-child(2),
+#LineItemTable td:nth-child(2) input {
+    width: 4.5em;
+}
+
+#LineItemTable td:nth-child(2) input {
+    padding: 2px;
+}
+
+.table-wrapper {
+    background: linear-gradient(to bottom,  #f2f2f2, #fdfdfd 80%);
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    border-radius: 0.5em;
+    width: 100%;
+}
+.item-price {
+    font-size: 0.7em;
+    font-style: italic;
+    padding-right: 0.5em;
+    opacity: 0.4;
+}
+.invoice-total {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: firebrick;
+    width: 6em;
+}
+.lineitem {
+    border-bottom:  1px solid #ddd;
+    margin-bottom:  0.7em;
+    min-height: 6em;
+}
+.lineitem-image-wrapper {
+    width:  6em;
+    height:  6em;
+    margin-right:  1em;
+    margin-top: 0.5em;
+    overflow: hidden;
+}
+.lineitem-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow:  hidden;
+}
+.lineitem-description {
+    font-weight: 500;
+    color: #606060;
+    margin-bottom: 0.35em;
+    display: block;
+}
+
+.invoice-subtotal {
+    font-size: 1.1em;
+    font-weight: 600;
+    opacity: 0.8; 
+    text-align: right;
+    width: 6em;
+}
+
+.invoice-total {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: firebrick;
+    width: 6em;
+}
+
+.quantity-textbox {
+    font-size:  0.8em;
+    width:  5.4em;
+}
+
+/* address Display */
+
+.tiny-title {
+    font-size: 0.7em;
+    font-style: italic;
+    color: #777;
+}
+
+.well {
+    min-width: 250px;
+    margin: 0.1em 0.8em 0.5em 0;
+    padding: 0.8em;
+}
+
+@media(max-width: 500px) {
+     .well {
+         width: 100%;
+     }
+ }

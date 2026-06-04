@@ -1,0 +1,123 @@
+﻿html, body {
+    font-size: 16px;
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","Liberation Sans",sans-serif;
+    line-height: 1.45;
+}
+
+table {
+    border-collapse: collapse;
+    border: 1px solid #ddd;
+    width: 100%;
+}
+td, th {
+    padding: 0.4em;
+    border: 1px solid #ddd;
+}
+th {
+    background: #f5f5f5;
+    color: #333;
+}
+
+.page-header-text {
+    font-size: 1.52em;
+    color: #0092d0;
+    padding-bottom: 0.35em;
+    margin-bottom: 0.6em;
+    border-bottom: 1px solid #e1e1e1;
+}
+
+h3.page-header-text {
+    margin-top: 1.2em;
+    font-size: 1.20em;
+}
+
+h4.page-header-text {
+    margin-top: 1em;
+    font-size: 1.1em;
+}
+
+.header-byline {
+    font-size: 0.75em;
+    font-style: italic;
+    color: #888;
+}
+
+.well {
+    min-width: 250px;
+    margin: 0.8em 0.2em;
+    padding: 0.8em;
+    background: #f2f2f2;
+    border-radius: 0.5em;
+    border: 1px solid #eee;
+    background: linear-gradient(to bottom #eee, #f4f4f4 100%);
+}
+
+.btn {
+    background: #007bff;
+    color: white;
+    padding: 0.5em 1em;
+    border-radius: 0.3em;
+    text-decoration: none;
+    font-weight: 600;
+}
+.btn-lg {
+    font-size: 1.2em;
+    padding: 0.6em 1.2em;
+}
+.btn-primary {
+    background: #007bff;
+}
+.btn-secondary {
+    background: #6c757d;
+}
+.btn-success {
+    background: #28a745;
+}
+.btn-warning {
+    background: #ffc107;
+}
+
+
+@media(max-width: 500px) {
+    .well {
+        width: 100%;
+        margin: 0.8em 0;
+    }
+}
+
+footer {
+    margin-top: 3em;
+    text-align: center
+}
+
+blockquote {
+    background: #ecf5ff;
+    padding: 0.8em;
+    border-radius: 0.3em;
+    border-left: 8px #507bac solid;
+    color: #222;
+}
+
+.tiny-title {
+    font-size: 0.7em;
+    font-style: italic;
+    color: #999;
+}
+
+.right {
+    text-align: right;
+}
+
+.highlighted { 
+    color:  firebrick;
+    font-weight:  bold; 
+}
+
+.text-danger {
+    color: firebrick;
+}
+
+.d-flex {
+    display: flex;
+}
+
