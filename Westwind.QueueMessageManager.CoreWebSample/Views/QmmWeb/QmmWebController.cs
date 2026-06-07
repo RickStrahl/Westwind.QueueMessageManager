@@ -1,13 +1,16 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using System.Diagnostics;
+using Westwind.AspNetCore;
 using Westwind.MessageQueueing;
 using Westwind.MessageQueueing.Hosting;
+using Westwind.QueueManager.CoreWebSample;
 using Westwind.QueueMessageManager.CoreWebSample.Models;
 
 namespace Westwind.QueueMessageManager.CoreWebSample;
 
 [Route("/qmm")]
-public class QmmWebController : Controller
+public class QmmWebController : BaseApiController
 {
 
     [Route("/qmm/queuemonitor")]
@@ -28,10 +31,49 @@ public class QmmWebController : Controller
         if (string.IsNullOrWhiteSpace(item?.Message))
             return BadRequest(new { error = "Message is required." });
 
-        await QueueMonitorServiceHub.WriteMessage(item);
+        await QueueMonitorServiceHub.WriteMessageInternal(item);
 
         return Ok(new { success = true, sentAt = DateTime.UtcNow });
-    } 
+    }
+
+    [HttpPost("/api/qmm/submit-item")]
+    public async Task<IActionResult> SubmitItem([FromBody] QueueMessageItem item)
+    {
+        if (string.IsNullOrWhiteSpace(item?.Message))
+            return BadRequest(new { error = "Message is required." });
+
+        using var manager = new QueueMessageManagerSql(qmmApp.ConnectionString);
+        
+        item.Id = "qmmweb-" + qmmApp.NewId();
+        manager.SubmitRequest(item, autoSave: true);
+        await QueueMonitorServiceHub.WriteMessageInternal(item);
+        await QueueMonitorServiceHub.GetWaitingQueueMessageCountInternal(item.QueueName);
+
+        return Ok(new { success = true, sentAt = DateTime.UtcNow });
+    }
+
+    [HttpPost("/api/qmm/update-item")]
+    public async Task<IActionResult> UpdateItem([FromBody] QueueMessageItem item)
+    {
+        if (string.IsNullOrWhiteSpace(item?.Id))
+            return NotFound(new { error = "Existing Message Id is required." });
+
+
+        using var manager = new QueueMessageManagerSql(qmmApp.ConnectionString);
+        
+        // Load the existing item and update it with some data from the incoming item.
+        var loadedItem = manager.Load(item.Id);
+        if (loadedItem == null)
+        {
+            return NotFound(new { error = "Existing Message Id is required." });
+        }
+        
+        manager.UpdateQueueMessageStatus(loadedItem, item.Status, item.Message);        
+        await QueueMonitorServiceHub.WriteMessageInternal(loadedItem);
+        await QueueMonitorServiceHub.GetWaitingQueueMessageCountInternal(item.QueueName);
+
+        return Ok(new { success = true, sentAt = DateTime.UtcNow });
+    }
 }
 
 public class TestWriteMessageRequest

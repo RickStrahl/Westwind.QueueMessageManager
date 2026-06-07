@@ -1,7 +1,7 @@
-.monitor-page {
+body {
 	--bg-top: #f8fbff;
 	--bg-bottom: #e8eef8;
-	--panel: #ffffff;
+	--panel: #f4f4f4;
 	--line: #d6dfeb;
 	--ink: #132238;
 	--ink-muted: #56708f;
@@ -10,11 +10,14 @@
 	--ok: #117f44;
 	--warn: #bd7a00;
 	--error: #ba1a1a;
-	background: radial-gradient(1300px 420px at -5% -10%, rgba(0, 104, 214, 0.18), transparent 60%), radial-gradient(900px 360px at 110% -20%, rgba(0, 169, 165, 0.16), transparent 55%), linear-gradient(160deg, var(--bg-top), var(--bg-bottom));
+}
+.monitor-page {
+
+	/* background: radial-gradient(1300px 420px at -5% -10%, rgba(0, 104, 214, 0.18), transparent 60%), radial-gradient(900px 360px at 110% -20%, rgba(0, 169, 165, 0.16), transparent 55%), linear-gradient(160deg, var(--bg-top), var(--bg-bottom));
 	border: 1px solid var(--line);
 	border-radius: 16px;
 	color: var(--ink);
-	min-height: calc(100vh - 180px);
+	min-height: calc(100vh - 180px); */
 	padding: 0.5rem 1rem 0.2rem 1rem;
 }
 
@@ -134,16 +137,17 @@
 	grid-column: 1 / -1;
 }
 
-.status-strip {
-	align-items: center;
+.status-strip {	
+	position: fixed;
+	display: flex;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	font-size: 0.825rem;
+	border: 1px solid var(--line);	
+	padding: .3rem 0.8rem;	
 	background: var(--panel);
-	border: 1px solid var(--line);
-	border-radius: 12px;
-	display: grid;
-	gap: 0.5rem;
-	grid-template-columns: 1fr auto 2fr;
-	margin-bottom: 0.9rem;
-	padding: 0.6rem 0.8rem;
+	margin-top: 0.2rem;
 }
 
 .status-message {
@@ -156,9 +160,9 @@
 .message-list {
 	display: grid;
 	gap: 0.2rem;
-	max-height: calc(100vh - 390px);
+	max-height: calc(100vh - 300px);
 	overflow: auto;
-	padding-right: 0.25rem;
+	padding-right: 0.25rem;	
 }
 
 .message-item {
@@ -185,7 +189,7 @@
 .message-top-row {
 	align-items: center;
 	display: grid;
-	gap: 0.55rem;
+	gap: 0rem 0.55rem;
 	grid-template-columns: auto 1fr auto;
 }
 
@@ -224,10 +228,6 @@
 	white-space: nowrap;
 }
 
-.message-time {
-	color: var(--ink-muted);
-	font-size: 0.82rem;
-}
 
 .message-mid-row {
 	color: var(--ink-muted);
@@ -238,13 +238,15 @@
 }
 
 .message-body {
-	background: #f6f9fe;
+	font-family: "Consolas", "Cascadia Mono", monospace;
+	font-size: 0.725em !important;
+	background: #e3eeff;
 	border: 1px solid #e3ebf8;
-	border-radius: 3px;
-	margin: 0.55rem 0 0;
+	border-radius: 2.5px;
+	margin: 0.2rem 0 0.3rem 0 !important;
 	max-height: 140px;
 	overflow: auto;
-	padding: 0.3em 0.55rem;
+	padding: 0.17em 0.55rem;
 	white-space: pre-wrap;
 }
 
@@ -330,7 +332,7 @@
 	}
 
 	.message-list {
-		max-height: calc(100vh - 460px);
+		max-height: calc(100vh - 300px);
 	}
 
 	.meta-grid {

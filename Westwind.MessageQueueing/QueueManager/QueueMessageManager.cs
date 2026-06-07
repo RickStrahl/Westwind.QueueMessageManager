@@ -21,7 +21,7 @@ namespace Westwind.MessageQueueing
     /// </summary>    
     public abstract  class QueueMessageManager : IDisposable
     {
-        protected const int INT_maxCount = 99999;
+        protected const int INT_maxCount = 99_999;
         protected bool _IsNew = false;
 
         /// <summary>

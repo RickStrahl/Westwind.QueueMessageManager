@@ -9,6 +9,13 @@ public static class qmmApp
 
     public static qmmAppConstants Constants { get; set; } = new();
 
+
+    /// <summary>
+    /// Shortcut to the Configured Connection String
+    /// </summary>
+    public static string ConnectionString => Configuration?.ConnectionString;
+
+
     public static bool IsDevelopment { get; set; }
 
     public static string EnvironmentName { get; set; } = "Production";

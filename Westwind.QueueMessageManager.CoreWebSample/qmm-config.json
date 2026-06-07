@@ -7,6 +7,6 @@
   "Controllers": null,
   "MonitorSignalRHubUrl": "~/signalR",
   "MonitorHtmlUrl": "~/QueueMonitor.cshtml",
-  "MonitorHostUrl": "http://*:8080/",
+  "MonitorHostUrl": "http://*:5080/",
   "MonitorReferringSiteUrl": null
 }

@@ -4,10 +4,11 @@
 }
 @section Headers {
     
-	<link href="/css/QueueMonitor.css" rel="stylesheet" />
+	<link href="~/css/QueueMonitor.css" rel="stylesheet" />
 
 }
-<div id="queueMonitorApp" class="monitor-page">
+<div id="queueMonitorApp">
+<div class="monitor-page">
     <header class="monitor-header">
         <div>
             <h1>Queue Monitor  <span style="font-size: 0.55em; font-weight: normal">v@(qmmApp.Version)</span></h1>            
@@ -46,32 +47,26 @@
             <button class="btn btn-success btn-sm" @@click="startService" v-if="controllerStatus.paused">Start</button>
             <button class="btn btn-danger btn-sm" @@click="stopService" v-else>Stop</button>
             <button class="btn btn-outline-secondary btn-sm" @@click="clearMessages">Clear</button>
-        </div>
-    </section>
 
-    <section class="status-strip">
-        <div>
-            <strong>Queue:</strong> {{ controllerStatus.queueName || "All Queues" }}
-        </div>
-        <div>
-            <strong>Waiting:</strong> {{ waitingMessages }}
-        </div>
-        <div class="status-message" :title="lastStatusMessage">
-            {{ lastStatusMessage || "Ready." }}
+            <div style="margin-left: 3em; display: block;">                
+                <div >
+                    <strong>Waiting in Queues:</strong> {{ waitingMessages }}
+                </div> 
+            </div>
         </div>
     </section>
 
     <section class="message-list">
         <article class="message-item" v-for="item in visibleMessages" :key="item.key" @@click="openMessage(item)" :class="rowClass(item.status)">
             <div class="message-top-row">
-                <div class="status-chip" :class="rowClass(item.status)">{{ item.status || "Info" }}</div>                                
-                <div class="message-id">	                	                
-	                <small>{{ item.id || "(no id)" }}</small>                    
-	                &bull; <b style="font-size: 1.15em">{{ item.queueName || "" }}</b>
-                </div>                
-                <div class="message-time small">	               
-	                {{ item.elapsted ? item.elapsed + " &bull; " : "" }}
-                    {{ item.time || "" }}
+                <div class="status-chip" :class="rowClass(item.status)">{{ item.status || "Info" }}</div>     
+                <div>
+                     <b>{{ item.queueName || "" }}</b>
+                     &bull; <b class="text-success">{{ item.action }}</b>
+                </div>
+                <div class="message-id">                    
+                    {{ item.elapsed ? item.elapsed + " &bull; " : "" }}                    
+                    {{ item.time || "" }} &bull; <small>{{ item.id || "(no id)" }}</small>                                        
                 </div>
             </div>
             <pre v-if="item.message" class="message-body">{{ item.message }}</pre>
@@ -89,297 +84,39 @@
                 <div><strong>ID</strong><span>{{ selectedMessage.id }}</span></div>
                 <div><strong>Status</strong><span>{{ selectedMessage.status }}</span></div>
                 <div><strong>Queue</strong><span>{{ selectedMessage.queueName }}</span></div>
-                <div><strong>Date</strong><span>{{ selectedMessage.date }}</span></div>
+                <div><strong>Date</strong>
+                    <span>{{ selectedMessage.date }}</span>
+                    <small>
+                    <span v-if="selectedMessage.completed">complete: {{ selectedMessage.completed }}</span>
+                    <span v-if="selectedMessage.elapsed"> &bull; {{ selectedMessage.elapsed }}</span>
+                    </small>
+                </div>
             </div>
             <h3>Message</h3>
             <pre>{{ selectedMessage.message }}</pre>
             <h3>Payload</h3>
             <pre>{{ selectedMessage.xml }}</pre>
+            <pre>{{ JSON.stringify(selectedMessage) }}</pre>
         </section>
     </div>
+
+
+
+</div>
+<section class="status-strip">
+    <div class="status-message" :title="lastStatusMessage">
+        <i class="fas fa-circle"
+           :class="{'text-success': !lastStatusMessage || statusType === 'success', 'text-danger': statusType === 'error', 'text-warning': statusType === 'progress'}"
+        ></i>
+           
+        {{ lastStatusMessage || "Ready" }}
+    </div>
+</section>
+
 </div>
 
 @section Scripts {
     <script src="https://unpkg.com/@@microsoft/signalr@10.0.0/dist/browser/signalr.min.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-    <script>
-        (() => {
-            const { createApp } = Vue;
-
-            createApp({
-                data() {
-                    return {
-                        hubConnection: null,
-                        connectionStatus: "Disconnected",
-                        activeQueue: "",
-                        queueOptions: [{ text: "All Queues", value: "" }],
-                        waitingMessages: 0,
-                        lastStatusMessage: "",
-                        controllerStatus: {
-                            queueName: "",
-                            threadCount: 0,
-                            waitInterval: 0,
-                            paused: false
-                        },
-                        messages: [],
-                        selectedMessage: null,
-                        messageCounter: 0
-                    };
-                },
-                computed: {
-                    connectionClass() {
-                        if (this.connectionStatus === "Connected") {
-                            return "connected";
-                        }
-
-                        if (this.connectionStatus === "Reconnecting") {
-                            return "reconnecting";
-                        }
-
-                        return "disconnected";
-                    },
-                    visibleMessages() {
-                        if (!this.activeQueue) {
-                            return this.messages;
-                        }
-
-                        return this.messages.filter(message => {
-                            return !message.queueName || message.queueName === this.activeQueue;
-                        });
-                    }
-                },
-                methods: {
-                    rowClass(status) {
-                        const normalized = (status || "").toLowerCase();
-
-                        if (["success", "ok", "completed"].includes(normalized)) {
-                            return "state-success";
-                        }
-
-                        if (["error", "failed", "cancelled"].includes(normalized)) {
-                            return "state-error";
-                        }
-
-                        if (["started"].includes(normalized)) {
-                            return "state-running";
-                        }
-
-                        return "state-info";
-                    },
-                    async initialize() {
-                        await this.connectHub();
-                    },
-                    async connectHub() {
-                        this.hubConnection = new signalR.HubConnectionBuilder()
-                            .withUrl("/queueMonitorServiceHub")
-                            .withAutomaticReconnect()
-                            .configureLogging(signalR.LogLevel.Warning)
-                            .build();
-
-                        this.hubConnection.on("writeMessage", (message, status, time, id, elapsed, waiting, queueName) => {
-                            this.onWriteMessage(message, status, time, id, elapsed, waiting, queueName);
-                        });
-
-                        this.hubConnection.on("statusMessage", message => {
-                            this.lastStatusMessage = message || "";
-                        });
-
-                        this.hubConnection.on("clearMessages", () => {
-                            this.clearMessages();
-                        });
-                      
-
-                        this.hubConnection.on("getServiceStatusCallback", status => {
-                            if (!status) {
-                                this.controllerStatus = {
-                                    queueName: "",
-                                    threadCount: 0,
-                                    waitInterval: 0,
-                                    paused: false
-                                };
-                                return;
-                            }
-
-                            this.controllerStatus = {
-                                queueName: status.queueName ?? "",
-                                threadCount: status.threadCount ?? 0,
-                                waitInterval: status.waitInterval ?? 0,
-                                paused: !!status.paused
-                            };
-                        });
-
-                        this.hubConnection.on("updateControllerStatusCallback", status => {
-                            if (!status) {
-                                return;
-                            }
-
-                            this.controllerStatus = {
-                                queueName: status.queueName ?? "",
-                                threadCount: status.threadCount ?? 0,
-                                waitInterval: status.waitInterval ?? 0,
-                                paused: !!status.paused
-                            };
-                        });
-
-                        this.hubConnection.on("getWaitingQueueMessageCountCallback", count => {
-                            this.waitingMessages = Number.isFinite(count) ? count : 0;
-                        });
-
-                        this.hubConnection.on("stopServiceCallback", () => {
-                            this.controllerStatus.paused = true;
-                        });
-
-                        this.hubConnection.on("startServiceCallback", () => {
-                            this.controllerStatus.paused = false;
-                        });
-
-                        this.hubConnection.on("getQueueMessageCallback", queueMessage => {
-                            this.selectedMessage = this.normalizeQueueItem(queueMessage);
-                        });
-
-                        this.hubConnection.on("getQueueNamesCallback", queueNames => {
-                            const names = Array.isArray(queueNames) ? queueNames : [];
-                            this.queueOptions = [{ text: "All Queues", value: "" }].concat(
-                                names.map(name => ({ text: name, value: name }))
-                            );
-                        });
-
-                        this.hubConnection.onreconnecting(() => {
-                            this.connectionStatus = "Reconnecting";
-                        });
-
-                        this.hubConnection.onreconnected(async () => {
-                            this.connectionStatus = "Connected";
-                            await this.loadStartupData();
-                        });
-
-                        this.hubConnection.onclose(() => {
-                            this.connectionStatus = "Disconnected";
-                        });
-
-                        try {
-                            await this.hubConnection.start();
-                            this.connectionStatus = "Connected";
-                            await this.loadStartupData();
-                        } catch (error) {
-                            this.connectionStatus = "Disconnected";
-                            this.lastStatusMessage = "Connection failed: " + (error?.message || String(error));
-                        }
-                    },
-                    async loadStartupData() {
-                        await this.invokeHub("getQueueNames");
-                        await this.reloadMessages();
-                        await this.refreshStatus();
-                    },
-                    async invokeHub(methodName, ...args) {
-                        if (!this.hubConnection || this.hubConnection.state !== signalR.HubConnectionState.Connected) {
-                            this.lastStatusMessage = "Hub is not connected.";
-                            return null;
-                        }
-
-                        try {
-                            return await this.hubConnection.invoke(methodName, ...args);
-                        } catch (error) {
-                            this.lastStatusMessage = "Hub error: " + (error?.message || String(error));
-                            return null;
-                        }
-                    },
-                    async onQueueChanged() {
-                        await this.reloadMessages();
-                        await this.refreshStatus();
-                    },
-                    async reloadMessages() {
-                        this.clearMessages();
-                        await this.invokeHub("GetInitialMessages", this.activeQueue || "");
-                        await this.invokeHub("GetWaitingQueueMessageCount", this.activeQueue || "");
-                    },
-                    async refreshStatus() {
-                        await this.invokeHub("GetServiceStatus", this.activeQueue || "");
-                    },
-                    clearMessages() {
-                        this.messages = [];
-                    },
-                    onWriteMessage(message, status, time, id, elapsed, waiting, queueName) {
-                        if (status && status !== "Started" && id) {
-                            this.messages = this.messages.filter(item => item.id !== id);
-                        }
-
-                        this.messageCounter += 1;
-                        const safeId = id || message || "";
-                        const safeMessage = id ? (message || "") : "";
-
-                        this.messages.unshift({
-                            key: `${safeId}-${this.messageCounter}`,
-                            id: safeId,
-                            status: status || "Info",
-                            time: time || "",
-                            elapsed: elapsed || "",
-                            queueName: queueName || "",
-                            message: safeMessage.trim()
-                        });
-
-                        if (this.messages.length > 60) {
-                            this.messages = this.messages.slice(0, 60);
-                        }
-
-                        if (typeof waiting === "number" && waiting > -1) {
-                            this.waitingMessages = waiting;
-                        } else {
-                            this.invokeHub("GetWaitingQueueMessageCount", this.activeQueue || "");
-                        }
-                    },
-                    async openMessage(message) {
-                        if (!message?.id) {
-                            return;
-                        }
-
-                        await this.invokeHub("getQueueMessage", message.id);
-                    },
-                    normalizeQueueItem(item) {
-                        if (!item) {
-                            return {
-                                id: "",
-                                status: "",
-                                queueName: "",
-                                date: "",
-                                message: "",
-                                xml: ""
-                            };
-                        }
-
-                        const submitted = item.submitted || item.Submitted || "";
-                        const date = submitted ? new Date(submitted) : null;
-
-                        return {
-                            id: item.id || item.Id || "",
-                            status: item.status || item.Status || "",
-                            queueName: item.queueName || item.QueueName || "",
-                            date: date && !Number.isNaN(date.getTime()) ? date.toLocaleString() : "",
-                            message: item.message || item.Message || "",
-                            xml: item.xml || item.Xml || ""
-                        };
-                    },
-                    async updateControllerStatus() {
-                        const payload = {
-                            queueName: this.controllerStatus.queueName || this.activeQueue,
-                            threadCount: Number(this.controllerStatus.threadCount || 0),
-                            waitInterval: Number(this.controllerStatus.waitInterval || 0),
-                            paused: !!this.controllerStatus.paused
-                        };
-
-                        await this.invokeHub("UpdateServiceStatus", payload);
-                    },
-                    async startService() {
-                        await this.invokeHub("StartService");
-                    },
-                    async stopService() {
-                        await this.invokeHub("StopService");
-                    }
-                },
-                async mounted() {
-                    await this.initialize();
-                }
-            }).mount("#queueMonitorApp");
-        })();
-    </script>
+    <script src="~/js/QueueMonitor.js"></script>
 }

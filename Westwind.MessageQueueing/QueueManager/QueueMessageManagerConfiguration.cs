@@ -100,9 +100,9 @@ namespace Westwind.MessageQueueing
             WaitInterval = 1000;
             ControllerThreads = 1;
             DefaultControllerQueueName = string.Empty;
-            MonitorHostUrl = "http://*:8080/";
+            MonitorHostUrl = "http://*:5080/";
             MonitorSignalRHubUrl = "~/signalR";
-            MonitorHtmlUrl = "~/QueueMonitor.cshtml";
+            MonitorHtmlUrl = "~/QueueMonitor.cshtml";            
             
         }
 
@@ -137,6 +137,7 @@ namespace Westwind.MessageQueueing
             {
                 JsonConfigurationFile = jsonFile,                                   
             };            
+            
             return provider;
         }
     }

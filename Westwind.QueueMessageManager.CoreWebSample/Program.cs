@@ -2,10 +2,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.FileProviders;
 using System.Runtime.InteropServices;
+using Newtonsoft.Json;
+using Westwind.AspNetCore.LiveReload;
 using Westwind.MessageQueueing;
 using Westwind.MessageQueueing.Hosting;
 using Westwind.QueueManager.CoreWebSample;
 using Westwind.Utilities;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -17,23 +20,46 @@ qmmApp.Constants.StartupFolder = Environment.CurrentDirectory;
 qmmApp.Constants.WebRootFolder = Path.Combine(qmmApp.Constants.StartupFolder, "wwwroot");
 
 var configFile = "_qmmApp-configuration.json";
-var noConfig = !File.Exists(configFile);
+var configExists = File.Exists(configFile);
 
 var appConfig = qmmApp.Configuration;
 builder.Configuration.GetSection("qmmApp").Bind(appConfig);
 services.AddSingleton(appConfig);
 
-if (noConfig)
+if (!configExists)
 {
     appConfig.Write();
     Console.WriteLine($"Configuration file '{configFile}' was created. Review it, and set default values, and restart the application.");
     return;
 }
 
+if (qmmApp.Configuration.System.LiveReloadEnabled)
+{
+    services.AddLiveReload(config =>
+    {
+        config.LiveReloadEnabled = qmmApp.Configuration.System.LiveReloadEnabled;
+        config.RefreshInclusionFilter = path =>
+        {
+            if (path.Contains("/LocalizationAdmin", StringComparison.OrdinalIgnoreCase))
+                return RefreshInclusionModes.DontRefresh;
+
+            return RefreshInclusionModes.ContinueProcessing;
+        };
+    });
+}
 
 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
+var mvcBuilder = services.AddControllersWithViews()
+    .AddNewtonsoftJson(opt =>
+    {
+        if (builder.Environment.IsDevelopment())
+            opt.SerializerSettings.Formatting = Formatting.Indented;
+    });
+
+if (appConfig.System.LiveReloadEnabled)
+{
+    mvcBuilder.AddRazorRuntimeCompilation();
+}
 
 // Authorization builder related
 builder.Services.AddSingleton<
@@ -53,23 +79,68 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddSignalR();
 
 
+var config = QueueMessageManagerConfiguration.Current;
+
+
 // create a new Controller to process in the background
 // on separate threads
-QmmGlobals.Controller  = new QueueControllerMultiple(controllers: new List<QueueController>()
+QmmGlobals.Controller = new QueueControllerMultiple(config, qmmApp.ConnectionString, new List<QueueController>()
 {
     new QueueControllerMultiple()
     {
         QueueName = "Queue1",
         WaitInterval = 300,
-        ThreadCount = 5
+        ThreadCount = 3
     },
     new QueueControllerMultiple()
     {
         QueueName = "Queue2",
         WaitInterval = 500,
-        ThreadCount = 3
+        ThreadCount = 2
     }
-});
+}, typeof(QueueMessageManagerSql));
+var controller = QmmGlobals.Controller;
+controller.ExecuteStart += async manager =>
+{
+    var item = manager.Item;
+
+    var swatch = Stopwatch.StartNew();
+
+    try
+    {
+        if (item.Action == "PRINT")
+        {
+            item.Message = "Completed on: " + DateTime.Now;
+
+            await Task.Delay(5000);
+
+            manager.CompleteRequest();
+            manager.Save();            
+        }
+        else
+        {
+            await Task.Delay(1200);
+            manager.FailRequest(messageText: "Unknown action: " + item.Action);
+            manager.Save();
+        }
+    }
+    catch(Exception ex)
+    {
+        manager.FailRequest(messageText: $"Processing failed: " + ex.GetBaseException().Message);
+        manager.Save();
+    }
+
+    swatch.Stop();
+    QueueMonitorServiceHub.WriteMessageInternal(item, elapsed: (int)swatch.ElapsedMilliseconds).FireAndForget();
+};
+QmmGlobals.Controller.StartProcessingAsync();
+
+
+void Controller_ExecuteStart(QueueMessageManager obj)
+{
+    throw new NotImplementedException();
+}
+
 
 //builder.Services.AddQueueHubAuthorization();
 
@@ -82,6 +153,9 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
 }
+
+if (qmmApp.Configuration.System.LiveReloadEnabled)
+    app.UseLiveReload();
 
 app.UseStaticFiles(new StaticFileOptions
 {

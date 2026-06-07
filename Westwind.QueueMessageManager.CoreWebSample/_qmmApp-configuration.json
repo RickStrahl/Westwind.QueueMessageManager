@@ -4,6 +4,9 @@
   "JwtAudience": "Westwind.Web.Template.Client",
   "JwtSigningKey": "Westwind.Web.Template.Jwt.Signing.Key.Change.Me.2026",
   "DefaultCulture": "en-US",
+  "ApplicationName": "Queue Message Manager",
+  "ApplicationShortName": "QMM",
+  "Theme": "Light",
   "Email": {
     "MailServer": "localhost",
     "MailServerUsername": "",
@@ -26,6 +29,7 @@
     "RedirectToHttps": false,
     "ErrorDisplayMode": "Application",
     "CookieTimeoutDays": 2,
-    "ShowConsoleDbCommands": false
+    "ShowConsoleDbCommands": false,
+    "LiveReloadEnabled": true
   }
 }

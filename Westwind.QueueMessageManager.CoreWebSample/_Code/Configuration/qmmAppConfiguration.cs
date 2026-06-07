@@ -18,15 +18,17 @@ public class qmmAppConfiguration : AppConfiguration
 
     public string DefaultCulture { get; set; } = "en-US";
 
-    public EmailConfiguration Email { get; set; } = new();
-
-    public SecurityConfiguration Security { get; set; } = new();
-
     public string ApplicationName { get; set; } = "Queue Message Manager";
 
     public string ApplicationShortName { get; set; } = "QMM";
 
     public string Theme { get; set; } = "Light";
+
+
+    public EmailConfiguration Email { get; set; } = new();
+
+    public SecurityConfiguration Security { get; set; } = new();
+      
     
     public SystemConfiguration System { get; set; } = new();
     
@@ -68,6 +70,8 @@ public class SystemConfiguration
     public ErrorDisplayModes ErrorDisplayMode { get; set; } = ErrorDisplayModes.Application;
     public int CookieTimeoutDays { get; set; } = 2;
     public bool ShowConsoleDbCommands { get; set; }
+    
+    public bool LiveReloadEnabled { get; set; }
 }
 
 public enum ErrorDisplayModes

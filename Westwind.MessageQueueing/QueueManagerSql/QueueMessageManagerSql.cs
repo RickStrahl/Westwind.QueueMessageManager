@@ -293,7 +293,7 @@ namespace Westwind.MessageQueueing
         {            
             object result = Db.ExecuteScalar("select count(id) from QueueMessageItems with (NOLOCK) " +
                     "WHERE " + 
-                    (queueName != null ? "queueName=@0 AND " : "" ) + 
+                    (!string.IsNullOrEmpty(queueName) ? "queueName=@0 AND " : "" ) + 
                     "started is null", queueName);
             if (result == null)
             {

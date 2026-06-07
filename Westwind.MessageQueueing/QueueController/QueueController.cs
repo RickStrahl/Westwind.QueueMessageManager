@@ -259,9 +259,8 @@ namespace Westwind.MessageQueueing
         /// QueueManager instance. Use its Item property to get access to the current method
         /// </param>
         protected virtual void OnExecuteStart(QueueMessageManager manager)
-        {
-            if (ExecuteStart != null)
-                ExecuteStart(manager);
+        {            
+            ExecuteStart?.Invoke(manager);
         }
 
         /// <summary>
@@ -281,8 +280,7 @@ namespace Westwind.MessageQueueing
         /// </param>
         protected virtual void OnExecuteComplete(QueueMessageManager Message)
         {
-            if (ExecuteComplete != null)
-                ExecuteComplete(Message);
+            ExecuteComplete?.Invoke(Message);
         }
 
         /// <summary>

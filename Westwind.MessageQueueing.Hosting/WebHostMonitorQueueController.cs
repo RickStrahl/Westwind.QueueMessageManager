@@ -107,7 +107,7 @@ namespace Westwind.MessageQueueing.Hosting
         public virtual void WriteMessage(string message)
         {
             // forward to SignalR Hub broadcast
-            QueueMonitorServiceHub.WriteMessage(message);
+            QueueMonitorServiceHub.WriteMessageInternal(message);
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace Westwind.MessageQueueing.Hosting
         public virtual void WriteMessage(QueueMessageItem queueItem, int elapsed = 0, int waiting = -1)
         {
             // forward to SignalR Hub broadcast
-            QueueMonitorServiceHub.WriteMessage(queueItem, elapsed, waiting);
+            QueueMonitorServiceHub.WriteMessageInternal(queueItem, elapsed, waiting);
         }
 
          int GetWaitingMessageCount(QueueMessageManager manager, int delay = 10)

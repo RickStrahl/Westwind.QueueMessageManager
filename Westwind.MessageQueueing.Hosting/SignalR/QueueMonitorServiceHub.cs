@@ -91,7 +91,7 @@ namespace Westwind.MessageQueueing.Hosting
                     time = msg.Started.Value;
                 }
 
-                WriteMessage(msg, elapsed, -1, time);
+                WriteMessageInternal(msg, elapsed, -1, time).FireAndForget();
             }
         }
 
@@ -200,7 +200,18 @@ namespace Westwind.MessageQueueing.Hosting
         /// all queues
         /// </summary>
         /// <param name="queueName"></param>
-        public async Task GetWaitingQueueMessageCount(string queueName = null)
+        public Task GetWaitingQueueMessageCount(string queueName = null)
+        {
+            return GetWaitingQueueMessageCountInternal(queueName);            
+        }
+
+
+        /// <summary>
+        /// Statically accessible method to broadcast
+        /// </summary>
+        /// <param name="queueName"></param>
+        /// <returns></returns>
+        public static async Task GetWaitingQueueMessageCountInternal(string queueName = null)
         {
             if (string.IsNullOrEmpty(queueName))
                 queueName = null; // force all
@@ -208,15 +219,19 @@ namespace Westwind.MessageQueueing.Hosting
             using (var manager = new QueueMessageManagerSql())
             {
                 int count = manager.GetWaitingQueueMessageCount(queueName);
-                // broadcast to all clients
-                await Clients.All.SendAsync("getWaitingQueueMessageCountCallback", count);
+                Console.WriteLine("Queue count: " + count + "  Queue: " + queueName);
+                if (count > -1)
+                {
+                    // broadcast to all clients
+                    await HubContext.Clients.All.SendAsync("getWaitingQueueMessageCountCallback", count);
+                }
             }
         }
 
 
         public async Task Notify(QueueMessageItem queueItem, int elapsed = 0, int waiting = 0)
         {
-            await WriteMessage(queueItem, elapsed, waiting);
+            await WriteMessageInternal(queueItem, elapsed, waiting);
         }
 
 
@@ -249,8 +264,8 @@ namespace Westwind.MessageQueueing.Hosting
         /// Writes out message to all connected SignalR clients
         /// </summary>
         /// <param name="message"></param>
-        public static async Task WriteMessage(string message, string id = null, string icon = "Info",
-            DateTime? time = null)
+        public static async Task WriteMessageInternal(string message, string id = null, string icon = "Info",
+            DateTime? time = null, string queueName = null)
         {
             if (id == null)
                 id = string.Empty;
@@ -271,7 +286,9 @@ namespace Westwind.MessageQueueing.Hosting
                 icon,
                 time.Value.ToString("HH:mm:ss"),
                 id,
-                string.Empty);
+                queueName ?? string.Empty);
+
+           
         }
 
 
@@ -281,7 +298,7 @@ namespace Westwind.MessageQueueing.Hosting
         /// <param name="queueItem"></param>
         /// <param name="elapsed"></param>
         /// <param name="waiting"></param>
-        public static async Task WriteMessage(QueueMessageItem queueItem,
+        public static async Task WriteMessageInternal(QueueMessageItem queueItem,
             int elapsed = 0,
             int waiting = -1,
             DateTime? time = null)
@@ -301,7 +318,9 @@ namespace Westwind.MessageQueueing.Hosting
                 time.Value.ToString("HH:mm:ss"),
                 queueItem.Id,
                 elapsedString,
-                waiting, queueItem.QueueName);
+                waiting, 
+                queueItem.QueueName,
+                queueItem.Action, new { name="Rick", company="West Wind" });
         }
 
         /// <summary>
