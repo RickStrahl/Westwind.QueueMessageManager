@@ -11,7 +11,7 @@
 <div class="monitor-page">
     <header class="monitor-header">
         <div>
-            <h1>Queue Monitor  <span style="font-size: 0.55em; font-weight: normal">v@(qmmApp.Version)</span></h1>            
+            <h1 style="margin: 0; border: none; padding: 0">Queue Monitor  <span style="font-size: 0.55em; font-weight: normal">v@(qmmApp.Version)</span></h1>            
         </div>
         <div class="connection-pill" :class="connectionClass">
             {{ connectionStatus }}
@@ -39,7 +39,7 @@
                        v-model.number="controllerStatus.waitInterval"  />
             </div>
             <button class="btn btn-primary btn-sm"
-                    style="padding: 0.1em 0.6em !important;"
+                    style="padding-top:0 !important;padding-bottom: 0 !important;"
                     @@click="updateControllerStatus" :disabled="!controllerStatus.queueName">Update</button>
         </div>
 
@@ -64,7 +64,7 @@
                 <div class="status-chip" :class="rowClass(item.status)">{{ item.status || "Info" }}</div>     
                 <div>
                      <b>{{ item.queueName || "" }}</b>
-                     &bull; <b class="text-success">{{ item.action }}</b>
+                     &bull; <b class="text-info">{{ item.action }}</b>
                 </div>
                 <div class="message-id">                    
                     {{ item.elapsed ? item.elapsed + " &bull; " : "" }}                    
@@ -108,10 +108,10 @@
 <section class="status-strip">
     <div class="status-message" :title="lastStatusMessage">
         <i class="fas fa-circle"
-           :class="{'text-success': !lastStatusMessage || statusType === 'success', 'text-danger': statusType === 'error', 'text-warning': statusType === 'progress'}"
-        ></i>
-           
-        {{ lastStatusMessage || "Ready" }}
+           :class="{'text-success': !lastStatusMessage || statusType === 'success', 'text-danger': statusType === 'error', 'text-warning': statusType === 'progress'}"          
+        ></i> <span :style="{ color: !lastStatusMessage ? 'var(--ink-muted)' : '', fontWeight: lastStatusMessage ? 'bold' : '400' }">
+            {{ lastStatusMessage || "Ready" }}
+        </span>
     </div>
 </section>
 

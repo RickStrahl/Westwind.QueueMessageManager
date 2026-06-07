@@ -1,14 +1,18 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.FileProviders;
-using System.Runtime.InteropServices;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Serilog;
+using Serilog.Sinks.File;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Westwind.AspNetCore.LiveReload;
 using Westwind.MessageQueueing;
 using Westwind.MessageQueueing.Hosting;
 using Westwind.QueueManager.CoreWebSample;
+using Westwind.QueueMessageManager.CoreWebSample;
 using Westwind.Utilities;
-using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -32,6 +36,28 @@ if (!configExists)
     Console.WriteLine($"Configuration file '{configFile}' was created. Review it, and set default values, and restart the application.");
     return;
 }
+
+
+builder.Logging.ClearProviders();
+
+// logging
+var logConfig = new LoggerConfiguration()
+    .MinimumLevel.Warning()
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    //outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}---{NewLine}")
+    .WriteTo.File(
+        Path.Combine(qmmApp.Constants.WebRootFolder, "admin", "applicationlog.txt"),
+        fileSizeLimitBytes: 3_000_000,
+        retainedFileCountLimit: 5,
+        rollOnFileSizeLimit: true,
+        shared: true,
+        outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}---{NewLine}",
+        flushToDiskInterval: TimeSpan.FromSeconds(20));
+
+Log.Logger = logConfig.CreateLogger();
+Log.Information("Application Started.");
+builder.Services.AddSerilog();
 
 if (qmmApp.Configuration.System.LiveReloadEnabled)
 {
@@ -81,40 +107,29 @@ builder.Services.AddSignalR();
 
 var config = QueueMessageManagerConfiguration.Current;
 
+
+//var launcher = new ServiceLauncher<TestQmmController>()
+//{
+//    LogManager = Log.Logger as Microsoft.Extensions.Logging.ILogger
+//};
+
 // create a new Controller to process in the background
 // on separate threads
-QmmGlobals.Controller = new QueueControllerMultiple(config, qmmApp.ConnectionString);
-
-
-//{
-//    new QueueControllerMultiple()
-//    {
-//        QueueName = "Queue1",
-//        WaitInterval = 300,
-//        ThreadCount = 1
-//    },
-//    new QueueControllerMultiple()
-//    {
-//        QueueName = "Queue2",
-//        WaitInterval = 500,
-//        ThreadCount = 1
-//    }
-//}, typeof(QueueMessageManagerSql));
-var controller = QmmGlobals.Controller;
+var controller = new QueueControllerMultiple(config, qmmApp.ConnectionString);
+QmmGlobals.Controller = controller;
 controller.ExecuteStart += async manager =>
 {
     var item = manager.Item;
-
     var swatch = Stopwatch.StartNew();
-    
+
     // TEST ONLY
     await Task.Delay(1000); // so we can see submission
 
     try
     {
         if (item.Action == "PRINT")
-        {            
-            item.Message = "Started on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;            
+        {
+            item.Message = "Started on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;
             manager.StartRequest();
             manager.Save();
             QueueMonitorServiceHub.WriteMessageInternal(item).FireAndForget();
@@ -123,7 +138,7 @@ controller.ExecuteStart += async manager =>
             item.Message = "Completed on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;
 
             manager.CompleteRequest();
-            manager.Save();            
+            manager.Save();
         }
         else
         {
@@ -132,7 +147,7 @@ controller.ExecuteStart += async manager =>
             manager.Save();
         }
     }
-    catch(Exception ex)
+    catch (Exception ex)
     {
         manager.FailRequest(messageText: $"Processing failed: " + ex.GetBaseException().Message);
         manager.Save();
@@ -141,7 +156,10 @@ controller.ExecuteStart += async manager =>
     swatch.Stop();
     QueueMonitorServiceHub.WriteMessageInternal(item, elapsed: (int)swatch.ElapsedMilliseconds).FireAndForget();
 };
-QmmGlobals.Controller.StartProcessingAsync();
+controller.StartProcessingAsync();
+
+
+
 
 
 void Controller_ExecuteStart(QueueMessageManager obj)

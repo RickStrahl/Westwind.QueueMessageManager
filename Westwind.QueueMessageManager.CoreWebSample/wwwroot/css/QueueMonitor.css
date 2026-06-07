@@ -18,7 +18,7 @@ body {
 	border-radius: 16px;
 	color: var(--ink);
 	min-height: calc(100vh - 180px); */
-	padding: 0.5rem 1rem 0.2rem 1rem;
+	padding: 0rem 1rem 0.2rem 1rem;
 }
 
 .monitor-header {
@@ -26,7 +26,7 @@ body {
 	display: flex;
 	gap: 1rem;
 	justify-content: space-between;
-	margin-bottom: 1rem;
+	margin-bottom: 0.5rem;
 }
 
 	.monitor-header h1 {
@@ -72,12 +72,12 @@ body {
 .control-grid {
 	background: color-mix(in srgb, var(--panel) 93%, #ecf3ff);
 	border: 1px solid var(--line);
-	border-radius: 14px;
+	border-radius: 7px;
 	display: grid;
-	gap: 0.9rem;
+	gap: 0.5rem;
 	grid-template-columns: 1fr 1fr;
-	margin-bottom: 0.9rem;
-	padding: 0.9rem;
+	margin-bottom: 0.6rem;
+	padding: 0.5em 0.9em;
 }
 
 .field {
@@ -111,24 +111,6 @@ body {
 
 
 
-.btn-primary {
-	background: linear-gradient(160deg, var(--accent), #0a7bf4);
-	border-color: color-mix(in srgb, var(--accent) 50%, black);
-	color: white;
-}
-
-.btn-success {
-	background: linear-gradient(160deg, #11944f, #0c7f45);
-	border-color: #0d6c3b;
-	color: white;
-}
-
-.btn-danger {
-	background: linear-gradient(160deg, #da3f3f, #bf2121);
-	border-color: #a91b1b;
-	color: white;
-}
-
 .button-row {
 	align-items: end;
 	display: flex;
@@ -151,7 +133,6 @@ body {
 }
 
 .status-message {
-	color: var(--ink-muted);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -160,7 +141,7 @@ body {
 .message-list {
 	display: grid;
 	gap: 0.2rem;
-	max-height: calc(100vh - 300px);
+	max-height: calc(100vh - 270px);
 	overflow: auto;
 	padding-right: 0.25rem;	
 }
@@ -169,7 +150,7 @@ body {
 	background: var(--panel);
 	border: 1px solid var(--line);
 	border-left: 7px solid #8fa4bd;
-	border-radius: 7px;
+	border-radius: 4.5px;
 	cursor: pointer;
 	padding: 0.4rem 0.75rem 0.1em 0.7em;
 }
@@ -332,7 +313,7 @@ body {
 	}
 
 	.message-list {
-		max-height: calc(100vh - 300px);
+		max-height: calc(100vh - 270px);
 	}
 
 	.meta-grid {

@@ -1,9 +1,8 @@
-#if false
+using Microsoft.Extensions.Logging;
 using System;
 using System.Text;
 using System.Threading;
-using System.Web.Hosting;
-using Westwind.Utilities.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Westwind.MessageQueueing.Hosting
 {
@@ -21,6 +20,22 @@ namespace Westwind.MessageQueueing.Hosting
     public class ServiceLauncher<TController>
         where TController:  QueueControllerMultiple, new()        
     {
+
+        public ILogger LogManager { get; }
+
+        QueueMessageManagerConfiguration QueueManagerConfiguration { get;  }
+
+        public ServiceLauncher()
+        {
+            LogManager = new NullLogger<ServiceLauncher<TController>>();
+        }
+
+
+        public ServiceLauncher(QueueMessageManagerConfiguration config)
+        {
+            QueueManagerConfiguration = config;
+        }
+
         /// <summary>
         /// Instance of the QueueService controller that is maintained
         /// on this service instance - ensures the controller's lifetime
@@ -43,7 +58,7 @@ namespace Westwind.MessageQueueing.Hosting
         public Func<QueueMessageManager> OnCreateQueueManager { get; set;  }
 
         public void Start()
-        {    
+        {                
             try
             {                
                 // Create multiple child controllers from web.config configuration                
@@ -62,19 +77,17 @@ namespace Westwind.MessageQueueing.Hosting
 
                 foreach (QueueController controller in Controller.Controllers)
                 {
-                   sb.AppendLine(String.Format(" [ {0} thread(s) on Queue: {1} ] ", controller.ThreadCount, controller.QueueName ));
+                   sb.AppendLine($" [ {controller.ThreadCount} thread(s) on Queue: {controller.QueueName} ] ");
                 }
-                LogManager.Current.LogInfo("QueueManager Controller Started", sb.ToString());
+                LogManager.LogInformation($"QueueManager Controller Started:\n{sb.ToString()}");
 
                 // Allow access to a global instance of this controler and service
                 // So we can access it from the stateless SignalR hub
-                Globals.Controller = Controller;
-                
+                QmmGlobals.Controller = Controller;                
             }
             catch (Exception ex)
             {
-                LogManager.Current.LogError(ex);
-                LogManager.Current.LogError(ex.GetBaseException());
+                LogManager.LogError(ex, ex.GetBaseException().Message);
             }
         }
 
@@ -85,7 +98,7 @@ namespace Westwind.MessageQueueing.Hosting
         /// <param name="immediate"></param>
         public void Stop(bool immediate = false)
         {
-            LogManager.Current.LogInfo("QueueManager Controller Stopped.");
+            LogManager.LogInformation("QueueManager Controller Stopped.");
 
             Controller.StopProcessing();
             Controller.Dispose();
@@ -94,4 +107,3 @@ namespace Westwind.MessageQueueing.Hosting
 
     }
 }
-#endif
