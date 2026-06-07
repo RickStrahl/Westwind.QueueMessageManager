@@ -32,8 +32,9 @@ Websurge-Request-Name: Submit Item with Bad Action
 ----- Start WebSurge Options -----
 
 {
-  "SiteBaseUrl": "https://localhost:5001/",
+  "SiteBaseUrl": "https://localhost:5080/",
   "RecentSiteBaseUrlList": [
+    "https://localhost:5080/",
     "https://localhost:5001/"
   ],
   "OnlineSessionId": null,

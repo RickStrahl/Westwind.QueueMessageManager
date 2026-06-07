@@ -169,7 +169,7 @@ namespace Westwind.MessageQueueing.Hosting
                 status.threadCount = 50;
             }
 
-            var config = QueueMessageManagerConfiguration.Current;
+            var config = QueueMessageManagerConfiguration.Current;        
 
             // grab the individual controller
             var controllerConfig = config.Controllers
@@ -184,7 +184,9 @@ namespace Westwind.MessageQueueing.Hosting
 
             // try to save config settings
             //config.Write();
-            Task.Delay(2000).ContinueWith(x => config.Write());
+            await Task.Delay(2000);
+
+            config.Write();
 
             controller.StopProcessing();
             controller.StartProcessingAsync();

@@ -4,7 +4,20 @@
   "DefaultQueueName": null,
   "DefaultControllerQueueName": "",
   "ControllerThreads": 1,
-  "Controllers": null,
+  "Controllers": [
+    {
+      "ConnectionString": null,
+      "QueueName": "Queue1",
+      "ControllerThreads": 2,
+      "WaitInterval": 300
+    },
+    {
+      "ConnectionString": null,
+      "QueueName": "Queue2",
+      "ControllerThreads": 3,
+      "WaitInterval": 300
+    }
+  ],
   "MonitorSignalRHubUrl": "~/signalR",
   "MonitorHtmlUrl": "~/QueueMonitor.cshtml",
   "MonitorHostUrl": "http://*:5080/",

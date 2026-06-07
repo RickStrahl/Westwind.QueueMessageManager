@@ -148,10 +148,10 @@ namespace Westwind.MessageQueueing
     /// </summary>
     public class ControllerConfiguration
     {
-        public string ConnectionString { get; set; }
-        public string QueueName { get; set; }
-        public int ControllerThreads { get; set; }
-        public int WaitInterval { get; set; }
+        public string ConnectionString { get; set; } 
+        public string QueueName { get; set; } 
+        public int ControllerThreads { get; set; } = 1;
+        public int WaitInterval { get; set; } = 300;
 
         /// <summary>
         /// Allows retrieving an object from a string generated with ToString()

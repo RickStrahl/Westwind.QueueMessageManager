@@ -38,12 +38,14 @@
                 <input id="waitInterval" type="number" min="10" style="width: 6em"
                        v-model.number="controllerStatus.waitInterval"  />
             </div>
+            <button class="btn btn-primary btn-sm"
+                    style="padding: 0.1em 0.6em !important;"
+                    @@click="updateControllerStatus" :disabled="!controllerStatus.queueName">Update</button>
         </div>
 
         <div class="button-row">
             <button class="btn btn-primary btn-sm" @@click="reloadMessages">Reload</button>
-            <button class="btn btn-primary btn-sm" @@click="refreshStatus">Refresh Status</button>
-            <button class="btn btn-primary btn-sm" @@click="updateControllerStatus" :disabled="!controllerStatus.queueName">Update</button>
+            <button class="btn btn-primary btn-sm" @@click="refreshStatus">Refresh Status</button>            
             <button class="btn btn-success btn-sm" @@click="startService" v-if="controllerStatus.paused">Start</button>
             <button class="btn btn-danger btn-sm" @@click="stopService" v-else>Stop</button>
             <button class="btn btn-outline-secondary btn-sm" @@click="clearMessages">Clear</button>

@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using Westwind.Utilities;
 
+
 namespace Westwind.MessageQueueing
 {
 
@@ -19,16 +20,19 @@ namespace Westwind.MessageQueueing
     /// </summary>
     public class QueueController : IDisposable
     {
+        public const int DEFAULT_INTERVAL = 1000;
+
+
         public QueueController()
         {            
             QueueName = string.Empty;
-            WaitInterval = 1000;
+            WaitInterval = -1;
             ThreadCount = 1; 
             QueueManagerType = typeof(QueueMessageManagerSql);                        
         }
 
         /// <summary>
-        /// Initializes the QueueController from the 
+        /// Initializes the top level QueueController from the 
         /// Queue Configuration Settings
         /// </summary>
         /// <param name="configuration"></param>
@@ -37,6 +41,8 @@ namespace Westwind.MessageQueueing
         {                        
             if (queueManagerType != null)
                 QueueManagerType = queueManagerType;
+            if (QueueManagerType == null)
+                QueueManagerType = typeof(QueueMessageManagerSql);
 
             if (configuration == null)
                 configuration = QueueMessageManagerConfiguration.Current;
@@ -47,9 +53,26 @@ namespace Westwind.MessageQueueing
             ConnectionString = connectionString ?? configuration.ConnectionString;
             ThreadCount = configuration.ControllerThreads;
             QueueName = configuration.DefaultControllerQueueName ?? string.Empty;
-            WaitInterval = configuration.WaitInterval;
+            WaitInterval = configuration.WaitInterval;            
         }
 
+
+        /// <summary>
+        /// Configures a single controller with the configuration settings. This is called for each controller in the Controllers list
+        /// </summary>       
+        /// <param name="configuration"></param>
+        /// <param name="connectionString"></param>
+        /// <param name="queueManagerType"></param>
+        public void InitializeIndiviualController(ControllerConfiguration configuration = null, string connectionString = null, Type queueManagerType = null)
+        {            
+            configuration = configuration ?? new();
+
+            WaitInterval = configuration.WaitInterval;         
+            QueueName = configuration.QueueName;
+            ThreadCount = configuration.ControllerThreads;
+            QueueManagerType = queueManagerType ?? QueueManagerType;
+            ConnectionString = connectionString ?? ConnectionString;
+        }
 
         /// <summary>
         /// Connection String for the database
@@ -72,7 +95,7 @@ namespace Westwind.MessageQueueing
         /// Determines how often the control checks for new messages
         /// Set in milliseconds.
         /// </summary>
-        public virtual int WaitInterval { get; set; }
+        public virtual int WaitInterval { get; set; } = -1;
 
         /// <summary>
         /// Number of threads processing the queue
@@ -147,6 +170,9 @@ namespace Westwind.MessageQueueing
         {
             Active = true;
             Paused = false;
+
+            if (WaitInterval == -1)
+                WaitInterval = DEFAULT_INTERVAL;        
 
             while (Active)
             {
@@ -377,5 +403,9 @@ namespace Westwind.MessageQueueing
             StopProcessing();
         }
 
+        public override string ToString()
+        {
+            return $"{QueueName} [ {ThreadCount} thread(s), {WaitInterval} ms, paused: {Paused} ]";
+        }
     }
 }

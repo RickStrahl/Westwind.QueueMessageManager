@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -41,6 +41,7 @@ namespace Westwind.MessageQueueing
         public void Initialize(QueueMessageManagerConfiguration configuration = null, string connectionString = null,
                                Type managerType = null, IEnumerable<QueueController> controllers = null)
         {            
+            // top level configuration
             base.Initialize(configuration, connectionString, managerType);
 
             if (controllers != null)
@@ -62,19 +63,18 @@ namespace Westwind.MessageQueueing
             // load up the controllers and create a single default controller
             Controllers = new List<QueueController>();
             
-            if (configuration != null && configuration.Controllers != null)
+            if (configuration?.Controllers != null)
             {
                 // pass configuration to all the child controllers
                 foreach (var config in configuration.Controllers)
                 {
-                    var ctrl = Activator.CreateInstance(QueueManagerType) as QueueController;
-                    ctrl.Initialize(configuration, ConnectionString, QueueManagerType);
-                    ctrl.OnCreateQueueManager = OnCreateQueueManager;
-
+                    var ctrl = Activator.CreateInstance(typeof(QueueController)) as QueueController;
+                    ctrl.InitializeIndiviualController( config, connectionString, managerType);                    
                     Controllers.Add(ctrl);
                 }
             }         
         }
+
 
 
         /// <summary>

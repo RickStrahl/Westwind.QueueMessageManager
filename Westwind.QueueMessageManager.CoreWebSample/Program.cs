@@ -81,38 +81,46 @@ builder.Services.AddSignalR();
 
 var config = QueueMessageManagerConfiguration.Current;
 
-
 // create a new Controller to process in the background
 // on separate threads
-QmmGlobals.Controller = new QueueControllerMultiple(config, qmmApp.ConnectionString, new List<QueueController>()
-{
-    new QueueControllerMultiple()
-    {
-        QueueName = "Queue1",
-        WaitInterval = 300,
-        ThreadCount = 3
-    },
-    new QueueControllerMultiple()
-    {
-        QueueName = "Queue2",
-        WaitInterval = 500,
-        ThreadCount = 2
-    }
-}, typeof(QueueMessageManagerSql));
+QmmGlobals.Controller = new QueueControllerMultiple(config, qmmApp.ConnectionString);
+
+
+//{
+//    new QueueControllerMultiple()
+//    {
+//        QueueName = "Queue1",
+//        WaitInterval = 300,
+//        ThreadCount = 1
+//    },
+//    new QueueControllerMultiple()
+//    {
+//        QueueName = "Queue2",
+//        WaitInterval = 500,
+//        ThreadCount = 1
+//    }
+//}, typeof(QueueMessageManagerSql));
 var controller = QmmGlobals.Controller;
 controller.ExecuteStart += async manager =>
 {
     var item = manager.Item;
 
     var swatch = Stopwatch.StartNew();
+    
+    // TEST ONLY
+    await Task.Delay(1000); // so we can see submission
 
     try
     {
         if (item.Action == "PRINT")
-        {
-            item.Message = "Completed on: " + DateTime.Now;
+        {            
+            item.Message = "Started on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;            
+            manager.StartRequest();
+            manager.Save();
+            QueueMonitorServiceHub.WriteMessageInternal(item).FireAndForget();
 
-            await Task.Delay(5000);
+            await Task.Delay(3000);
+            item.Message = "Completed on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;
 
             manager.CompleteRequest();
             manager.Save();            

@@ -96,13 +96,13 @@ body {
 .two-up {
 	display: grid;
 	gap: 0.6rem;
-	grid-template-columns: 1fr 1fr;
+	grid-template-columns: 9em 11em 70px;
+	
 }
 
 .monitor-page input,
 .monitor-page select {
-	background: white;
-	border: 1px solid var(--line);
+	background: white;	
 	border-radius: 3px;
 	color: var(--ink);
 	padding: 0.3rem 0.4rem;
