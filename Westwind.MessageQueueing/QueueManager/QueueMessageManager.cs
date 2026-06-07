@@ -198,6 +198,29 @@ namespace Westwind.MessageQueueing
             return true;
         }
 
+        /// <summary>
+        /// Starts a request setting the Started Time and setting Status to `Started`
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="messageText"></param>
+        /// <param name="autoSave"></param>
+        /// <returns></returns>
+        public bool StartRequest(QueueMessageItem item = null, string messageText = null, bool autoSave = false)
+        {
+            if (item == null)
+                item = Item;
+            if (item == null)
+                item = CreateItem();
+            item.Started = DateTime.UtcNow;
+            item.Status = "Started";
+            if (!string.IsNullOrEmpty(messageText))
+                item.Message = messageText;
+            Item = item;
+            if (autoSave)
+                return Save();
+            return true;
+        }
+
 
         /// <summary>
         /// Sets the Item record with the required settings
