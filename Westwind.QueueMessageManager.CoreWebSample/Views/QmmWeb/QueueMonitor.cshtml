@@ -80,6 +80,7 @@
         <section class="modal-panel">
             <header>
                 <h2>Queue Item Details</h2>
+                <button class="btn" @@click="resetMessage">Restart</button>
                 <button class="btn" @@click="selectedMessage = null">Close</button>
             </header>
             <div class="meta-grid">
@@ -98,7 +99,7 @@
             <pre>{{ selectedMessage.message }}</pre>
             <h3>Payload</h3>
             <pre>{{ selectedMessage.xml }}</pre>
-            <pre>{{ JSON.stringify(selectedMessage) }}</pre>
+            @* <pre>{{ JSON.stringify(selectedMessage) }}</pre> *@
         </section>
     </div>
 

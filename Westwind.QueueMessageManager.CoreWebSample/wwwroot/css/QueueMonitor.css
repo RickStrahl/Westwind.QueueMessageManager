@@ -141,7 +141,7 @@ body {
 .message-list {
 	display: grid;
 	gap: 0.2rem;
-	max-height: calc(100vh - 270px);
+	max-height: calc(100vh - 230px);
 	overflow: auto;
 	padding-right: 0.25rem;	
 }
@@ -313,7 +313,7 @@ body {
 	}
 
 	.message-list {
-		max-height: calc(100vh - 270px);
+		max-height: calc(100vh - 250px);
 	}
 
 	.meta-grid {

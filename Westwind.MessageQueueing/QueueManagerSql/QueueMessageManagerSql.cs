@@ -158,7 +158,10 @@ namespace Westwind.MessageQueueing
             Item.Status = "Started";
 
             // load up Properties from XmlProperties field
-            GetProperties("XmlProperties", Item);
+            if (!string.IsNullOrEmpty(Item.XmlProperties))
+            {
+                GetProperties("XmlProperties", Item);
+            }
 
             return Item;
         }

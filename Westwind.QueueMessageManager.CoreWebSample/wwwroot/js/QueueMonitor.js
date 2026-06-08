@@ -148,6 +148,7 @@
                 this.hubConnection.on("getQueueMessageCallback", queueMessage => {                    
                     this.selectedMessage = this.normalizeQueueItem(queueMessage);
                 });
+                
 
                 this.hubConnection.on("getQueueNamesCallback", queueNames => {
                     const names = Array.isArray(queueNames) ? queueNames : [];
@@ -202,11 +203,18 @@
             },
             async reloadMessages() {
                 this.clearMessages();
-                await this.invokeHub("GetInitialMessages", this.activeQueue || "");
+                //await this.invokeHub("GetInitialMessages", this.activeQueue || "");
+                var msgs = await this.invokeHub("GetInitialMessagesList", this.activeQueue || "");
+                for (var msg of msgs || []) {
+                    this.onWriteMessage(msg.message, msg.status, msg.time, msg.id, msg.elapsed, null, msg.queueName, msg.action);
+                }
                 await this.invokeHub("GetWaitingQueueMessageCount", this.activeQueue || "");
             },
             async refreshStatus() {
                 await this.invokeHub("GetServiceStatus", this.activeQueue || "");
+            },
+            async resetMessage() {     
+                this.selectedMessage = await this.invokeHub("ResetRequest", this.selectedMessage?.id);
             },
             clearMessages() {
                 this.messages = [];

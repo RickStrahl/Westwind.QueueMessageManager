@@ -44,12 +44,22 @@ namespace Westwind.MessageQueueing
 
             if (controllers != null)
                 Controllers = controllers.ToList();
-                
 
-            // ignore controller list if controllers have been 
-            // explicitly set
+
+            // if controllers were passed in then we assume they are already configured and just use them
             if (Controllers != null && Controllers.Count > 0)
+            {
+                // fix up passed controllers for missing props
+                foreach(var ctrl in Controllers) 
+                {
+                    if (string.IsNullOrEmpty(ctrl.ConnectionString))
+                        ctrl.ConnectionString = connectionString;
+                    if (ctrl.WaitInterval < 1)
+                        ctrl.WaitInterval = WaitInterval;                    
+                }
+
                 return;
+            }
 
             
             if (configuration == null)
@@ -67,7 +77,12 @@ namespace Westwind.MessageQueueing
                 foreach (var config in configuration.Controllers)
                 {
                     var ctrl = Activator.CreateInstance(typeof(QueueController)) as QueueController;
-                    ctrl.InitializeIndiviualController( config, connectionString, managerType);                    
+                    ctrl.InitializeIndiviualController( config, connectionString, managerType);
+                    ctrl.ExecuteStart = OnExecuteStart;
+                    ctrl.ExecuteStartAsync = OnExecuteStartAsync;
+                    ctrl.ExecuteComplete = OnExecuteComplete;                        
+                    ctrl.ExecuteFailed = OnExecuteFailed;
+
                     Controllers.Add(ctrl);
                 }
             }         
@@ -98,51 +113,49 @@ namespace Westwind.MessageQueueing
         private int _MessageProcessed = 0;
 
 
-        /// <summary>
-        /// Event called when an individual request starts processing
-        /// Your user code can attach to this event and start processing
-        /// with the message information.
-        /// </summary>        
-        public virtual event Action<QueueMessageManager> ExecuteStart;
+        ///// <summary>
+        ///// Event called when an individual request starts processing
+        ///// Your user code can attach to this event and start processing
+        ///// with the message information.
+        ///// </summary>        
+        //public virtual event Action<QueueMessageManager> ExecuteStart;
 
-        /// <summary>
-        /// Event fired when the asynch operation has successfully completed
-        /// </summary>
-        public virtual event Action<QueueMessageManager> ExecuteComplete;
+        ///// <summary>
+        ///// Event fired when the asynch operation has successfully completed
+        ///// </summary>
+        //public virtual event Action<QueueMessageManager> ExecuteComplete;
          
-        /// <summary>
-        /// Event fired when the asynch operation has failed to complete (an exception
-        /// was thrown during processing). Implement for logging or notifications.
-        /// </summary>
-        public virtual event Action<QueueMessageManager, Exception> ExecuteFailed;
+        ///// <summary>
+        ///// Event fired when the asynch operation has failed to complete (an exception
+        ///// was thrown during processing). Implement for logging or notifications.
+        ///// </summary>
+        //public virtual event Action<QueueMessageManager, Exception> ExecuteFailed;
         
-        /// <summary>
-        /// Event fired when the read operation to retrieve the next message from
-        /// the database has failed. Allows for error handling or logging.
-        /// </summary>
-        public virtual event Action<QueueMessageManager, Exception> NextMessageFailed;
+        ///// <summary>
+        ///// Event fired when the read operation to retrieve the next message from
+        ///// the database has failed. Allows for error handling or logging.
+        ///// </summary>
+        //public virtual event Action<QueueMessageManager, Exception> NextMessageFailed;
 
 
         /// <summary>
         /// Starts all of the controllers processing requests on 
         /// a sepearate thread
         /// </summary>
-        public void StartProcessingAsync()
-        {
-            foreach (QueueController controller in Controllers)
+            public void StartProcessingAsync()
             {
-                if (ExecuteStart != null)
-                    controller.ExecuteStart += ExecuteStart;
-                if (ExecuteComplete != null)
-                    controller.ExecuteComplete += ExecuteComplete;
-                if (ExecuteFailed != null)
-                    controller.ExecuteFailed += ExecuteFailed;
-                if (NextMessageFailed != null)
-                    controller.NextMessageFailed += NextMessageFailed;
+                foreach (QueueController controller in Controllers)
+                {                    
+                    controller.ExecuteStart = ExecuteStart;
+                    controller.ExecuteStartAsync = ExecuteStartAsync;
 
-                controller.StartProcessingAsync();
+                    controller.ExecuteComplete = ExecuteComplete;
+                    controller.ExecuteFailed = ExecuteFailed;
+                    controller.NextMessageFailed = NextMessageFailed;
+
+                    controller.StartProcessingAsync();
+                }
             }
-        }
 
         /// <summary>
         /// Stops all queue requests from processing  and ends

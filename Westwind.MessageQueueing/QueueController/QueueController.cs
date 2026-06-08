@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Westwind.Utilities;
 
 
@@ -201,7 +202,7 @@ namespace Westwind.MessageQueueing
                     }
 
                     // Fire events to execute the real operation
-                    ExecuteSteps(manager);
+                    ExecuteSteps(manager).FireAndForget();
                 }
 
                 // let CPU breathe
@@ -247,12 +248,13 @@ namespace Westwind.MessageQueueing
         /// ExecuteFailed
         /// </summary>
         /// <param name="manager">Instance of QueueMessageManager and it's Item property</param>
-        protected virtual void ExecuteSteps(QueueMessageManager manager)
+        protected virtual async Task ExecuteSteps(QueueMessageManager manager)
         {
             try
             {
                 // Hook up start processing
                 OnExecuteStart(manager);
+                await OnExecuteStartAsync(manager);
 
                 // Hookup end processing
                 OnExecuteComplete(manager);
@@ -271,8 +273,16 @@ namespace Westwind.MessageQueueing
         /// Your user code can attach to this event and start processing
         /// with the message information.
         /// </summary>        
-        public virtual event Action<QueueMessageManager> ExecuteStart;
+        public Action<QueueMessageManager> ExecuteStart;        
 
+        /// <summary>
+        /// Event called when an individual request starts processing
+        /// Your user code can attach to this event and start processing
+        /// with the message information.
+        /// </summary>        
+        public Func<QueueMessageManager, Task> ExecuteStartAsync;
+
+       
 
         /// <summary>
         /// Override this method to process your async  operation. Required for
@@ -289,12 +299,29 @@ namespace Westwind.MessageQueueing
             ExecuteStart?.Invoke(manager);
         }
 
+
+        /// <summary>
+        /// Override this method to process your async  operation. Required for
+        /// anything to happen when the message is processed. If the operation 
+        /// succeeds (no exception), OnExecuteComplete will
+        /// be called. This method should throw an exception if the operation fails,
+        /// so that OnExecuteFailed will be fired. 
+        /// </summary>
+        /// <param name="manager">
+        /// QueueManager instance. Use its Item property to get access to the current method
+        /// </param>
+        protected virtual Task OnExecuteStartAsync(QueueMessageManager manager)
+        {
+            if (ExecuteStartAsync == null) return Task.CompletedTask;
+            return ExecuteStartAsync?.Invoke(manager);
+        }
+
+
         /// <summary>
         /// Event fired when the asynch operation has successfully completed
         /// </summary>
-        public virtual event Action<QueueMessageManager> ExecuteComplete;
+        public Action<QueueMessageManager> ExecuteComplete = null;
 
-        
 
         /// <summary>
         /// Override this method to do any post processing that needs to happen
@@ -304,17 +331,18 @@ namespace Westwind.MessageQueueing
         /// <param name="manager">
         /// QueueManager instance. Use its Item property to get access to the current method
         /// </param>
-        protected virtual void OnExecuteComplete(QueueMessageManager Message)
+        protected virtual void OnExecuteComplete(QueueMessageManager manager)
         {
-            ExecuteComplete?.Invoke(Message);
+            ExecuteComplete?.Invoke(manager);
         }
 
         /// <summary>
         /// Event fired when the asynch operation has failed to complete (an exception
         /// was thrown during processing). Implement for logging or notifications.
         /// </summary>
-        public event Action<QueueMessageManager, Exception> ExecuteFailed;
+        public Action<QueueMessageManager, Exception> ExecuteFailed;
 
+        
         /// <summary>
         /// Override this method to handle any errors that occured during processing
         /// of the async task. Optional - implement for logging or notifications.
@@ -353,7 +381,8 @@ namespace Westwind.MessageQueueing
         /// Event fired when the read operation to retrieve the next message from
         /// the database has failed. Allows for error handling or logging.
         /// </summary>
-        public virtual event Action<QueueMessageManager, Exception> NextMessageFailed;
+        public  Action<QueueMessageManager, Exception> NextMessageFailed;
+
 
         /// <summary>
         /// Override this method to handle any errors that occured trying to receive 

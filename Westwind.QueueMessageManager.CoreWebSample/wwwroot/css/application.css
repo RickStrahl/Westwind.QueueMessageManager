@@ -207,9 +207,12 @@ label {
     font-size: 1.4em;
     margin-bottom: 2em;
 }
+.btn-sm {
+    padding: 0.17em 0.55em !important;
+}
 .btn-primary {
     background-color: #337ab6;
-    border-color: #337ab6;
+    border-color: #286292;
 }
 .table th {
     font-weight: 600;
@@ -287,6 +290,12 @@ alert-info {
 .date { width: 7.9em }
 .date-time { width: 14em }
 
+input, textarea, select {
+    border: 1px #ddd solid;
+}
+input:focus, select:focus, textarea:focus {
+       border: 1px steelblue solid;
+}
 input[type=number] {
     text-align: right;
 }

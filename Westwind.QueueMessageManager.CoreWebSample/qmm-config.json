@@ -8,13 +8,13 @@
     {
       "ConnectionString": null,
       "QueueName": "Queue1",
-      "ControllerThreads": 3,
+      "ControllerThreads": 1,
       "WaitInterval": 300
     },
     {
       "ConnectionString": null,
       "QueueName": "Queue2",
-      "ControllerThreads": 3,
+      "ControllerThreads": 0,
       "WaitInterval": 300
     }
   ],

@@ -115,48 +115,64 @@ var config = QueueMessageManagerConfiguration.Current;
 
 // create a new Controller to process in the background
 // on separate threads
-var controller = new QueueControllerMultiple(config, qmmApp.ConnectionString);
+
+
+var controller = new QueueControllerMultiple(
+    connectionString: qmmApp.ConnectionString,
+    controllers: [
+        new Test1Queue(),
+        new Test2Queue()
+    ]);
+
+//var controller = new TestQmmController(connectionString: qmmApp.ConnectionString);
 QmmGlobals.Controller = controller;
-controller.ExecuteStart += async manager =>
-{
-    var item = manager.Item;
-    var swatch = Stopwatch.StartNew();
-
-    // TEST ONLY
-    await Task.Delay(1000); // so we can see submission
-
-    try
-    {
-        if (item.Action == "PRINT")
-        {
-            item.Message = "Started on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;
-            manager.StartRequest();
-            manager.Save();
-            QueueMonitorServiceHub.WriteMessageInternal(item).FireAndForget();
-
-            await Task.Delay(3000);
-            item.Message = "Completed on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;
-
-            manager.CompleteRequest();
-            manager.Save();
-        }
-        else
-        {
-            await Task.Delay(1200);
-            manager.FailRequest(messageText: "Unknown action: " + item.Action);
-            manager.Save();
-        }
-    }
-    catch (Exception ex)
-    {
-        manager.FailRequest(messageText: $"Processing failed: " + ex.GetBaseException().Message);
-        manager.Save();
-    }
-
-    swatch.Stop();
-    QueueMonitorServiceHub.WriteMessageInternal(item, elapsed: (int)swatch.ElapsedMilliseconds).FireAndForget();
-};
 controller.StartProcessingAsync();
+
+
+//var controller = new QueueControllerMultiple(config, qmmApp.ConnectionString);
+//controller.ExecuteStart += async manager =>
+//{
+//    var item = manager.Item;
+//    var swatch = Stopwatch.StartNew();
+
+//    // TEST ONLY
+//    await Task.Delay(1000); // so we can see submission
+//    //Thread.Sleep(1000);
+
+//    try
+//    {
+//        if (item.Action == "PRINT")
+//        {
+//            item.Message = "Started on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;
+//            manager.StartRequest();
+//            manager.Save();
+//            QueueMonitorServiceHub.WriteMessageInternal(item).FireAndForget();
+
+//            await Task.Delay(3000);
+//            //Thread.Sleep(3000);
+//            item.Message = "Completed on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;
+
+//            manager.CompleteRequest();
+//            manager.Save();
+//        }
+//        else
+//        {
+//            //Thread.Sleep(1200);
+//            await Task.Delay(1200);
+//            manager.FailRequest(messageText: "Unknown action: " + item.Action);
+//            manager.Save();
+//        }
+//    }
+//    catch (Exception ex)
+//    {
+//        manager.FailRequest(messageText: $"Processing failed: " + ex.GetBaseException().Message);
+//        manager.Save();
+//    }
+
+//    swatch.Stop();
+//    QueueMonitorServiceHub.WriteMessageInternal(item, elapsed: (int)swatch.ElapsedMilliseconds).FireAndForget();
+//};
+//controller.StartProcessingAsync();
 
 
 

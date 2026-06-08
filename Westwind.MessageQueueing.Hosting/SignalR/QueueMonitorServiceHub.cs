@@ -95,6 +95,22 @@ namespace Westwind.MessageQueueing.Hosting
             }
         }
 
+        public async Task<List<QueueMessageItem>> GetInitialMessagesList(string queueName = null)
+        {
+            if (string.IsNullOrEmpty(queueName))
+                queueName = null;
+
+            var queue = new QueueMessageManagerSql();
+            List<QueueMessageItem> msgs = queue.GetRecentQueueItems(queueName, 10).Reverse().ToList();
+
+            if (msgs.Count < 1)
+            {
+                return [];
+            }
+
+            return msgs;
+        }
+
         public async Task getQueueNames()
         {
             var queues = new List<string>();
@@ -207,6 +223,24 @@ namespace Westwind.MessageQueueing.Hosting
             return GetWaitingQueueMessageCountInternal(queueName);            
         }
 
+        /// <summary>
+        /// Direct access method that retrieves the value for the waiting messages
+        /// </summary>
+        /// <param name="queueName"></param>
+        /// <returns></returns>
+        public async Task<int> GetWaitingQueueMessageCountValue(string queueName = null)
+        {
+            if (string.IsNullOrEmpty(queueName))
+                queueName = null; // force all
+
+            using (var manager = new QueueMessageManagerSql())
+            {
+                int count = manager.GetWaitingQueueMessageCount(queueName);
+                return count;
+            }
+
+            return -1;
+        }
 
         /// <summary>
         /// Statically accessible method to broadcast
@@ -228,6 +262,25 @@ namespace Westwind.MessageQueueing.Hosting
                     await HubContext.Clients.All.SendAsync("getWaitingQueueMessageCountCallback", count);
                 }
             }
+        }
+
+
+        /// <summary>
+        /// Resets an item to its original submitted
+        /// state by clearing out action and progress dates
+        /// </summary>
+        /// <param name="id">Item id</param>
+        /// <param name="updateUi">Whether to update the UI</param>
+        /// <returns>Updated item</returns>
+        public async Task<QueueMessageItem> ResetRequest(string id)
+        {
+            var manager = new QueueMessageManagerSql();
+            var item = manager.Load(id);
+            manager.ResubmitMessage(item);
+            
+            QueueMonitorServiceHub.WriteMessageInternal(item).FireAndForget();
+            
+            return item;
         }
 
 

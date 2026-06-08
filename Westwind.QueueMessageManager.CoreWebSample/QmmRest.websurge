@@ -5,9 +5,24 @@ Accept-Encoding: gzip, deflate, br
 Websurge-Request-Name: Submit a new Item
 
 {
-  "QueueName": "Queue1",
+  "QueueName": "Test1",
   "Message": "Test Submission",
   "Action": "PRINT",
+  "Xml": "<doc><value>Hello</value></doc>"
+}
+
+------------------------------------------------------------------
+
+POST /api/qmm/submit-item HTTP/2.0
+Content-Type: application/json
+Accept: text/json
+Accept-Encoding: gzip, deflate, br
+Websurge-Request-Name: Submit a new Item Test2 Queue
+
+{
+  "QueueName": "Test2",
+  "Message": "Test Submission",
+  "Action": "PRINTTEST2",
   "Xml": "<doc><value>Hello</value></doc>"
 }
 
@@ -20,7 +35,7 @@ Accept-Encoding: gzip, deflate, br
 Websurge-Request-Name: Submit Item with Bad Action
 
 {
-  "QueueName": "Queue1",
+  "QueueName": "Test1",
   "Message": "Test Submission",
   "Action": "PRINTs",
   "Xml": "<doc><value>Hello</value></doc>"
