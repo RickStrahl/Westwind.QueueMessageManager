@@ -1,9 +1,9 @@
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
+using Microsoft.Extensions.Logging.Abstractions;
 using Westwind.Utilities;
 
 
@@ -24,13 +24,19 @@ namespace Westwind.MessageQueueing
     {
         public const int DEFAULT_INTERVAL = 300;
 
-
         public QueueController()
         {            
             QueueName = string.Empty;
             WaitInterval = -1;
             ThreadCount = 1; 
             QueueManagerType = typeof(QueueMessageManagerSql);                        
+            LogManager = new NullLogger<QueueController>();
+        }
+
+
+        public QueueController(ILogger logger)
+        {
+            LogManager = logger;
         }
 
         /// <summary>
@@ -143,6 +149,8 @@ namespace Westwind.MessageQueueing
         /// instance. Use this to create and configure the QUeueManager instance
         /// </summary>
         public Func<QueueMessageManager> OnCreateQueueManager { get; set; }
+
+        public ILogger LogManager { get; }
 
         /// <summary>
         /// Starts queue processing in the background and returns immediately.

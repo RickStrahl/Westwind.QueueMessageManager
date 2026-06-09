@@ -208,7 +208,11 @@ label {
     margin-bottom: 2em;
 }
 .btn-sm {
-    padding: 0.17em 0.55em !important;
+    padding: 0.17em 0.55em !important;    
+}
+.btn-xs {
+    font-size: 1.1em;
+    padding: 0em 0.4em !important;
 }
 .btn-primary {
     background-color: #337ab6;

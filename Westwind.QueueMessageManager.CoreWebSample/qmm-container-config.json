@@ -10,7 +10,8 @@
       "WaitInterval": 300,
       "ThreadCount": 3,
       "QueueControllerType": "Westwind.QueueMessageManager.CoreWebSample.Test1Queue",
-      "OnCreateQueueManager": null
+      "OnCreateQueueManager": null,
+      "LogManager": {}
     },
     {
       "QueueName": "Test2",
@@ -19,7 +20,8 @@
       "WaitInterval": 500,
       "ThreadCount": 2,
       "QueueControllerType": "Westwind.QueueMessageManager.CoreWebSample.Test2Queue",
-      "OnCreateQueueManager": null
+      "OnCreateQueueManager": null,
+      "LogManager": {}
     }
   ]
 }

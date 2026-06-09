@@ -44,7 +44,7 @@ public class QmmWebController : BaseApiController
 
         using var manager = new QueueMessageManagerSql(qmmApp.ConnectionString);
         
-        item.Id = "qmmweb-" + qmmApp.NewId();
+        item.Id = qmmApp.NewId();
         manager.SubmitRequest(item, autoSave: true);
         await QueueMonitorServiceHub.WriteMessageInternal(item);
         await QueueMonitorServiceHub.GetWaitingQueueMessageCountInternal(item.QueueName);

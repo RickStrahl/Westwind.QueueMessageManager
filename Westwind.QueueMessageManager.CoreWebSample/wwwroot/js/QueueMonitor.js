@@ -71,7 +71,6 @@
                     .configureLogging(signalR.LogLevel.Warning)
                     .build();
 
-
                 this.hubConnection.on("writeMessage", (message, status, time, id, elapsed, waiting, queueName, action, obj) => {
                     this.onWriteMessage(message, status, time, id, elapsed, waiting, queueName, action, obj);
                 });
@@ -205,7 +204,8 @@
                 this.clearMessages();
                 //await this.invokeHub("GetInitialMessages", this.activeQueue || "");
                 var msgs = await this.invokeHub("GetInitialMessagesList", this.activeQueue || "");
-                for (var msg of msgs || []) {
+                for (var msg of msgs || []) {                    
+                    msg = this.normalizeQueueItem(msg);
                     this.onWriteMessage(msg.message, msg.status, msg.time, msg.id, msg.elapsed, null, msg.queueName, msg.action);
                 }
                 await this.invokeHub("GetWaitingQueueMessageCount", this.activeQueue || "");
@@ -231,6 +231,7 @@
                 this.messageCounter += 1;
                 const safeId = id;
                 const safeMessage = id ? (message || "") : "";
+                elapsed = elapsed ? (typeof elapsed === "number" ? `${elapsed.toLocaleString()} ms` : String(elapsed)) : "";
 
                 this.messages.unshift({
                     key: `${safeId}-${this.messageCounter}`,
@@ -269,13 +270,14 @@
                         action: "",
                         queueName: "",
                         date: "",
+                        time: "",
                         message: "",
                         xml: ""
                     };
                 }
-
                 const submitted = item.submitted || item.Submitted || "";
                 const date = submitted ? new Date(submitted) : null;
+                const time = date ? date.toLocaleTimeString() : "";
                 let elapsed = "";
                 if (!item.elapsed && item.started && item.completed) {
                     const start = new Date(item.started);
@@ -294,6 +296,7 @@
                     queueName: item.queueName || item.QueueName || "",
                     action: item.action || item.Action || "",
                     date: date && !Number.isNaN(date.getTime()) ? date.toLocaleString() : "",
+                    time: time,
                     submitted: submitted,
                     started: item.started && !Number.isNaN(new Date(item.started).getTime()) ? new Date(item.started).toLocaleString() : item.Started || null,
                     completed: item.completed && !Number.isNaN(new Date(item.completed).getTime()) ? new Date(item.completed).toLocaleString() : item.Completed || null,

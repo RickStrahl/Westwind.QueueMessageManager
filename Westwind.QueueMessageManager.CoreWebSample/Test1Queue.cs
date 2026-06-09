@@ -1,6 +1,10 @@
+// #define USE_ASYNC
+
 using Westwind.MessageQueueing;
 using Westwind.MessageQueueing.Hosting;
 using Westwind.Utilities;
+
+
 
 namespace Westwind.QueueMessageManager.CoreWebSample;
 
@@ -15,7 +19,7 @@ public class Test1Queue : QueueController
 
     protected override void OnExecuteStart(MessageQueueing.QueueMessageManager manager)
     {
-        //return; // sync
+#if !USE_ASYNC        
 
         var item = manager.Item;
 
@@ -27,35 +31,45 @@ public class Test1Queue : QueueController
 
         try
         {
-            if (item.Action == "PRINT")
+            switch (item.Action)
             {
 
-                item.Message = "Started on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;
-                manager.StartRequest();
-                manager.Save();
-                
-                QueueMonitorServiceHub.WriteMessageInternal(item).FireAndForget();
+                case "PRINT":
+                {
+                    item.Message = "Started on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;
+                    manager.StartRequest();
+                    manager.Save();
 
+                    QueueMonitorServiceHub.WriteMessageInternal(item).FireAndForget();
 
-                Thread.Sleep(3000);
-                item.Message = "Completed on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;
+                    Thread.Sleep(3000);
+                    item.Message = "Completed on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;
 
-                OnExecuteComplete(manager);
+                    OnExecuteComplete(manager);
+                    break;
+                }
+                default:
+                {
+                    manager.CancelRequest(messageText: "Unknown action: " + item.Action + "\nOriginal message:\n" + item.Message);
+                    manager.Save();
+
+                    // no handler so directly write out
+                    WriteMessageHub(manager.Item);
+                    break;
+                }
             }
         }
         catch (Exception ex)
         {
             OnExecuteFailed(manager, ex);
         }
+#endif
     }
-
     
-
 
     protected override async Task OnExecuteStartAsync(MessageQueueing.QueueMessageManager manager)
     {
-        return; // no async
-
+#if USE_ASYNC
         var item = manager.Item;
 
         if (item == null)
@@ -66,26 +80,39 @@ public class Test1Queue : QueueController
 
         try
         {
-            if (item.Action == "PRINT")
+            switch (item.Action)
             {
 
-                item.Message = "Started on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;
-                manager.StartRequest();
-                manager.Save();
+                case "PRINT":
+                {
+                    item.Message = "Started on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;
+                    manager.StartRequest();
+                    manager.Save();
 
-                QueueMonitorServiceHub.WriteMessageInternal(item).FireAndForget();
+                    QueueMonitorServiceHub.WriteMessageInternal(item).FireAndForget();
 
+                    Thread.Sleep(3000);
+                    item.Message = "Completed on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;
 
-                await Task.Delay(3000);
-                item.Message = "Completed on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;
+                    OnExecuteComplete(manager);
+                    break;
+                }
+                default:
+                {
+                    manager.CancelRequest(messageText: "Unknown action: " + item.Action + "\nOriginal message:\n" + item.Message);
+                    manager.Save();
 
-                OnExecuteComplete(manager);                
+                    // no handler so directly write out
+                    WriteMessageHub(manager.Item);
+                    break;
+                }
             }
         }
         catch (Exception ex)
         {
             OnExecuteFailed(manager, ex);
         }
+#endif
     }
 
     protected override void OnExecuteComplete(MessageQueueing.QueueMessageManager manager)
@@ -93,14 +120,24 @@ public class Test1Queue : QueueController
         manager.CompleteRequest();
         manager.Save();
 
-        QueueMonitorServiceHub.WriteMessageInternal(manager.Item).FireAndForget();
+        WriteMessageHub(manager.Item);
     }
 
     protected override void OnExecuteFailed(MessageQueueing.QueueMessageManager manager, Exception ex)
-    {
+    {        
         manager.FailRequest(messageText: $"Request failed: {ex.Message}\nOriginal message:\n{manager.Item.Message}");
         manager.Save();
 
-        QueueMonitorServiceHub.WriteMessageInternal(manager.Item).FireAndForget();
+        WriteMessageHub(manager.Item);
+    }
+
+
+    protected void WriteMessageHub(QueueMessageItem item, string messageText = null)
+    {        
+        if (!string.IsNullOrEmpty(messageText))
+            item.Message = messageText;
+        
+
+        QueueMonitorServiceHub.WriteMessageInternal(item).FireAndForget();
     }
 }

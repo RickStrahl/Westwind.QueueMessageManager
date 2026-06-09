@@ -59,7 +59,7 @@
     </section>
 
     <section class="message-list">
-        <article class="message-item" v-for="item in visibleMessages" :key="item.key" @@click="openMessage(item)" :class="rowClass(item.status)">
+        <article class="message-item" v-for="item in visibleMessages" :key="item.key"  :class="rowClass(item.status)">
             <div class="message-top-row">
                 <div class="status-chip" :class="rowClass(item.status)">{{ item.status || "Info" }}</div>     
                 <div>
@@ -67,8 +67,12 @@
                      &bull; <b class="text-info">{{ item.action }}</b>
                 </div>
                 <div class="message-id">                    
-                    {{ item.elapsed ? item.elapsed + " &bull; " : "" }}                    
-                    {{ item.time || "" }} &bull; <small>{{ item.id || "(no id)" }}</small>                                        
+                    <b class="text-info">{{ item.time?.toLowerCase() || "" }}</b> &bull;
+                    <i>{{ item.elapsed }}</i>                                        
+                    &nbsp;
+                    <button class="btn btn-secondary btn-sm btn-xs" style="font-family: monospace" @@click="openMessage(item)" @@click="selectedMessage = item">
+                        <small>{{ item.id || "(no id)" }}</small>
+                    </button>                                        
                 </div>
             </div>
             <pre v-if="item.message" class="message-body">{{ item.message }}</pre>
@@ -99,7 +103,7 @@
             <pre>{{ selectedMessage.message }}</pre>
             <h3>Payload</h3>
             <pre>{{ selectedMessage.xml }}</pre>
-            @* <pre>{{ JSON.stringify(selectedMessage) }}</pre> *@
+            <pre>{{ JSON.stringify(selectedMessage) }}</pre>
         </section>
     </div>
 

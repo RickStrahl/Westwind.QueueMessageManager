@@ -11,6 +11,9 @@ namespace Westwind.MessageQueueing.Hosting
     //[QueueAuthorize]
     public class QueueMonitorServiceHub : Hub
     {
+
+        public int DisplayMessageCount { get; set; } = 15;
+
         public QueueMonitorServiceHub()
         {            
         }
@@ -64,7 +67,7 @@ namespace Westwind.MessageQueueing.Hosting
                 queueName = null;
 
             var queue = new QueueMessageManagerSql();
-            List<QueueMessageItem> msgs = queue.GetRecentQueueItems(queueName, 10).Reverse().ToList();
+            List<QueueMessageItem> msgs = queue.GetRecentQueueItems(queueName, DisplayMessageCount).Reverse().ToList();
 
             if (msgs.Count < 1)
             {
@@ -101,7 +104,7 @@ namespace Westwind.MessageQueueing.Hosting
                 queueName = null;
 
             var queue = new QueueMessageManagerSql();
-            List<QueueMessageItem> msgs = queue.GetRecentQueueItems(queueName, 10).Reverse().ToList();
+            List<QueueMessageItem> msgs = queue.GetRecentQueueItems(queueName, this.DisplayMessageCount).Reverse().ToList();
 
             if (msgs.Count < 1)
             {
@@ -185,24 +188,24 @@ namespace Westwind.MessageQueueing.Hosting
                 status.threadCount = 50;
             }
 
-            var config = QueueMessageManagerConfiguration.Current;        
+            //var config = QueueMessageManagerConfiguration.Current;        
 
-            // grab the individual controller
-            var controllerConfig = config.Controllers
-                .FirstOrDefault(ct => ct.QueueName == status.queueName);
+            //// grab the individual controller
+            //var controllerConfig = config.Controllers
+            //    .FirstOrDefault(ct => ct.QueueName == status.queueName);
 
-            if (config == null)
-                return;
+            //if (config == null)
+            //    return;
 
-            controllerConfig.ControllerThreads = controller.ThreadCount;
-            controllerConfig.WaitInterval = controller.WaitInterval;
-            controllerConfig.QueueName = status.queueName;
+            //controllerConfig.ControllerThreads = controller.ThreadCount;
+            //controllerConfig.WaitInterval = controller.WaitInterval;
+            //controllerConfig.QueueName = status.queueName;
 
             // try to save config settings
             //config.Write();
             await Task.Delay(2000);
 
-            config.Write();
+            //config.Write();
 
             controller.StopProcessing();
             controller.StartProcessingAsync();
@@ -316,39 +319,8 @@ namespace Westwind.MessageQueueing.Hosting
         }
 
         /// <summary>
-        /// Writes out message to all connected SignalR clients
-        /// </summary>
-        /// <param name="message"></param>
-        public static async Task WriteMessageInternal(string message, string id = null, string icon = "Info",
-            DateTime? time = null, string queueName = null)
-        {
-            if (id == null)
-                id = string.Empty;
-
-            // if no id is passed write the message in the ID area
-            // and show no message
-            //if (string.IsNullOrEmpty(id))
-            //{
-            //    id = message;
-            //    message = string.Empty;
-            //}
-
-            if (time == null)
-                time = DateTime.UtcNow;
-
-            // Write out message to SignalR clients  
-            await HubContext.Clients.All.SendAsync("writeMessage", message,
-                icon,
-                time.Value.ToString("HH:mm:ss"),
-                id,
-                queueName ?? string.Empty);
-
-           
-        }
-
-
-        /// <summary>
-        /// Writes out a message to all SignalR clients
+        /// Writes out a message to all SignalR clients with a QueueMessageItem object
+        /// as its main input. 
         /// </summary>
         /// <param name="queueItem"></param>
         /// <param name="elapsed"></param>
@@ -357,11 +329,7 @@ namespace Westwind.MessageQueueing.Hosting
             int elapsed = 0,
             int waiting = -1,
             DateTime? time = null)
-        {
-            string elapsedString = string.Empty;
-            if (elapsed > 0)
-                elapsedString = (Convert.ToDecimal(elapsed) / 1000).ToString("N2") + "s";
-
+        {            
             var msg = HtmlUtils.DisplayMemo(queueItem.Message);
 
             if (time == null)
@@ -370,13 +338,47 @@ namespace Westwind.MessageQueueing.Hosting
             // Write out message to SignalR clients            
             await HubContext.Clients.All.SendAsync("writeMessage", msg,
                 queueItem.Status,
-                time.Value.ToString("HH:mm:ss"),
+                time.Value.ToString("T"),
                 queueItem.Id,
-                elapsedString,
-                waiting, 
+                elapsed,
+                waiting,
                 queueItem.QueueName,
-                queueItem.Action, new { name="Rick", company="West Wind" });
+                queueItem.Action, new { name = "Rick", company = "West Wind" });
         }
+
+        /// <summary>
+        /// Writes out message to all connected SignalR clients
+        /// with individual string inputs for values. You can use
+        /// optional parameters to pass just what you need other
+        /// than the required message.
+        /// </summary>
+        /// <param name="message"></param>
+        public static async Task WriteMessageInternal(string message, 
+            string id = null, string status = "Submitted",
+            DateTime? time = null, string queueName = null, 
+            int elapsed = 0, string action = null)
+        {
+            if (id == null)
+                id = string.Empty;
+
+            if (time == null)
+                time = DateTime.UtcNow;
+            
+            // Write out message to SignalR clients  
+            await HubContext.Clients.All.SendAsync("writeMessage", message,
+                status,
+                time.Value.ToString("T"),
+                id,                
+                elapsed,
+                -1,
+                queueName,
+                action );
+
+           
+        }
+
+
+  
 
         /// <summary>
         /// Throws an exception from server to client

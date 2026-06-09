@@ -201,8 +201,7 @@ body {
 		color: #46607e;
 	}
 
-.message-id {
-	font-family: "Consolas", "Cascadia Mono", monospace;
+.message-id {	
 	font-size: 0.65rem;
 	overflow: hidden;
 	text-overflow: ellipsis;

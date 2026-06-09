@@ -18,9 +18,8 @@ namespace Westwind.MessageQueueing.Hosting
     /// when self hosting.
     /// </summary>
     public class ServiceLauncher<TQueueContainer>
-        where TQueueContainer:  Westwind.MessageQueueing.QueueContainer, new()        
+        where TQueueContainer:  QueueContainer, new()        
     {
-
         public ILogger LogManager { get; }
 
         QueueMessageManagerConfiguration QueueManagerConfiguration { get;  }
@@ -30,9 +29,10 @@ namespace Westwind.MessageQueueing.Hosting
             LogManager = new NullLogger<ServiceLauncher<TQueueContainer>>();
         }
 
-
-        public ServiceLauncher(QueueMessageManagerConfiguration config)
+        public ServiceLauncher(TQueueContainer queueContainer, 
+                               QueueMessageManagerConfiguration config)
         {
+            Container = queueContainer;
             QueueManagerConfiguration = config;
         }
 
@@ -53,8 +53,9 @@ namespace Westwind.MessageQueueing.Hosting
         {                
             try
             {
-                // Create multiple child controllers from web.config configuration                
-                Container = new TQueueContainer();            
+                // Create multiple child controllers from web.config configuration
+                if (Container == null)
+                    Container = new TQueueContainer();            
 
                 // *** Spin up n Number of threads to process requests
                 Container.StartProcessingAsync();
@@ -86,11 +87,11 @@ namespace Westwind.MessageQueueing.Hosting
         public void Stop(bool immediate = false)
         {
             LogManager.LogInformation("QueueManager Controller Stopped.");
-
+            
             Container.StopProcessing();
             Container.Dispose();
+
             Thread.Sleep(1500);            
         }
-
     }
 }

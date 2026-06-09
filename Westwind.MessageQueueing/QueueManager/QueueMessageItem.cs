@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Westwind.Utilities;
 
 namespace Westwind.MessageQueueing
@@ -44,6 +44,20 @@ namespace Westwind.MessageQueueing
         /// Time when the message is completed (optional)
         /// </summary>
         public DateTime? Completed { get; set; }
+
+        /// <summary>
+        /// Elapsed time in milliseconds between Started and Completed or 0
+        /// </summary>
+        public int ElapsedMs
+        {
+            get
+            {
+                if (Completed != null && Started != null && Completed > Started) 
+                    return (int) (Completed.Value - Started).Value.TotalMilliseconds;
+                
+                return 0;
+            }
+        }
 
         /// <summary>
         /// Determines whether a message is complete
