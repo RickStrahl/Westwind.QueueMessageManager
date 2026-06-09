@@ -1,0 +1,25 @@
+{
+  "DefaultConnectionString": "server=.;database=QueueMessageManager;integrated security=yes;encrypt=false;trustservercertificate=true;",
+  "DefaultWaitInterval": 300,
+  "DefaultThreadCount": 1,
+  "Controllers": [
+    {
+      "QueueName": "Test1",
+      "ConnectionString": "server=.;database=QueueMessageManager;integrated security=yes;encrypt=false;trustservercertificate=true;",
+      "Paused": false,
+      "WaitInterval": 300,
+      "ThreadCount": 3,
+      "QueueControllerType": "Westwind.QueueMessageManager.CoreWebSample.Test1Queue",
+      "OnCreateQueueManager": null
+    },
+    {
+      "QueueName": "Test2",
+      "ConnectionString": "server=.;database=QueueMessageManager;integrated security=yes;encrypt=false;trustservercertificate=true;",
+      "Paused": false,
+      "WaitInterval": 500,
+      "ThreadCount": 2,
+      "QueueControllerType": "Westwind.QueueMessageManager.CoreWebSample.Test2Queue",
+      "OnCreateQueueManager": null
+    }
+  ]
+}

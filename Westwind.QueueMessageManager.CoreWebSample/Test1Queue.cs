@@ -6,7 +6,7 @@ namespace Westwind.QueueMessageManager.CoreWebSample;
 
 public class Test1Queue : QueueController
 {
-    public Test1Queue()
+    public Test1Queue() 
     {
         WaitInterval = 1000;
         QueueName = "Test1";

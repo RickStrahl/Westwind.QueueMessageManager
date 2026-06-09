@@ -34,19 +34,19 @@ namespace Westwind.MessageQueueing.Hosting
         public async Task StartService()
         {
             // unpause the QueueController to start processing again
-            QmmGlobals.Controller.PauseProcessing(false);
+            QueueContainer.Current.PauseProcessing(false);
 
             await Clients.All.SendAsync("startServiceCallback", true);
 
             await Clients.All.SendAsync("writeMessage",
-                "Queues starting with " + QmmGlobals.Controller.ThreadCount.ToString() + " threads.",
+                "Queues starting with " + QueueContainer.Current.DefaultThreadCount.ToString() + " threads.",
                 "Info", DateTime.Now.ToString("HH:mm:ss"));
         }
 
         public async Task StopService()
         {
             // Pause - we can't stop service because that'll exit the server            
-            QmmGlobals.Controller.PauseProcessing(true);
+            QueueContainer.Current.PauseProcessing(true);
 
             await Clients.All.SendAsync("stopServiceCallback", true);
 
@@ -114,7 +114,7 @@ namespace Westwind.MessageQueueing.Hosting
         public async Task getQueueNames()
         {
             var queues = new List<string>();
-            foreach (var controller in QmmGlobals.Controller.Controllers)
+            foreach (var controller in QueueContainer.Current.Controllers)
             {
                 queues.Add(controller.QueueName);
             }
@@ -131,7 +131,7 @@ namespace Westwind.MessageQueueing.Hosting
 
         public async Task GetServiceStatus(string queueName)
         {
-            var controller = QmmGlobals.Controller;
+            var controller = QueueContainer.Current;
             if (controller.Controllers == null || string.IsNullOrEmpty(queueName))
                 controller = null;
 
@@ -167,7 +167,7 @@ namespace Westwind.MessageQueueing.Hosting
                 return;
             }
 
-            var controller = QmmGlobals.Controller.Controllers
+            var controller = QueueContainer.Current.Controllers
                 .FirstOrDefault(ct => ct.QueueName == status.queueName);
 
             if (controller == null)

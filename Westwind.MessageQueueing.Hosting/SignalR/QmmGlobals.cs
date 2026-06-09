@@ -1,10 +1,10 @@
 
-using Westwind.MessageQueueing;
+//using Westwind.MessageQueueing;
 
-namespace Westwind.MessageQueueing.Hosting
-{
-    public static class QmmGlobals
-    {
-        public static QueueControllerMultiple Controller;        
-    }
-}
+//namespace Westwind.MessageQueueing.Hosting
+//{
+//    public static class QmmGlobals
+//    {
+//        public static QueueContainer QueueContainer;                
+//    }
+//}

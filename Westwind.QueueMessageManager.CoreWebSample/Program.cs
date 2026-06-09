@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -117,16 +118,30 @@ var config = QueueMessageManagerConfiguration.Current;
 // on separate threads
 
 
-var controller = new QueueControllerMultiple(
-    connectionString: qmmApp.ConnectionString,
-    controllers: [
-        new Test1Queue(),
-        new Test2Queue()
-    ]);
 
-//var controller = new TestQmmController(connectionString: qmmApp.ConnectionString);
-QmmGlobals.Controller = controller;
-controller.StartProcessingAsync();
+QueueContainer queueContainer = null;
+bool readFromConfig = true;
+if (readFromConfig)
+{
+    // Load From File Config
+    queueContainer = QueueContainer.CreateFromConfigurationFile("qmm-container-config.json");
+}
+else
+{
+    // Explicitly load from Code
+    queueContainer = new Westwind.MessageQueueing.QueueContainer
+    {
+        DefaultConnectionString = qmmApp.Configuration.ConnectionString,
+        DefaultThreadCount = 1,
+        DefaultWaitInterval = 300,
+        Controllers = [
+            new Test1Queue(),
+            new Test2Queue()
+        ]
+    };    
+}
+queueContainer.StartProcessingAsync();
+queueContainer.SaveToConfigurationFile("qmm-container-config.json");
 
 
 //var controller = new QueueControllerMultiple(config, qmmApp.ConnectionString);

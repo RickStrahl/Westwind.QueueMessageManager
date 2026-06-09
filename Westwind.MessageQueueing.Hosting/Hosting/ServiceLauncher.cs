@@ -17,8 +17,8 @@ namespace Westwind.MessageQueueing.Hosting
     /// in Application_Start or in the oWin bootstrap process 
     /// when self hosting.
     /// </summary>
-    public class ServiceLauncher<TController>
-        where TController:  QueueControllerMultiple, new()        
+    public class ServiceLauncher<TQueueContainer>
+        where TQueueContainer:  Westwind.MessageQueueing.QueueContainer, new()        
     {
 
         public ILogger LogManager { get; }
@@ -27,7 +27,7 @@ namespace Westwind.MessageQueueing.Hosting
 
         public ServiceLauncher()
         {
-            LogManager = new NullLogger<ServiceLauncher<TController>>();
+            LogManager = new NullLogger<ServiceLauncher<TQueueContainer>>();
         }
 
 
@@ -41,15 +41,7 @@ namespace Westwind.MessageQueueing.Hosting
         /// on this service instance - ensures the controller's lifetime
         /// is tied to the service.
         /// </summary>
-        TController Controller { get; set; }
-
-        /// <summary>
-        /// QueueManager Type to instantiate (defaults to QueueManagerSql)
-        /// 
-        /// Use this or OnCreateQueueManager to instantiate the
-        /// appropriate QueueManager type
-        /// </summary>
-        public Type QueueManagerType { get; set;  }
+        TQueueContainer Container { get; set; }
 
         /// <summary>
         /// Optional expression used to create a QueueManager Instance
@@ -60,22 +52,17 @@ namespace Westwind.MessageQueueing.Hosting
         public void Start()
         {                
             try
-            {                
+            {
                 // Create multiple child controllers from web.config configuration                
-                Controller = new TController()
-                {
-                    QueueManagerType = QueueManagerType,
-                    OnCreateQueueManager = OnCreateQueueManager
-                };
-                Controller.Initialize();                
+                Container = new TQueueContainer();            
 
                 // *** Spin up n Number of threads to process requests
-                Controller.StartProcessingAsync();
+                Container.StartProcessingAsync();
 
                 // Create a log entry to show which Queues and what their settigs are.
                 var sb = new StringBuilder();
 
-                foreach (QueueController controller in Controller.Controllers)
+                foreach (QueueController controller in Container.Controllers)
                 {
                    sb.AppendLine($" [ {controller.ThreadCount} thread(s) on Queue: {controller.QueueName} ] ");
                 }
@@ -83,7 +70,7 @@ namespace Westwind.MessageQueueing.Hosting
 
                 // Allow access to a global instance of this controler and service
                 // So we can access it from the stateless SignalR hub
-                QmmGlobals.Controller = Controller;                
+                QueueContainer.Current = Container;                
             }
             catch (Exception ex)
             {
@@ -100,8 +87,8 @@ namespace Westwind.MessageQueueing.Hosting
         {
             LogManager.LogInformation("QueueManager Controller Stopped.");
 
-            Controller.StopProcessing();
-            Controller.Dispose();
+            Container.StopProcessing();
+            Container.Dispose();
             Thread.Sleep(1500);            
         }
 

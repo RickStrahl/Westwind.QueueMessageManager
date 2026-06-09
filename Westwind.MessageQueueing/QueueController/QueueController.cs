@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Westwind.Utilities;
 
 
@@ -21,7 +22,7 @@ namespace Westwind.MessageQueueing
     /// </summary>
     public class QueueController : IDisposable
     {
-        public const int DEFAULT_INTERVAL = 1000;
+        public const int DEFAULT_INTERVAL = 300;
 
 
         public QueueController()
@@ -76,6 +77,12 @@ namespace Westwind.MessageQueueing
         }
 
         /// <summary>
+        /// Sets the types of messages that this controller is looking for
+        /// </summary>
+        public string QueueName { get; set; }
+
+
+        /// <summary>
         /// Connection String for the database
         /// </summary>
         public string ConnectionString { get; set; }
@@ -107,17 +114,29 @@ namespace Westwind.MessageQueueing
         /// Counter that keeps track of how many messages have been processed 
         /// since the server started.
         /// </summary>
+
+        [JsonIgnore]
         public virtual int MessagesProcessed { get; set; }
 
-        /// <summary>
-        /// Sets the types of messages that this controller is looking for
-        /// </summary>
-        public string QueueName { get; set; }
-
+        
         /// <summary>
         /// The specific type of the message manager class
-        /// </summary>
+        /// </summary>        
+        [JsonIgnore]
         public Type QueueManagerType { get; set; }
+
+        /// <summary>
+        /// Returns a full .NET class name that can be used 
+        /// create an instance at runtime.
+        /// </summary>
+        public string QueueControllerType
+        {
+            get
+            {
+                var type = GetType();
+                return type.FullName;
+            }
+        }
 
         /// <summary>
         /// Optional function you can hook to handle creation of the QueueManager
@@ -273,17 +292,19 @@ namespace Westwind.MessageQueueing
         /// Your user code can attach to this event and start processing
         /// with the message information.
         /// </summary>        
-        public Action<QueueMessageManager> ExecuteStart;        
+        [JsonIgnore]
+        public Action<QueueMessageManager> ExecuteStart;
+
 
         /// <summary>
         /// Event called when an individual request starts processing
         /// Your user code can attach to this event and start processing
         /// with the message information.
         /// </summary>        
+        [JsonIgnore]
         public Func<QueueMessageManager, Task> ExecuteStartAsync;
 
        
-
         /// <summary>
         /// Override this method to process your async  operation. Required for
         /// anything to happen when the message is processed. If the operation 
@@ -320,6 +341,7 @@ namespace Westwind.MessageQueueing
         /// <summary>
         /// Event fired when the asynch operation has successfully completed
         /// </summary>
+        [JsonIgnore]
         public Action<QueueMessageManager> ExecuteComplete = null;
 
 
@@ -340,6 +362,7 @@ namespace Westwind.MessageQueueing
         /// Event fired when the asynch operation has failed to complete (an exception
         /// was thrown during processing). Implement for logging or notifications.
         /// </summary>
+        [JsonIgnore] 
         public Action<QueueMessageManager, Exception> ExecuteFailed;
 
         
@@ -381,6 +404,7 @@ namespace Westwind.MessageQueueing
         /// Event fired when the read operation to retrieve the next message from
         /// the database has failed. Allows for error handling or logging.
         /// </summary>
+        [JsonIgnore]
         public  Action<QueueMessageManager, Exception> NextMessageFailed;
 
 
