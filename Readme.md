@@ -2,11 +2,11 @@
 #### .NET Library to provide a simple, two-way messaging queue for enabling offloading of long running operations to other processes/machines####
 The purpose of this library is to simplify async processing where long running processes
 need to be offloaded to background operations (say in an ASP.NET application) on
-seperate threads, external processes or to remote machines. 
+separate threads, external processes or to remote machines. 
 
 Unlike traditional First In First Out queue services this messaging solution allows 
 for two-way messaging between the client and the async processing server, to allow for 
-progress information, cancelation and completion information between the client and
+progress information, cancellation and completion information between the client and
 server doing the async processing. 
 
 This library provides a simple queue message manager that can be used to read and write
@@ -35,7 +35,7 @@ in the background.
 ![Westwind.MessageQueueing](https://raw.github.com/RickStrahl/Westwind.QueueMessageManager/master/QueueManager_Diagram.png)
 
 ### Data Providers
-The implementation of this library is based on replacable data providers using
+The implementation of this library is based on replaceable data providers using
 the QueueMessageManager abstract class. The following providers are provided:
 
 * **QueueMessageManagerSql**
@@ -227,7 +227,7 @@ or even inside of an ASP.NET Web application started from Application_Start().
 The QueueController can be plugged into any kind of application as long
 as the application has a lifetime to keep the controller alive. This can
 be as part of an ASP.NET application (loaded from Application_Start then
-runnning in the background) or from a service that loads the component on
+running in the background) or from a service that loads the component on
 startup. Note that you're responsible for keeping the Controller instance
 alive by attaching it to a global or static property that persists until the
 application is ready to terminate.
@@ -312,7 +312,7 @@ private void controller_ExecuteStart(QueueMessageManager manager)
     // third request should throw exception, trigger ExecuteFailed            
     if (RequestCount > 2)
     {
-        // throw an Execption through code failure
+        // throw an Exception through code failure
         object obj = null;
         obj.ToString();
     }
@@ -376,10 +376,10 @@ controller.StartProcessingAsync();
 ```
 
 ###Multiple QueueControllers###
-You can also run multiplate QueueControllers simultaneously, simply
+You can also run multiple QueueControllers simultaneously, simply
 by configuring multiple QueueController instances pointing at separate
 queue names. This allows you to handle multiple operations to run at
-seperate isolation levels and queue priorities. For example, you may
+separate isolation levels and queue priorities. For example, you may
 have one queue that processes relatively few, but lengthy requests and
 another queue that processes very short but quick requests. In order for
 the long requests to not hold up slower requests you can have two separate
