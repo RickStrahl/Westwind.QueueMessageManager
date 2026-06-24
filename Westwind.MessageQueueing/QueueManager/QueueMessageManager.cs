@@ -47,6 +47,14 @@ namespace Westwind.MessageQueueing
         /// </summary>
         public QueueMessageManagerSerializationHelper Serialization { get; set; }
 
+        /// <summary>
+        /// A flag you can set on the manager to specify that the message has been handled
+        /// and shouldn't fire OnExecuteComplete or OnExecuteFailed handlers.
+        /// 
+        /// Avoid using this flag, and use Exceptions instead.
+        /// </summary>
+        public bool MessageHandled { get; set; }
+
         ///// <summary>
         ///// Instance of the configuration object for queuemessage manager
         ///// </summary>
@@ -62,6 +70,16 @@ namespace Westwind.MessageQueueing
         /// Connection string used for this component
         /// </summary>
         public string ConnectionString { get; set; }
+
+
+        /// <summary>
+        /// If true automatically attempts to create the database if
+        /// it doesn't exist. Note this adds a little overhead as a single
+        /// query is run to check for existance. False by default.
+        /// </summary>
+        public bool AutoCreateTables { get; set; }
+
+
 
         public QueueMessageManager()
         {
@@ -288,8 +306,9 @@ namespace Westwind.MessageQueueing
         /// </summary>
         public bool FailRequest(QueueMessageItem item = null, string messageText = null, bool autoSave = false)
         {
-            if (item == null)
+            if (item == null) 
                 item = Item;
+
             if (item == null)
                 item = CreateItem();
 
@@ -305,6 +324,7 @@ namespace Westwind.MessageQueueing
 
             if (autoSave)
                 return Save();
+
 
             return true;
         }

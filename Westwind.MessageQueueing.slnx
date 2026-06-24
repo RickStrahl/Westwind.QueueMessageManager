@@ -1,0 +1,55 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Deploy" />
+    <BuildType Name="Release" />
+    <BuildType Name="SandBox" />
+  </Configurations>
+  <Folder Name="/.nuget/">
+    <File Path=".nuget/NuGet.Config" />
+    <File Path=".nuget/NuGet.exe" />
+    <File Path=".nuget/NuGet.targets" />
+  </Folder>
+  <Folder Name="/Documents/">
+    <File Path="Changelog.md" />
+    <File Path="Readme.md" />
+  </Folder>
+  <Folder Name="/Samples/">
+    <Project Path="../../WestwindToolkit/Westwind.Data.MongoDb/Westwind.Data.MongoDb.csproj">
+      <BuildType Solution="Deploy|*" Project="Debug" />
+      <BuildType Solution="SandBox|*" Project="Release" />
+    </Project>
+    <Project Path="../Samples/Westwind.QueueMessageManager/LongRunningSignalRWeb/LongRunningSignalRWeb.csproj">
+      <BuildType Solution="Deploy|*" Project="Debug" />
+      <BuildType Solution="SandBox|*" Project="Release" />
+    </Project>
+  </Folder>
+  <Project Path="../../Westwind.Utilities/Westwind.Utilities.Data/Westwind.Utilities.Data.csproj">
+    <BuildType Solution="Deploy|*" Project="Release" />
+    <BuildType Solution="SandBox|*" Project="Release" />
+  </Project>
+  <Project Path="../../Westwind.Utilities/Westwind.Utilities/Westwind.Utilities.csproj">
+    <BuildType Solution="Deploy|*" Project="Release" />
+    <BuildType Solution="SandBox|*" Project="Release" />
+  </Project>
+  <Project Path="Westwind.MessageQueueing.Hosting/Westwind.MessageQueueing.Hosting.csproj">
+    <BuildType Solution="Deploy|*" Project="Debug" />
+    <BuildType Solution="SandBox|*" Project="Release" />
+  </Project>
+  <Project Path="Westwind.MessageQueueing.Tests/Westwind.MessageQueueing.Tests.csproj">
+    <BuildType Solution="Deploy|*" Project="Debug" />
+    <BuildType Solution="SandBox|*" Project="Release" />
+  </Project>
+  <Project Path="Westwind.MessageQueueing.WebHostSample/Westwind.MessageQueueing.WebHostSample.csproj">
+    <BuildType Solution="Deploy|*" Project="Debug" />
+    <BuildType Solution="SandBox|*" Project="Release" />
+  </Project>
+  <Project Path="Westwind.MessageQueueing/Westwind.MessageQueueing.csproj">
+    <BuildType Solution="Deploy|*" Project="Debug" />
+    <BuildType Solution="SandBox|*" Project="Release" />
+  </Project>
+  <Project Path="Westwind.QueueMessageManager.CoreWebSample/Westwind.QueueMessageManager.CoreWebSample.csproj">
+    <BuildType Solution="Deploy|*" Project="Release" />
+    <BuildType Solution="SandBox|*" Project="Release" />
+  </Project>
+</Solution>

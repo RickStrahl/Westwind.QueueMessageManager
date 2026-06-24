@@ -3,6 +3,7 @@ using System.Linq;
 using Westwind.MessageQueueing.Properties;
 using System.Collections.Generic;
 using Westwind.Utilities.Data;
+using System.Threading;
 
 namespace Westwind.MessageQueueing
 {
@@ -44,12 +45,7 @@ namespace Westwind.MessageQueueing
         }
         private SqlDataAccess _Db;
 
-        /// <summary>
-        /// If true automatically attempts to create the database if
-        /// it doesn't exist. Note this adds a little overhead as a single
-        /// query is run to check for existance. False by default.
-        /// </summary>
-        public bool AutoCreateDataStore { get; set;  }
+  
 
         public QueueMessageManagerSql() : base()
         {
@@ -407,6 +403,8 @@ namespace Westwind.MessageQueueing
         }
 
 
+        
+
         /// <summary>
         /// Generic routine to load up the data access layer.
         /// </summary>
@@ -417,30 +415,38 @@ namespace Westwind.MessageQueueing
             if (connectionString == null)
                 connectionString = ConnectionString;            
 
-            var db = new SqlDataAccess(connectionString);            
+            var db = new SqlDataAccess(connectionString);
 
-            if (AutoCreateDataStore)
+            if (AutoCreateTables)
             {
                 var result = db.ExecuteNonQuery("select id from QueueMessageItems where id='@!@'");
                 if (result == -1)
                 {
-
-                    // table doesn't exist - try to create
-                    if (db.ErrorNumber == -2146232060)
-                    {
-                        // hack - avoid recursion here because 
-                        // _Db is not set yet when in constructor
-                        _Db = db;
-                        if (!CreateDatastore())
-                            throw new ArgumentException(Resources.CouldntAccessQueueDatabase + "\r\n" + ErrorMessage);
+                    lock (_createTableLock)
+                    {                        
+                        result = db.ExecuteNonQuery("select id from QueueMessageItems where id='@!@'");
+                        if (result == -1)
+                        {
+                            // table doesn't exist - try to create
+                            if (db.ErrorNumber == -2146232060)
+                            {
+                                // hack - avoid recursion here because 
+                                // _Db is not set yet when in constructor
+                                _Db = db;
+                                if (!CreateDatastore())
+                                    throw new ArgumentException(Resources.CouldntAccessQueueDatabase + "\r\n" + ErrorMessage);
+                            }
+                            else if (db.ErrorNumber != 0)
+                                throw new ArgumentException(Resources.CouldntAccessQueueDatabase);
+                        }
                     }
-                    else if (db.ErrorNumber != 0)
-                        throw new ArgumentException(Resources.CouldntAccessQueueDatabase);
                 }
+
             }
 
             return db;
         }
+        private static readonly Lock _createTableLock = new Lock();
 
 
         /// <summary>
@@ -504,7 +510,7 @@ GO
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[QueueMessageItems]') AND type in (N'U'))
 BEGIN
 CREATE TABLE [dbo].[QueueMessageItems](
-	[Id] [nvarchar](50) NOT NULL,
+	[Id] [nvarchar](50) NOT NULL Default(newid()),
 	[QueueName] [nvarchar](40) NULL,
 	[Action] [nvarchar](80) NULL,
     [Status] [nvarchar](50) NULL,	
@@ -512,33 +518,26 @@ CREATE TABLE [dbo].[QueueMessageItems](
 	[Submitted] [datetime] NOT NULL,
 	[Started] [datetime] NULL,
 	[Completed] [datetime] NULL,
-	[IsComplete] [bit] NOT NULL,
-	[IsCancelled] [bit] NOT NULL,
-    [IsFailed] [bit] NULL,
+	[IsComplete] [bit] NOT NULL Default(0),
+	[IsCancelled] [bit] NOT NULL Default(0),
+    [IsFailed] [bit] NULL Default(0),
 	[Expire] [int] NOT NULL,	
     [TextInput] [nvarchar](max) NULL,	
     [TextResult] [nvarchar](max) NULL,	
-	[NumberResult] [decimal](18, 2) NOT NULL,	
+	[NumberResult] [decimal](18, 2) NOT NULL DEFAULT(0),	
     [Data] [nvarchar] (max) NULL,    
     [BinData] [varbinary](max) NULL,
     [Xml] [nvarchar](max) NULL,
     [Json] [nvarchar] (max) NULL,		
-	[PercentComplete] [int] NOT NULL,
+	[PercentComplete] [int] NOT NULL DEFAULT(0),
 	[XmlProperties] [nvarchar](max) NULL,
+    [Retries] [int] NULL DEFAULT (0)
  CONSTRAINT [PK_dbo.QueueMessageItems] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 
-
-    ALTER TABLE [dbo].[QueueMessageItems] ADD  CONSTRAINT [DF_QueueMessageItems_Id]  DEFAULT (CONVERT([nvarchar](36),newid())) FOR [Id]
-    ALTER TABLE [dbo].[QueueMessageItems] ADD  CONSTRAINT [DF_QueueMessageItems_IsComplete]  DEFAULT ((0)) FOR [IsComplete]
-    ALTER TABLE [dbo].[QueueMessageItems] ADD  CONSTRAINT [DF_QueueMessageItems_IsCancelled]  DEFAULT ((0)) FOR [IsCancelled]
-    ALTER TABLE [dbo].[QueueMessageItems] ADD  CONSTRAINT [DF_QueueMessageItems_IsFailed]  DEFAULT ((0)) FOR [IsFailed]
-    ALTER TABLE [dbo].[QueueMessageItems] ADD  CONSTRAINT [DF_QueueMessageItems_Expire]  DEFAULT ((0)) FOR [Expire]
-    ALTER TABLE [dbo].[QueueMessageItems] ADD  CONSTRAINT [DF_QueueMessageItems_NumberResult]  DEFAULT ((0)) FOR [NumberResult]
-    ALTER TABLE [dbo].[QueueMessageItems] ADD  CONSTRAINT [DF_QueueMessageItems_PercentComplete]  DEFAULT ((0)) FOR [PercentComplete]
 
     CREATE NONCLUSTERED INDEX [IX_QueueMessageItems_IsComplete] ON [dbo].[QueueMessageItems]
     (

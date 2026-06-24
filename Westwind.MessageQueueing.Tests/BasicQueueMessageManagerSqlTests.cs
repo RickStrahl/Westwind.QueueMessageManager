@@ -45,7 +45,7 @@ namespace Westwind.MessageQueueing.Tests
         public void SubmitRequestWithPresetObjectTest()
         {
             string xml = "<doc><value>Hello</value></doc>";
-            using var manager = new QueueMessageManagerSql() { AutoCreateDataStore = true };
+            using var manager = new QueueMessageManagerSql() { AutoCreateTables = true };
 
             var msg = new QueueMessageItem()
             {
@@ -62,7 +62,7 @@ namespace Westwind.MessageQueueing.Tests
         public void SubmitAndCompleteRequestWithPresetObjectTest()
         {
             string xml = "<doc><value>Hello</value></doc>";
-            using var manager = new QueueMessageManagerSql() { AutoCreateDataStore = true };
+            using var manager = new QueueMessageManagerSql() { AutoCreateTables = true };
 
             var msg = new QueueMessageItem()
             {
@@ -91,7 +91,7 @@ namespace Westwind.MessageQueueing.Tests
         {
             var data = new { message = "Hello World", timestamp = DateTime.Now };
 
-            using var manager = new QueueMessageManagerSql() { AutoCreateDataStore = true };
+            using var manager = new QueueMessageManagerSql() { AutoCreateTables = true };
 
             var msg = new QueueMessageItem()
             {
@@ -110,7 +110,7 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public void SubmitRequestsToQueueTest()
         {
-            using var manager = new QueueMessageManagerSql() { AutoCreateDataStore = true };
+            using var manager = new QueueMessageManagerSql() { AutoCreateTables = true };
             int queueCount = 10;
 
             bool res = true;
@@ -268,7 +268,7 @@ namespace Westwind.MessageQueueing.Tests
         [TestMethod]
         public async Task GetNextQueueMessageItemWithAddedItemTest()
         {
-            using (var manager = new QueueMessageManagerSql() {  AutoCreateDataStore = true, DefaultQueue = "TestQueue" })
+            using (var manager = new QueueMessageManagerSql() {  AutoCreateTables = true, DefaultQueue = "TestQueue" })
             {
                 // delete all pending requests
                 int res = manager.Db.ExecuteNonQuery("delete from QueuemessageItems where IsNull(started,'') = '' or started < '01/01/2000'");
@@ -373,7 +373,7 @@ namespace Westwind.MessageQueueing.Tests
         {
             var manager = new QueueMessageManagerSql()
             {
-                AutoCreateDataStore = true
+                AutoCreateTables = true
             };
 
             var items = manager.GetWaitingQueueMessages();

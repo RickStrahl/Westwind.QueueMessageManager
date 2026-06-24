@@ -36,7 +36,7 @@ public class QueueContainer : IDisposable
     /// The default threads used for all controllers in the container **if** 
     /// not defined in the controller explicitly.
     /// </summary>
-    public int DefaultThreadCount { get; set; } = 1;
+    public int DefaultThreadCount { get; set; } = 1;  
 
 
     /// <summary>
@@ -133,9 +133,29 @@ public class QueueContainer : IDisposable
     {
         if (string.IsNullOrEmpty(filename) || !System.IO.File.Exists(filename))
             return null;
-        
 
-        var json = File.ReadAllText(filename);
+        try
+        {
+            var json = File.ReadAllText(filename);
+            return CreateFromConfigurationString(json);
+        }
+        catch 
+        {
+            return null;
+        }        
+    }
+
+    /// <summary>
+    /// Deserializes a container instance from a JSON string.
+    /// </summary>
+    /// <param name="json"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidCastException"></exception>
+    public static QueueContainer CreateFromConfigurationString(string json)
+    {
+        if(string.IsNullOrEmpty(json))
+            return null;
+        
         var container = JsonSerializationUtils.Deserialize(json, typeof(QueueContainer)) as QueueContainer;
         if (container == null)
             return null;
@@ -147,24 +167,24 @@ public class QueueContainer : IDisposable
         // and replace with explicitly created instances of the correct type.
         container.Controllers.Clear();
 
-        dynamic jcontrollers = jobj.Controllers;        
+        dynamic jcontrollers = jobj.Controllers;
 
-        foreach(var jctrl in jcontrollers)
+        foreach (var jctrl in jcontrollers)
         {
-            var typename = jctrl.QueueControllerType?.ToString();           
+            var typename = jctrl.QueueControllerType?.ToString();
             if (string.IsNullOrEmpty(typename))
                 continue;
-        
+
             var controller = ReflectionUtils.CreateInstanceFromString(typename);
-            if (controller == null)            
+            if (controller == null)
                 throw new InvalidCastException("Unable to create QueueController of type " + typename);
 
             string connectionString = jctrl.ConnectionString?.ToString();
             if (string.IsNullOrEmpty(connectionString))
                 connectionString = container.DefaultConnectionString;
             string queueName = jctrl.QueueName?.ToString();
-            int threadCount = jctrl.ThreadCount?.Value is long ? (int) jctrl.ThreadCount.Value : container.DefaultThreadCount;
-            int waitInterval = jctrl.WaitInterval?.Value is long ? (int) jctrl.WaitInterval.Value : container.DefaultWaitInterval;
+            int threadCount = jctrl.ThreadCount?.Value is long ? (int)jctrl.ThreadCount.Value : container.DefaultThreadCount;
+            int waitInterval = jctrl.WaitInterval?.Value is long ? (int)jctrl.WaitInterval.Value : container.DefaultWaitInterval;
             bool paused = jctrl.Paused?.Value is bool ? jctrl.Paused.Value : false;
 
 
@@ -178,15 +198,15 @@ public class QueueContainer : IDisposable
 
             container.AddController(controller);
         }
-    
-        return container;    
+
+        return container;
     }
 
     /// <summary>
     /// Saves the current container configuration to file
     /// </summary>
-    /// <param name="filename"></param>
-    /// <returns></returns>
+    /// <param name="filename">File name to save to</param>
+    /// <returns>success or failure</returns>
     public bool SaveToConfigurationFile(string filename)
     {
         return JsonSerializationUtils.SerializeToFile(this, filename, false, true, false);

@@ -19,7 +19,14 @@ namespace Westwind.MessageQueueing
         /// Queue Manager
         /// </summary>
         public string ConnectionString { get; set; }
-        
+
+
+        /// <summary>
+        /// If true the database will be created automatically if it doesn't exist.
+        /// Adds a little overhead on creation of each manager instance.
+        /// </summary>
+        public bool AutoCreateTables { get; set; } = false;
+
         /// <summary>
         /// Poll interval for the controller in milliseconds
         /// when no requests are pending

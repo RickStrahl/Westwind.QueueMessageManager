@@ -322,9 +322,10 @@ namespace Westwind.MessageQueueing.Hosting
         /// Writes out a message to all SignalR clients with a QueueMessageItem object
         /// as its main input. 
         /// </summary>
-        /// <param name="queueItem"></param>
-        /// <param name="elapsed"></param>
-        /// <param name="waiting"></param>
+        /// <param name="queueItem">The Queue Item to display</param>
+        /// <param name="elapsed">Elapsed time in milliseconds</param>
+        /// <param name="waiting">Number of waiting items in the queue</param>
+        /// <param name="time">Timestamp for the message - submitted or completed</param>
         public static async Task WriteMessageInternal(QueueMessageItem queueItem,
             int elapsed = 0,
             int waiting = -1,

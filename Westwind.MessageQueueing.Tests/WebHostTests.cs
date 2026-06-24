@@ -14,7 +14,7 @@ namespace QueueStarter.Tests
         [TestMethod]
         public void CreateQmmTableTest()
         {
-            var qm = new QueueMessageManagerSql(connectionString) { AutoCreateDataStore = true };
+            var qm = new QueueMessageManagerSql(connectionString) { AutoCreateTables = true };
 
             Assert.IsNotNull(qm);
 

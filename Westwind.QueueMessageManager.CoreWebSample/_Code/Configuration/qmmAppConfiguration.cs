@@ -10,6 +10,8 @@ public class qmmAppConfiguration : AppConfiguration
     public string ConnectionString { get; set; } =
         "server=.;database=QueueMessageManager;integrated security=yes;encrypt=false;trustservercertificate=true;";
 
+    public bool AutoCreateTables { get; set; } = false;
+
     public string JwtIssuer { get; set; } = "Westwind.Web.Template";
 
     public string JwtAudience { get; set; } = "Westwind.Web.Template.Client";

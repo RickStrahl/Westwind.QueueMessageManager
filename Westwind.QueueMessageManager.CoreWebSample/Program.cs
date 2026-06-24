@@ -1,12 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Serilog;
-using Serilog.Sinks.File;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Westwind.AspNetCore.LiveReload;
 using Westwind.MessageQueueing;
@@ -26,6 +22,7 @@ qmmApp.Constants.WebRootFolder = Path.Combine(qmmApp.Constants.StartupFolder, "w
 
 var configFile = "_qmmApp-configuration.json";
 var configExists = File.Exists(configFile);
+
 
 var appConfig = qmmApp.Configuration;
 builder.Configuration.GetSection("qmmApp").Bind(appConfig);
@@ -109,16 +106,6 @@ builder.Services.AddSignalR();
 var config = QueueMessageManagerConfiguration.Current;
 
 
-//var launcher = new ServiceLauncher<TestQmmController>()
-//{
-//    LogManager = Log.Logger as Microsoft.Extensions.Logging.ILogger
-//};
-
-// create a new Controller to process in the background
-// on separate threads
-
-
-
 QueueContainer queueContainer = null;
 bool readFromConfig = true;
 if (readFromConfig)
@@ -135,68 +122,16 @@ else
         DefaultThreadCount = 1,
         DefaultWaitInterval = 300,
         Controllers = [
-            new Test1Queue(),
-            new Test2Queue()
+            new Test1Queue() { ConnectionString = qmmApp.Configuration.ConnectionString, ThreadCount = 2 },
+            new Test2Queue() { ConnectionString = qmmApp.Configuration.ConnectionString, ThreadCount = 3, WaitInterval = 200 },
+            new Test2Queue() { ConnectionString = qmmApp.Configuration.ConnectionString, ThreadCount = 2, WaitInterval = 400 }
         ]
-    };    
+    };
 }
 queueContainer.StartProcessingAsync();
-queueContainer.SaveToConfigurationFile("qmm-container-config.json");
 
+//queueContainer.SaveToConfigurationFile("qmm-container-config.json");
 
-//var controller = new QueueControllerMultiple(config, qmmApp.ConnectionString);
-//controller.ExecuteStart += async manager =>
-//{
-//    var item = manager.Item;
-//    var swatch = Stopwatch.StartNew();
-
-//    // TEST ONLY
-//    await Task.Delay(1000); // so we can see submission
-//    //Thread.Sleep(1000);
-
-//    try
-//    {
-//        if (item.Action == "PRINT")
-//        {
-//            item.Message = "Started on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;
-//            manager.StartRequest();
-//            manager.Save();
-//            QueueMonitorServiceHub.WriteMessageInternal(item).FireAndForget();
-
-//            await Task.Delay(3000);
-//            //Thread.Sleep(3000);
-//            item.Message = "Completed on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;
-
-//            manager.CompleteRequest();
-//            manager.Save();
-//        }
-//        else
-//        {
-//            //Thread.Sleep(1200);
-//            await Task.Delay(1200);
-//            manager.FailRequest(messageText: "Unknown action: " + item.Action);
-//            manager.Save();
-//        }
-//    }
-//    catch (Exception ex)
-//    {
-//        manager.FailRequest(messageText: $"Processing failed: " + ex.GetBaseException().Message);
-//        manager.Save();
-//    }
-
-//    swatch.Stop();
-//    QueueMonitorServiceHub.WriteMessageInternal(item, elapsed: (int)swatch.ElapsedMilliseconds).FireAndForget();
-//};
-//controller.StartProcessingAsync();
-
-
-
-
-
-void Controller_ExecuteStart(QueueMessageManager obj)
-{
-    throw new NotImplementedException();
-}
 
 
 //builder.Services.AddQueueHubAuthorization();

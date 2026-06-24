@@ -43,6 +43,13 @@ Websurge-Request-Name: Submit Item with Bad Action
 
 ------------------------------------------------------------------
 
+GET /api/qmm/get-message/-1 HTTP/2.0
+Accept-Encoding: gzip,deflate
+Accept: application/json
+Websurge-Request-Name: Get Message Item by Id
+
+------------------------------------------------------------------
+
 
 ----- Start WebSurge Options -----
 

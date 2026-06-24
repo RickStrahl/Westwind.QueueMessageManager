@@ -1,5 +1,6 @@
 // #define USE_ASYNC
 
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Westwind.MessageQueueing;
 using Westwind.MessageQueueing.Hosting;
 using Westwind.Utilities;
@@ -8,12 +9,15 @@ using Westwind.Utilities;
 
 namespace Westwind.QueueMessageManager.CoreWebSample;
 
-public class Test1Queue : QueueController
+public class Test1Queue : QmmWebHostController
 {
+
+    
+
     public Test1Queue() 
     {
         WaitInterval = 1000;
-        QueueName = "Test1";
+        QueueName = "Test1";        
     }
 
 
@@ -29,12 +33,9 @@ public class Test1Queue : QueueController
         // Testing only brief delay so we can see transition from Submitted to Started
         Thread.Sleep(1000);
 
-        try
+        switch (item.Action)
         {
-            switch (item.Action)
-            {
-
-                case "PRINT":
+            case "PRINT":
                 {
                     item.Message = "Started on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;
                     manager.StartRequest();
@@ -42,26 +43,16 @@ public class Test1Queue : QueueController
 
                     QueueMonitorServiceHub.WriteMessageInternal(item).FireAndForget();
 
-                    Thread.Sleep(3000);
+                    Thread.Sleep(3000); // simulat work
                     item.Message = "Completed on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;
 
-                    OnExecuteComplete(manager);
                     break;
                 }
-                default:
+            default:
                 {
-                    manager.CancelRequest(messageText: "Unknown action: " + item.Action + "\nOriginal message:\n" + item.Message);
-                    manager.Save();
-
-                    // no handler so directly write out
-                    WriteMessageHub(manager.Item);
-                    break;
+                    // force exception so it fails
+                    throw new InvalidOperationException("Unknown action: " + item.Action + "\nOriginal message:\n" + item.Message);
                 }
-            }
-        }
-        catch (Exception ex)
-        {
-            OnExecuteFailed(manager, ex);
         }
 #endif
     }
@@ -115,29 +106,29 @@ public class Test1Queue : QueueController
 #endif
     }
 
-    protected override void OnExecuteComplete(MessageQueueing.QueueMessageManager manager)
-    {
-        manager.CompleteRequest();
-        manager.Save();
+    //protected override void OnExecuteComplete(MessageQueueing.QueueMessageManager manager)
+    //{
+    //    manager.CompleteRequest();
+    //    manager.Save();
 
-        WriteMessageHub(manager.Item);
-    }
+    //    WriteMessageHub(manager.Item);
+    //}
 
-    protected override void OnExecuteFailed(MessageQueueing.QueueMessageManager manager, Exception ex)
-    {        
-        manager.FailRequest(messageText: $"Request failed: {ex.Message}\nOriginal message:\n{manager.Item.Message}");
-        manager.Save();
+    //protected override void OnExecuteFailed(MessageQueueing.QueueMessageManager manager, Exception ex)
+    //{        
+    //    manager.FailRequest(messageText: $"Request failed: {ex.Message}\nOriginal message:\n{manager.Item.Message}");
+    //    manager.Save();
 
-        WriteMessageHub(manager.Item);
-    }
+    //    WriteMessageHub(manager.Item);
+    //}
 
 
-    protected void WriteMessageHub(QueueMessageItem item, string messageText = null)
-    {        
-        if (!string.IsNullOrEmpty(messageText))
-            item.Message = messageText;
+    //protected void WriteMessageHub(QueueMessageItem item, string messageText = null)
+    //{        
+    //    if (!string.IsNullOrEmpty(messageText))
+    //        item.Message = messageText;
         
 
-        QueueMonitorServiceHub.WriteMessageInternal(item).FireAndForget();
-    }
+    //    QueueMonitorServiceHub.WriteMessageInternal(item).FireAndForget();
+    //}
 }

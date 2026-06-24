@@ -1,11 +1,25 @@
 using System;
+using Newtonsoft.Json;
 using Westwind.Utilities;
 
 namespace Westwind.MessageQueueing
 {
+
+    /// <summary>
+    /// Class that describes a Message Queue Item that is stored in the database.
+    /// 
+    /// </summary>
     public partial class QueueMessageItem
     {
+        /// <summary>
+        /// Unique Id assigned to this message.
+        /// </summary>
         public string Id { get; set; }
+
+
+        /// <summary>
+        /// Name of the Queue that this item is stored in.
+        /// </summary>
         public string QueueName { get; set; }
 
 
@@ -44,6 +58,11 @@ namespace Westwind.MessageQueueing
         /// Time when the message is completed (optional)
         /// </summary>
         public DateTime? Completed { get; set; }
+
+        /// <summary>
+        /// The number of times this message has been retried on failure.
+        /// </summary>
+        public int Retries { get; set; }
 
         /// <summary>
         /// Elapsed time in milliseconds between Started and Completed or 0
@@ -132,6 +151,7 @@ namespace Westwind.MessageQueueing
 
         public string XmlProperties { get; set; }
 
+        [JsonIgnore]
         public bool __IsNew = true;
 
         
@@ -152,6 +172,7 @@ namespace Westwind.MessageQueueing
         private static readonly DateTime baseDate = new DateTime(DateTime.UtcNow.Year -1, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         public static string GenerateId()
         {
+            // generate a semi sequential id based on ticks at beginning of string
             return (DateTime.UtcNow - baseDate).Ticks + "_" +
                  DataUtils.GenerateUniqueId(8);
         }

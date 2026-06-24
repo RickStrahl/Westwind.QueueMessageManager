@@ -1,0 +1,12 @@
+[2026-06-23 20:48:45 ERR] The view '~/views/qmmweb/queuemonitor.cshtml' was not found. Searched locations: ["~/views/qmmweb/queuemonitor.cshtml"]
+---
+[2026-06-23 20:48:45 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-23 21:04:05 ERR] Failed to invoke hub method 'GetInitialMessagesList'.
+---
+[2026-06-23 22:14:28 ERR] Failed to invoke hub method 'GetInitialMessagesList'.
+---
+[2026-06-23 22:15:16 ERR] Failed to invoke hub method 'GetInitialMessagesList'.
+---
+[2026-06-23 22:22:12 ERR] Failed to invoke hub method 'GetInitialMessagesList'.
+---

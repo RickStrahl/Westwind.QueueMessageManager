@@ -9,6 +9,7 @@
       "Paused": false,
       "WaitInterval": 300,
       "ThreadCount": 3,
+      "MaxRetries": 0,
       "QueueControllerType": "Westwind.QueueMessageManager.CoreWebSample.Test1Queue",
       "OnCreateQueueManager": null,
       "LogManager": {}
@@ -19,6 +20,18 @@
       "Paused": false,
       "WaitInterval": 500,
       "ThreadCount": 2,
+      "MaxRetries": 0,
+      "QueueControllerType": "Westwind.QueueMessageManager.CoreWebSample.Test2Queue",
+      "OnCreateQueueManager": null,
+      "LogManager": {}
+    },
+    {
+      "QueueName": "Test3",
+      "ConnectionString": "server=.;database=QueueMessageManager;integrated security=yes;encrypt=false;trustservercertificate=true;",
+      "Paused": false,
+      "WaitInterval": 400,
+      "ThreadCount": 2,
+      "MaxRetries": 0,
       "QueueControllerType": "Westwind.QueueMessageManager.CoreWebSample.Test2Queue",
       "OnCreateQueueManager": null,
       "LogManager": {}

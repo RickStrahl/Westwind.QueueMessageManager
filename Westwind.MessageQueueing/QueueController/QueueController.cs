@@ -129,7 +129,12 @@ namespace Westwind.MessageQueueing
         /// The specific type of the message manager class
         /// </summary>        
         [JsonIgnore]
-        public Type QueueManagerType { get; set; }
+        public Type QueueManagerType { get; set; }        
+
+        /// <summary>
+        /// Max retries for failed requests.
+        /// </summary>
+        public int MaxRetries { get; set; } = 0;
 
         /// <summary>
         /// Returns a full .NET class name that can be used 
@@ -186,6 +191,7 @@ namespace Westwind.MessageQueueing
                 th.Start();
             }
         }
+        
 
         /// <summary>
         /// Starts processing the controller's queue on the current thread.
@@ -216,6 +222,11 @@ namespace Westwind.MessageQueueing
                 else
                     manager = Activator.CreateInstance(QueueManagerType, [ ConnectionString ?? string.Empty ]) as QueueMessageManager;
                 
+
+                var config = QueueMessageManagerConfiguration.Current;
+                if(config.AutoCreateTables)
+                    manager.AutoCreateTables = true;
+                               
                 using (manager)
                 {
                     if (OnGetNextQueueMessage(manager, QueueName) == null)                                        
@@ -280,9 +291,9 @@ namespace Westwind.MessageQueueing
             try
             {
                 // Hook up start processing
+                await OnExecuteStartAsync(manager); 
                 OnExecuteStart(manager);
-                await OnExecuteStartAsync(manager);
-
+                
                 // Hookup end processing
                 OnExecuteComplete(manager);
             }
@@ -342,7 +353,7 @@ namespace Westwind.MessageQueueing
         protected virtual Task OnExecuteStartAsync(QueueMessageManager manager)
         {
             if (ExecuteStartAsync == null) return Task.CompletedTask;
-            return ExecuteStartAsync?.Invoke(manager);
+            return ExecuteStartAsync.Invoke(manager);
         }
 
 

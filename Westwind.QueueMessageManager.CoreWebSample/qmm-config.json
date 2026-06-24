@@ -1,23 +1,11 @@
 {
   "ConnectionString": "Server=.;Database=QueueMessageManager;integrated security=true;Enlist=True;MultipleActiveResultSets=True;Encrypt=False",
+  "AutoCreateTables": true,
   "WaitInterval": 1000,
   "DefaultQueueName": null,
   "DefaultControllerQueueName": "",
   "ControllerThreads": 1,
-  "Controllers": [
-    {
-      "ConnectionString": null,
-      "QueueName": "Queue1",
-      "ControllerThreads": 1,
-      "WaitInterval": 300
-    },
-    {
-      "ConnectionString": null,
-      "QueueName": "Queue2",
-      "ControllerThreads": 0,
-      "WaitInterval": 300
-    }
-  ],
+  "Controllers": null,
   "MonitorSignalRHubUrl": "~/signalR",
   "MonitorHtmlUrl": "~/QueueMonitor.cshtml",
   "MonitorHostUrl": "http://*:5080/",
