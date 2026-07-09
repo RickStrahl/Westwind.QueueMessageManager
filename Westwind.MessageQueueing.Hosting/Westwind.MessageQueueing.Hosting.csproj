@@ -4,11 +4,12 @@
 		<OutputType>Library</OutputType>						
 	</PropertyGroup>	
 	<ItemGroup>
-		<ProjectReference Include="..\Westwind.MessageQueueing\Westwind.MessageQueueing.csproj" />
-
+		<ProjectReference Include="..\Westwind.MessageQueueing\Westwind.MessageQueueing.csproj" />		
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+		<!--<PackageReference Include="Westwind.AspNetCore" Version="4.*" />-->
 		<PackageReference Include="Westwind.Utilities" Version="5.3.1.2" />
 
+		<ProjectReference Include="..\..\..\Westwind.AspNetCore\Westwind.AspNetCore\Westwind.AspNetCore.csproj" />
 	</ItemGroup>	
 	<ItemGroup>
 	  <Folder Include="Properties\" />

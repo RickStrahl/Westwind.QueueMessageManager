@@ -1,7 +1,7 @@
 using System.Reflection;
 using Westwind.Utilities;
 
-namespace Westwind.QueueManager.CoreWebSample;
+namespace Westwind.QueueManager.Hosting;
 
 public static class qmmApp
 {

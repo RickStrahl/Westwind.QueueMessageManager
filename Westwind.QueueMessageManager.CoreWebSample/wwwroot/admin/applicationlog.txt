@@ -10,3 +10,241 @@
 ---
 [2026-06-23 22:22:12 ERR] Failed to invoke hub method 'GetInitialMessagesList'.
 ---
+[2026-06-24 15:25:28 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:27:04 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:28:19 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:28:30 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:28:40 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:28:55 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:28:59 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:29:09 ERR] An exception was thrown attempting to display the error page.
+---
+[2026-06-24 15:29:09 ERR] Connection id "0HNMI7VSREENC", Request id "0HNMI7VSREENC:00000001": An unhandled exception was thrown by the application.
+---
+[2026-06-24 15:30:53 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:31:11 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:32:33 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:33:07 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:33:18 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:33:42 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:33:47 ERR] An exception was thrown attempting to display the error page.
+---
+[2026-06-24 15:33:47 ERR] Connection id "0HNMI82B8GROQ", Request id "0HNMI82B8GROQ:00000001": An unhandled exception was thrown by the application.
+---
+[2026-06-24 15:38:29 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:38:33 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:38:40 ERR] An exception was thrown attempting to display the error page.
+---
+[2026-06-24 15:38:40 ERR] Connection id "0HNMI857NKQU5", Request id "0HNMI857NKQU5:00000001": An unhandled exception was thrown by the application.
+---
+[2026-06-24 15:40:12 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:42:03 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:45:04 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:50:18 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:50:21 ERR] An exception was thrown attempting to display the error page.
+---
+[2026-06-24 15:50:21 ERR] Connection id "0HNMI88TIPURM", Request id "0HNMI88TIPURM:00000001": An unhandled exception was thrown by the application.
+---
+[2026-06-24 15:50:34 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:50:46 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:50:57 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:51:02 ERR] An exception was thrown attempting to display the error page.
+---
+[2026-06-24 15:51:02 ERR] Connection id "0HNMI8C3I62O0", Request id "0HNMI8C3I62O0:00000001": An unhandled exception was thrown by the application.
+---
+[2026-06-24 15:51:27 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:51:36 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:51:41 ERR] An exception was thrown attempting to display the error page.
+---
+[2026-06-24 15:51:41 ERR] Connection id "0HNMI8CFR31MK", Request id "0HNMI8CFR31MK:00000001": An unhandled exception was thrown by the application.
+---
+[2026-06-24 15:52:09 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:52:21 ERR] An exception was thrown attempting to display the error page.
+---
+[2026-06-24 15:52:21 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:52:21 ERR] Connection id "0HNMI8CFR31ML", Request id "0HNMI8CFR31ML:00000001": An unhandled exception was thrown by the application.
+---
+[2026-06-24 15:52:23 ERR] An exception was thrown attempting to display the error page.
+---
+[2026-06-24 15:52:23 ERR] Connection id "0HNMI8CFR31MM", Request id "0HNMI8CFR31MM:00000001": An unhandled exception was thrown by the application.
+---
+[2026-06-24 15:52:27 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:52:49 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:53:07 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:54:44 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:59:06 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:59:10 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:59:42 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 15:59:53 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 16:04:49 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 16:04:52 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 16:04:53 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 16:04:58 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 16:05:22 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 16:05:24 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 16:05:24 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 16:05:24 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 16:05:24 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-24 16:05:25 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 09:13:56 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 09:14:36 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 09:14:49 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 09:37:24 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 09:37:40 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 09:38:16 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 10:17:42 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 10:17:57 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 10:19:24 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 10:19:27 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 10:19:28 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 10:19:28 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 10:19:37 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 10:19:45 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 21:21:56 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 21:22:12 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 21:22:13 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 21:22:14 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 21:22:21 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 21:22:26 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 21:22:27 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 21:49:59 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 21:52:35 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 22:27:49 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 22:28:37 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 22:29:04 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 22:29:19 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 22:33:08 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 22:33:35 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 22:33:41 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 22:33:44 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 22:34:26 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 22:37:56 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 22:40:56 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 22:41:52 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 22:43:21 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 22:43:27 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 22:44:02 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 22:50:16 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-25 22:50:22 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-26 14:57:09 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-26 14:57:19 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-26 14:57:38 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-26 15:18:22 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-26 15:52:53 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-26 15:54:29 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-26 15:56:05 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-26 15:57:50 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-26 16:29:01 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-26 16:29:06 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-26 16:30:42 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-26 17:47:28 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-27 09:25:31 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-27 09:25:48 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-27 09:30:49 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-27 10:59:14 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-29 09:18:56 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-06-29 12:48:55 ERR] An unhandled exception has occurred while executing the request.
+---
+[2026-07-09 15:12:06 ERR] An unhandled exception has occurred while executing the request.
+---

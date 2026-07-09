@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using Westwind.MessageQueueing.Hosting;
-using Westwind.QueueMessageManager.CoreWebSample.Models;
 
 namespace Westwind.QueueMessageManager.CoreWebSample;
 

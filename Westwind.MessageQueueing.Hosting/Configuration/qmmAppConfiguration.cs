@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc.Razor;
 using Westwind.Utilities.Configuration;
 using IConfigurationProvider = Westwind.Utilities.Configuration.IConfigurationProvider;
 
-namespace Westwind.QueueManager.CoreWebSample;
+namespace Westwind.QueueManager.Hosting;
 
 public class qmmAppConfiguration : AppConfiguration
 {

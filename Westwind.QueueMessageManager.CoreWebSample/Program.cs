@@ -1,13 +1,16 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.FileProviders;
 using Newtonsoft.Json;
 using Serilog;
 using System.Runtime.InteropServices;
+using Microsoft.AspNetCore.Mvc.Abstractions;
 using Westwind.AspNetCore.LiveReload;
+using Westwind.AspNetCore;
 using Westwind.MessageQueueing;
 using Westwind.MessageQueueing.Hosting;
-using Westwind.QueueManager.CoreWebSample;
+using Westwind.QueueManager.Hosting;
 using Westwind.QueueMessageManager.CoreWebSample;
 using Westwind.Utilities;
 
@@ -73,12 +76,21 @@ if (qmmApp.Configuration.System.LiveReloadEnabled)
 }
 
 
+//var inheritedRouteConvention = new InheritedControllerRouteConvention
+//{
+//    //ChildControllerTypes = [typeof(SampleAppQmmApiController)]
+//};
+//services.AddSingleton<IActionDescriptorProvider>(inheritedRouteConvention);
+
 var mvcBuilder = services.AddControllersWithViews()
+    // have to let MVC know we have a dynamically loaded controller
+    .AddApplicationPart(typeof(QmmApiController).Assembly)
     .AddNewtonsoftJson(opt =>
     {
         if (builder.Environment.IsDevelopment())
             opt.SerializerSettings.Formatting = Formatting.Indented;
     });
+
 
 if (appConfig.System.LiveReloadEnabled)
 {
@@ -140,6 +152,25 @@ queueContainer.StartProcessingAsync();
 
 var app = builder.Build();
 
+
+//var adProvider = app.Services.GetRequiredService<IActionDescriptorCollectionProvider>();
+//foreach (var a in adProvider.ActionDescriptors.Items)
+//{
+//    var route = a.AttributeRouteInfo?.Template ?? "(conventional)";
+//    Console.WriteLine($"{a.DisplayName} => {route}");
+//}
+
+var endpointSource = app.Services.GetRequiredService<EndpointDataSource>();
+foreach (var endpoint in endpointSource.Endpoints.OfType<RouteEndpoint>())
+{
+    var methods = endpoint.Metadata
+        .OfType<HttpMethodMetadata>()
+        .FirstOrDefault()?.HttpMethods ?? new[] { "ANY" };
+
+    Console.WriteLine($"{string.Join(",", methods),-10} {endpoint.RoutePattern.RawText,-40} {endpoint.DisplayName}");
+}
+
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -160,10 +191,26 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
+app.MapControllers().WithStaticAssets();
+
+
+
+
+
+//app.MapGet("/api/test", () => {
+//    return new { message = "Hello cruel World!" };
+//});
+
+
+//app.UseEndpoints(endpoints =>
+//{
+//    // We need MVC Routing for Markdown to work
+//    endpoints.MapDefaultControllerRoute();
+//});
+// app.MapControllerRoute(
+//     name: "default",
+//     pattern: "{controller=Home}/{action=Index}/{id?}")
+//     .WithStaticAssets();
 
 
 app.MapHub<QueueMonitorServiceHub>("/queueMonitorServiceHub");

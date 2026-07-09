@@ -1,6 +1,6 @@
 using Westwind.MessageQueueing;
 using Westwind.MessageQueueing.Hosting;
-using Westwind.QueueManager.CoreWebSample;
+using Westwind.QueueManager.Hosting;
 using Westwind.Utilities;
 
 namespace Westwind.QueueMessageManager.CoreWebSample;

@@ -12,15 +12,22 @@
   </Folder>
   <Folder Name="/Documents/">
     <File Path="Changelog.md" />
+    <File Path="global.json" />
     <File Path="Readme.md" />
   </Folder>
   <Folder Name="/Samples/">
-    <Project Path="../../WestwindToolkit/Westwind.Data.MongoDb/Westwind.Data.MongoDb.csproj">
+    <Project Path="../../WestwindToolkit/Westwind.Data.MongoDb/Westwind.Data.MongoDb.csproj" Id="0ce58260-3b66-480c-8394-35ba649f77d6">
       <BuildType Solution="Deploy|*" Project="Debug" />
       <BuildType Solution="SandBox|*" Project="Release" />
     </Project>
     <Project Path="../Samples/Westwind.QueueMessageManager/LongRunningSignalRWeb/LongRunningSignalRWeb.csproj">
       <BuildType Solution="Deploy|*" Project="Debug" />
+      <BuildType Solution="SandBox|*" Project="Release" />
+    </Project>
+  </Folder>
+  <Folder Name="/SupportProjects/">
+    <Project Path="../../Westwind.AspNetCore/Westwind.AspNetCore/Westwind.AspNetCore.csproj">
+      <BuildType Solution="Deploy|*" Project="Release" />
       <BuildType Solution="SandBox|*" Project="Release" />
     </Project>
   </Folder>

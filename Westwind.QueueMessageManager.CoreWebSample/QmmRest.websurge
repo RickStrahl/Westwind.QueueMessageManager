@@ -1,7 +1,23 @@
+POST /api/qmm/authenticate HTTP/2.0
+Content-Type: application/json
+Accept: text/json
+Accept-Encoding: gzip, deflate, br
+WebSurge-Request-CaptureAndSetAuthorizationBearerTokenFromJson: token
+Websurge-Request-Name: Authenticate
+
+{ 
+   username: "test@test.com",
+   password: "test"
+}
+
+------------------------------------------------------------------
+
 POST /api/qmm/submit-item HTTP/2.0
 Content-Type: application/json
 Accept: text/json
 Accept-Encoding: gzip, deflate, br
+WebSurge-Request-InjectJsonBearerToken: token
+Authorization: Bearer
 Websurge-Request-Name: Submit a new Item
 
 {
@@ -17,6 +33,7 @@ POST /api/qmm/submit-item HTTP/2.0
 Content-Type: application/json
 Accept: text/json
 Accept-Encoding: gzip, deflate, br
+Authorization: Bearer
 Websurge-Request-Name: Submit a new Item Test2 Queue
 
 {
@@ -32,6 +49,7 @@ POST /api/qmm/submit-item HTTP/2.0
 Content-Type: application/json
 Accept: text/json
 Accept-Encoding: gzip, deflate, br
+Authorization: Bearer
 Websurge-Request-Name: Submit Item with Bad Action
 
 {
@@ -46,7 +64,16 @@ Websurge-Request-Name: Submit Item with Bad Action
 GET /api/qmm/get-message/-1 HTTP/2.0
 Accept-Encoding: gzip,deflate
 Accept: application/json
-Websurge-Request-Name: Get Message Item by Id
+Authorization: Bearer
+Websurge-Request-Name: Get Last Completed Message
+
+------------------------------------------------------------------
+
+GET /api/qmm/get-message/xxxx HTTP/2.0
+Accept-Encoding: gzip,deflate
+Accept: application/json
+Authorization: Bearer
+Websurge-Request-Name: Get Message Item by Id (change as needed)
 
 ------------------------------------------------------------------
 
@@ -78,7 +105,7 @@ Websurge-Request-Name: Get Message Item by Id
   "ReplaceQueryStringValuePairs": null,
   "ReplaceCookieValue": null,
   "TrackPerSessionCookies": true,
-  "ReplaceAuthorization": null,
+  "ReplaceAuthorization": "Bearer dbc9h2tkaiuggsf",
   "Username": null,
   "Password": null,
   "UsernamePasswordType": "Negotiate",
