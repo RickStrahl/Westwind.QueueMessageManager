@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
-using Westwind.MessageQueueing;
 using Westwind.Utilities;
 
 namespace Westwind.MessageQueueing.Hosting
@@ -239,6 +239,7 @@ namespace Westwind.MessageQueueing.Hosting
             using (var manager = new QueueMessageManagerSql())
             {
                 int count = manager.GetWaitingQueueMessageCount(queueName);
+                Debug.WriteLine("Waiting queue items: " + count);
                 return count;
             }
 
@@ -258,7 +259,7 @@ namespace Westwind.MessageQueueing.Hosting
             using (var manager = new QueueMessageManagerSql())
             {
                 int count = manager.GetWaitingQueueMessageCount(queueName);
-                Console.WriteLine("Queue count: " + count + "  Queue: " + queueName);
+                Debug.WriteLine("Queue count: " + count + "  Queue: " + queueName);
                 if (count > -1)
                 {
                     // broadcast to all clients
@@ -304,8 +305,9 @@ namespace Westwind.MessageQueueing.Hosting
             get
             {
                 if (_context == null)
-                    throw new ApplicationException(
-                        "HubContext is not initialized. Set it during Start up with:\nQueueMonitorServiceHub.HubContext = app.Services.GetRequiredService<IHubContext<QueueMonitorServiceHub>>()");
+                    return null;
+                    //throw new ApplicationException(
+                    //    "HubContext is not initialized. Set it during Start up with:\nQueueMonitorServiceHub.HubContext = app.Services.GetRequiredService<IHubContext<QueueMonitorServiceHub>>()");
 
                 return _context;
             }
@@ -315,6 +317,9 @@ namespace Westwind.MessageQueueing.Hosting
 
         public static async Task StatusMessage(string message)
         {
+            if (HubContext == null)
+                return;
+
             await HubContext.Clients.All.SendAsync("statusMessage", message);
         }
 
@@ -330,12 +335,15 @@ namespace Westwind.MessageQueueing.Hosting
             int elapsed = 0,
             int waiting = -1,
             DateTime? time = null)
-        {            
+        {
+            if (HubContext == null)
+                return;
+
             var msg = HtmlUtils.DisplayMemo(queueItem.Message);
 
             if (time == null)
                 time = DateTime.UtcNow;
-
+            
             // Write out message to SignalR clients            
             await HubContext.Clients.All.SendAsync("writeMessage", msg,
                 queueItem.Status,
@@ -359,6 +367,9 @@ namespace Westwind.MessageQueueing.Hosting
             DateTime? time = null, string queueName = null, 
             int elapsed = 0, string action = null)
         {
+            if (HubContext == null)
+                return;
+
             if (id == null)
                 id = string.Empty;
 
@@ -373,9 +384,7 @@ namespace Westwind.MessageQueueing.Hosting
                 elapsed,
                 -1,
                 queueName,
-                action );
-
-           
+                action );           
         }
 
 

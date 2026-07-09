@@ -49,9 +49,9 @@ namespace Westwind.MessageQueueing.Tests
 
             var msg = new QueueMessageItem()
             {
-                QueueName = "Queue1",
+                QueueName = "Test1",
                 Message = "Xml Message  @ " + DateTime.Now.ToString("t"),
-                Action = "NEWXMLORDER",    // Some Application specific Action Id`         
+                Action = "PRINT",    // Some Application specific Action Id`         
                 Xml = xml
             };
             manager.SubmitRequest(msg);

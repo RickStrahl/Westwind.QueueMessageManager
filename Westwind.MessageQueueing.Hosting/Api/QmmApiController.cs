@@ -180,8 +180,7 @@ public abstract class QmmApiController : BaseApiController
         }
 
         await QueueMonitorServiceHub.WriteMessageInternal(item);
-        await QueueMonitorServiceHub.GetWaitingQueueMessageCountInternal(item.QueueName);
-
+        
         return Ok(new { success = true, sentAt = DateTime.UtcNow });
     }
 
@@ -202,9 +201,9 @@ public abstract class QmmApiController : BaseApiController
         }
 
         manager.UpdateQueueMessageStatus(loadedItem, item.Status, item.Message);
-        await QueueMonitorServiceHub.WriteMessageInternal(loadedItem);
-        await QueueMonitorServiceHub.GetWaitingQueueMessageCountInternal(item.QueueName);
 
+        await QueueMonitorServiceHub.WriteMessageInternal(loadedItem);
+        
         return Ok(new { success = true, sentAt = DateTime.UtcNow });
     }
 

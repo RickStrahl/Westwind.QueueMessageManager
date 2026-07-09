@@ -41,7 +41,7 @@ public class Test1Queue : QmmWebHostController
                     manager.StartRequest();
                     manager.Save();
 
-                    QueueMonitorServiceHub.WriteMessageInternal(item).FireAndForget();
+                    //QueueMonitorServiceHub.WriteMessageInternal(item).FireAndForget();
 
                     Thread.Sleep(3000); // simulat work
                     item.Message = "Completed on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;

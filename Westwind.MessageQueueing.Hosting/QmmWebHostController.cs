@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Westwind.Utilities;
 
 namespace Westwind.MessageQueueing.Hosting
@@ -10,6 +11,41 @@ namespace Westwind.MessageQueueing.Hosting
     /// </summary>
     public class QmmWebHostController : QueueController
     {
+        /// <summary>
+        /// This is the 'handler' code that actually does processing work 
+        /// It merely calls into any events that are hooked up to the controller
+        /// for these events:
+        /// 
+        /// ExecuteStart
+        /// ExecuteComplete
+        /// ExecuteFailed
+        /// </summary>
+        /// <param name="manager">Instance of QueueMessageManager and it's Item property</param>
+        protected override async Task ExecuteSteps(QueueMessageManager manager)
+        {
+            try
+            {
+                WriteMessageHub(manager.Item);  // refresh SignalR
+                QueueMonitorServiceHub.GetWaitingQueueMessageCountInternal(manager.Item?.QueueName).FireAndForget();
+
+                // Hook up start processing
+                
+                // Async logic
+                await OnExecuteStartAsync(manager);
+
+                // Sync logic
+                OnExecuteStart(manager);
+
+                // Hookup end processing
+                OnExecuteComplete(manager);
+            }
+            catch (Exception ex)
+            {
+                OnExecuteFailed(manager, ex);
+            }
+
+            MessagesProcessed++;
+        }
 
 
         protected override void OnExecuteComplete(MessageQueueing.QueueMessageManager manager)
