@@ -1,5 +1,7 @@
 @using System.Runtime.InteropServices
 @using Westwind.QueueManager.Hosting
+@addTagHelper *, Westwind.AspNetCore
+
 @model Westwind.MessageQueueing.Hosting.AdminViewModel
 @{
 
@@ -46,8 +48,7 @@
 		}
 	</div>
 
-
-	<error-display class="mt-3 mb-4" error-display-model="Model.ErrorDisplay">
+	<error-display error-display-model="@Model.ErrorDisplay" class="mt-3 mb-4" >
 	</error-display>
     
 	<form method="post" action="">	
