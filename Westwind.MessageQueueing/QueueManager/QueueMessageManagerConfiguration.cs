@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Westwind.Utilities;
 using Westwind.Utilities.Configuration;
 
@@ -51,7 +52,7 @@ namespace Westwind.MessageQueueing
         /// The number of threads that the Queue controller
         /// uses to process incoming queue requests
         /// </summary>
-        public int ControllerThreads { get; set; }
+        public int DefaultThreadCount { get; set; }
 
        
 
@@ -105,12 +106,12 @@ namespace Westwind.MessageQueueing
         {
             ConnectionString =  "Server=.;Database=QueueMessageManager;integrated security=true;Enlist=True;MultipleActiveResultSets=True;Encrypt=False";
             WaitInterval = 1000;
-            ControllerThreads = 1;
+            DefaultThreadCount = 1;
             DefaultControllerQueueName = string.Empty;
             MonitorHostUrl = "http://*:5080/";
             MonitorSignalRHubUrl = "~/signalR";
-            MonitorHtmlUrl = "~/QueueMonitor.cshtml";            
-            
+            MonitorHtmlUrl = "~/QueueMonitor.cshtml";
+            Controllers = [];
         }
 
 
@@ -153,12 +154,34 @@ namespace Westwind.MessageQueueing
     /// Indidual Controller Configuration Item
     /// in a multi-controller configuration.        
     /// </summary>
-    public class ControllerConfiguration
+    public class ControllerConfiguration 
     {
+        /// <summary>
+        /// Connection string for the database or queue data backend.
+        /// </summary>
         public string ConnectionString { get; set; } 
+
+        /// <summary>
+        /// Name of the queue - can be empty or null
+        /// </summary>
         public string QueueName { get; set; } 
+
+        /// <summary>
+        /// Number of threads used for this controller in
+        /// threading mode.
+        /// </summary>
         public int ControllerThreads { get; set; } = 1;
+
+        /// <summary>
+        /// Time to wait between before next request check
+        /// </summary>
         public int WaitInterval { get; set; } = 300;
+
+
+        /// <summary>
+        /// The type that is used to create the Queue Message Manager
+        /// </summary>
+        public string QueueManagerType { get; set; } = nameof(QueueMessageManagerSql);            
 
         /// <summary>
         /// Allows retrieving an object from a string generated with ToString()
@@ -170,9 +193,26 @@ namespace Westwind.MessageQueueing
             return StringSerializer.Deserialize<ControllerConfiguration>(data, ",");
         }
 
+        /// <summary>
+        /// Creates a serialized string of properties
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return StringSerializer.SerializeObject(this, ",");
         }
+    }
+
+
+    /// <summary>
+    /// Determines how timed out messages are handled. Default is Timeout
+    /// </summary>
+    public enum TimeoutActions
+    {
+        Timeout,
+        Delete,
+        Reset,
+        Fail,
+        Cancel        
     }
 }

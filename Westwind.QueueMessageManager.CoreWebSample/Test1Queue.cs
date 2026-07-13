@@ -1,4 +1,4 @@
-// #define USE_ASYNC
+//#define USE_ASYNC
 
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Westwind.MessageQueueing;
@@ -11,8 +11,6 @@ namespace Westwind.QueueMessageManager.CoreWebSample;
 
 public class Test1Queue : QmmWebHostController
 {
-
-    
 
     public Test1Queue() 
     {
@@ -40,8 +38,6 @@ public class Test1Queue : QmmWebHostController
                     item.Message = "Started on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;
                     manager.StartRequest();
                     manager.Save();
-
-                    //QueueMonitorServiceHub.WriteMessageInternal(item).FireAndForget();
 
                     Thread.Sleep(3000); // simulat work
                     item.Message = "Completed on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;

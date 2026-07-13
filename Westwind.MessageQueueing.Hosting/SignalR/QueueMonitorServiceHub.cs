@@ -280,7 +280,7 @@ namespace Westwind.MessageQueueing.Hosting
         {
             var manager = new QueueMessageManagerSql();
             var item = manager.Load(id);
-            manager.ResubmitMessage(item);
+            manager.ResubmitRequest(item);
             
             QueueMonitorServiceHub.WriteMessageInternal(item).FireAndForget();
             

@@ -142,22 +142,6 @@ namespace Westwind.MessageQueueing
 
 
         /// <summary>
-        /// Resubmits an existing message by clearing out all
-        /// completion/date settings and then resubmitting the
-        /// entry.
-        /// 
-        /// This method calls Save() and actually saves the message
-        /// to disk.
-        /// </summary>
-        /// <param name="item"></param>
-        /// <returns></returns>
-        public virtual bool ResubmitMessage(QueueMessageItem item = null)
-        {
-            SubmitRequest(item);
-            return Save(item);
-        }
-
-        /// <summary>
         /// Saves the passed item or the attached item
         /// to the database. Call this after updating properties
         /// or individual values.
@@ -299,6 +283,7 @@ namespace Westwind.MessageQueueing
             return true;
         }
 
+
         /// <summary>
         /// Sets the Item record with the required settings
         /// to complete and cancel a request. Not saved to database
@@ -326,6 +311,26 @@ namespace Westwind.MessageQueueing
                 return Save();
 
 
+            return true;
+        }
+
+
+
+        /// <summary>
+        /// Resubmits an existing message by clearing out all
+        /// completion/date settings and then resubmitting the
+        /// entry.
+        /// 
+        /// This method calls Save() and actually saves the message
+        /// to disk.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public virtual bool ResubmitRequest(QueueMessageItem item = null, bool autoSave = false)
+        {
+            SubmitRequest(item);
+            if (autoSave)
+                return Save(item);
             return true;
         }
 
@@ -410,9 +415,18 @@ namespace Westwind.MessageQueueing
         /// Returns a list of queue items that have timed out during processing.
         /// Not completed where started time is greater than the MessageTimeout.
         /// </summary>
-        /// <param name="maxCount"></param>
+        /// <param name="queueName">Name of the queue</param>
+        /// <returns>Any timed out queue messages</returns>
+        public abstract IEnumerable<QueueMessageItem> GetTimedOutQueueMessages(string queueName = null);
+
+
+        /// <summary>
+        /// Updates or deletes timed out messages for a given queue
+        /// </summary>
+        /// <param name="queueName"></param>
+        /// <param name="timeoutAction"></param>
         /// <returns></returns>
-        public abstract IEnumerable<QueueMessageItem> GetTimedOutQueueMessages(string queueName = null, int maxCount = 0);
+        public abstract bool UpdateTimedOutQueueMessages(string queueName = null, TimeoutActions timeoutAction = TimeoutActions.Timeout);
 
         /// <summary>
         /// Returns all messages in a queue that are cancelled
@@ -588,6 +602,9 @@ namespace Westwind.MessageQueueing
         None,
         Submitted,
         Completed,
-        Canceled      
+        Canceled,
+        Failed,
+        TimedOut,
+        Deleted
     }
 }

@@ -13,8 +13,17 @@
         <div>
             <h1 style="margin: 0; border: none; padding: 0">Queue Monitor  <span style="font-size: 0.55em; font-weight: normal">v@(qmmApp.Version)</span></h1>            
         </div>
-        <div class="connection-pill" :class="connectionClass">
-            {{ connectionStatus }}
+
+        <div style="display: flex; align-items: end;">
+            
+	        
+            <div class="connection-pill " :class="connectionClass">
+                {{ connectionStatus }}
+            </div>
+            <a href="configuration" title="Queue Monitor Application Configuration"
+               class="btn btn-secondary btn-sm float-end ms-2" style="font-size: 1.1em;margin-bottom: 0.25em;">
+	            <i class="fad fa-gears text-warning"></i>
+            </a>
         </div>
     </header>
 

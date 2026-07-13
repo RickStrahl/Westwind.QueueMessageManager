@@ -1,13 +1,14 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.FileProviders;
 using Newtonsoft.Json;
 using Serilog;
 using System.Runtime.InteropServices;
-using Microsoft.AspNetCore.Mvc.Abstractions;
-using Westwind.AspNetCore.LiveReload;
 using Westwind.AspNetCore;
+using Westwind.AspNetCore.Errors;
+using Westwind.AspNetCore.LiveReload;
 using Westwind.MessageQueueing;
 using Westwind.MessageQueueing.Hosting;
 using Westwind.QueueManager.Hosting;
@@ -60,8 +61,37 @@ Log.Logger = logConfig.CreateLogger();
 Log.Information("Application Started.");
 builder.Services.AddSerilog();
 
-if (qmmApp.Configuration.System.LiveReloadEnabled)
+
+
+//var inheritedRouteConvention = new InheritedControllerRouteConvention
+//{
+//    //ChildControllerTypes = [typeof(SampleAppQmmApiController)]
+//};
+//services.AddSingleton<IActionDescriptorProvider>(inheritedRouteConvention);
+
+//var mvcBuilder = services.AddControllersWithViews()
+//    // have to let MVC know we have a dynamically loaded controller
+//    .AddApplicationPart(typeof(QmmApiController).Assembly)
+//    .AddNewtonsoftJson(opt =>
+//    {
+//        if (builder.Environment.IsDevelopment())
+//            opt.SerializerSettings.Formatting = Formatting.Indented;
+//    });
+// services.AddSignalR();
+
+
+services.AddQmm(options =>
 {
+    options.LoadContainerFromFile("_qmm-container-config.json");    
+});
+
+
+
+if (appConfig.System.LiveReloadEnabled)
+{
+    var mvcBuilder = services.AddControllersWithViews();
+    mvcBuilder.AddRazorRuntimeCompilation();
+
     services.AddLiveReload(config =>
     {
         config.LiveReloadEnabled = qmmApp.Configuration.System.LiveReloadEnabled;
@@ -76,78 +106,37 @@ if (qmmApp.Configuration.System.LiveReloadEnabled)
 }
 
 
-//var inheritedRouteConvention = new InheritedControllerRouteConvention
+//});
+
+//QueueContainer queueContainer = null;
+//bool readFromConfig = true;
+//if (readFromConfig)
 //{
-//    //ChildControllerTypes = [typeof(SampleAppQmmApiController)]
-//};
-//services.AddSingleton<IActionDescriptorProvider>(inheritedRouteConvention);
-
-var mvcBuilder = services.AddControllersWithViews()
-    // have to let MVC know we have a dynamically loaded controller
-    .AddApplicationPart(typeof(QmmApiController).Assembly)
-    .AddNewtonsoftJson(opt =>
-    {
-        if (builder.Environment.IsDevelopment())
-            opt.SerializerSettings.Formatting = Formatting.Indented;
-    });
-
-
-if (appConfig.System.LiveReloadEnabled)
-{
-    mvcBuilder.AddRazorRuntimeCompilation();
-}
-
-// Authorization builder related
-builder.Services.AddSingleton<
-    IAuthorizationHandler,
-    QueueMonitorAccessHandler>();
-
-builder.Services.AddAuthorization(options =>
-{
-    // Register [QueueMonitorAuthorize] attribute
-    options.AddPolicy("QueueMonitorAccess", policy =>
-    {
-        policy.RequireAuthenticatedUser();
-        policy.AddRequirements(new QueueMonitorAccessRequirement());
-    });
-});
-
-builder.Services.AddSignalR();
-
-
-var config = QueueMessageManagerConfiguration.Current;
-
-
-QueueContainer queueContainer = null;
-bool readFromConfig = true;
-if (readFromConfig)
-{
-    // Load From File Config
-    queueContainer = QueueContainer.CreateFromConfigurationFile("qmm-container-config.json");
-}
-else
-{
-    // Explicitly load from Code
-    queueContainer = new Westwind.MessageQueueing.QueueContainer
-    {
-        DefaultConnectionString = qmmApp.Configuration.ConnectionString,
-        DefaultThreadCount = 1,
-        DefaultWaitInterval = 300,
-        Controllers = [
-            new Test1Queue() { ConnectionString = qmmApp.Configuration.ConnectionString, ThreadCount = 2 },
-            new Test2Queue() { ConnectionString = qmmApp.Configuration.ConnectionString, ThreadCount = 3, WaitInterval = 200 },
-            new Test2Queue() { ConnectionString = qmmApp.Configuration.ConnectionString, ThreadCount = 2, WaitInterval = 400 }
-        ]
-    };
-}
-queueContainer.StartProcessingAsync();
+//    // Load From File Config
+//    queueContainer = QueueContainer.CreateFromConfigurationFile("qmm-container-config.json");
+//}
+//else
+//{
+//    // Explicitly load from Code
+//    queueContainer = new Westwind.MessageQueueing.QueueContainer
+//    {
+//        DefaultConnectionString = qmmApp.Configuration.ConnectionString,
+//        DefaultThreadCount = 1,
+//        DefaultWaitInterval = 300,
+//        Controllers = [
+//            new Test1Queue() { ConnectionString = qmmApp.Configuration.ConnectionString, ThreadCount = 2 },
+//            new Test2Queue() { ConnectionString = qmmApp.Configuration.ConnectionString, ThreadCount = 3, WaitInterval = 200 },
+//            new Test2Queue() { ConnectionString = qmmApp.Configuration.ConnectionString, ThreadCount = 2, WaitInterval = 400 }
+//        ]
+//    };
+//}
+//queueContainer.StartProcessingAsync();
 
 //queueContainer.SaveToConfigurationFile("qmm-container-config.json");
 
 
 
 //builder.Services.AddQueueHubAuthorization();
-
 
 
 var app = builder.Build();
@@ -160,22 +149,22 @@ var app = builder.Build();
 //    Console.WriteLine($"{a.DisplayName} => {route}");
 //}
 
-var endpointSource = app.Services.GetRequiredService<EndpointDataSource>();
-foreach (var endpoint in endpointSource.Endpoints.OfType<RouteEndpoint>())
-{
-    var methods = endpoint.Metadata
-        .OfType<HttpMethodMetadata>()
-        .FirstOrDefault()?.HttpMethods ?? new[] { "ANY" };
+//var endpointSource = app.Services.GetRequiredService<EndpointDataSource>();
+//foreach (var endpoint in endpointSource.Endpoints.OfType<RouteEndpoint>())
+//{
+//    var methods = endpoint.Metadata
+//        .OfType<HttpMethodMetadata>()
+//        .FirstOrDefault()?.HttpMethods ?? new[] { "ANY" };
 
-    Console.WriteLine($"{string.Join(",", methods),-10} {endpoint.RoutePattern.RawText,-40} {endpoint.DisplayName}");
-}
+//    Console.WriteLine($"{string.Join(",", methods),-10} {endpoint.RoutePattern.RawText,-40} {endpoint.DisplayName}");
+//}
 
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-}
+//if (!app.Environment.IsDevelopment())
+//{
+//    app.UseExceptionHandler("/Home/Error");
+//}
 
 if (qmmApp.Configuration.System.LiveReloadEnabled)
     app.UseLiveReload();
@@ -184,15 +173,29 @@ app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(qmmApp.Constants.WebRootFolder)
 });
-app.MapStaticAssets();
+// app.MapStaticAssets();   // TODO: What is this for?
+
 app.UseRouting();
 app.UseCors("CorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapControllers();
+if (qmmApp.Configuration.System.ErrorDisplayMode == ErrorDisplayModes.Developer)
+{
+    app.UseDeveloperExceptionPage();
+    ApiExceptionFilterAttribute.ShowExceptionDetail = true;
+}
+else
+{
+    app.UseExceptionHandler("/Home/Error");
+}
 
-app.MapControllers().WithStaticAssets();
 
+app.UseQmm();
+
+app.MapHub<QueueMonitorServiceHub>("/queueMonitorServiceHub");
+QueueMonitorServiceHub.HubContext = app.Services.GetRequiredService<IHubContext<QueueMonitorServiceHub>>();
 
 
 
@@ -213,8 +216,6 @@ app.MapControllers().WithStaticAssets();
 //     .WithStaticAssets();
 
 
-app.MapHub<QueueMonitorServiceHub>("/queueMonitorServiceHub");
-QueueMonitorServiceHub.HubContext = app.Services.GetRequiredService<IHubContext<QueueMonitorServiceHub>>();
 
 app.Start();
 

@@ -1,6 +1,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,8 +37,15 @@ public class QueueContainer : IDisposable
     /// The default threads used for all controllers in the container **if** 
     /// not defined in the controller explicitly.
     /// </summary>
-    public int DefaultThreadCount { get; set; } = 1;  
+    public int DefaultThreadCount { get; set; } = 1;
 
+    /// <summary>
+    /// Determines whether tables are automatically created
+    /// if they don't exists on the connection string.
+    /// 
+    /// Note: Database must exist before this will work
+    /// </summary>
+    public bool AutoCreateTables { get; set; } = false;
 
     /// <summary>
     /// The list of controllers that are part of this container.
@@ -83,7 +91,7 @@ public class QueueContainer : IDisposable
                 if (ctrl.WaitInterval < 1)
                     ctrl.WaitInterval = DefaultWaitInterval;
                 if (ctrl.ThreadCount < 1)
-                    ctrl.ThreadCount = DefaultThreadCount;
+                    ctrl.ThreadCount = DefaultThreadCount;               
 
                 ctrl.StartProcessingAsync();
             }
@@ -201,6 +209,45 @@ public class QueueContainer : IDisposable
 
         return container;
     }
+
+    /// <summary>
+    /// Creates a controller instance from controller 'configuration' value by 
+    /// creating a new instance of the Controller Type. 
+    /// </summary>
+    /// <param name="jctrl"></param>
+    /// <param name="container"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidCastException"></exception>
+    public QueueController CreateController(QueueController jctrl, QueueContainer container)
+    {
+        var typename = jctrl.QueueControllerType?.ToString();
+        if (string.IsNullOrEmpty(typename))
+            return null;
+
+        var controller = ReflectionUtils.CreateInstanceFromString(typename) as QueueController;
+        if (controller == null)
+            throw new InvalidCastException("Unable to create QueueController of type " + typename);
+
+        string connectionString = jctrl.ConnectionString?.ToString();
+        if (string.IsNullOrEmpty(connectionString))
+            connectionString = container.DefaultConnectionString;
+        string queueName = jctrl.QueueName;
+        int threadCount = jctrl.ThreadCount;
+        int waitInterval = jctrl.WaitInterval;
+        bool paused = jctrl.Paused;
+
+
+        if (!string.IsNullOrEmpty(connectionString))
+            controller.ConnectionString = connectionString;
+        if (!string.IsNullOrEmpty(queueName))
+            controller.QueueName = queueName;
+        controller.ThreadCount = threadCount;
+        controller.WaitInterval = waitInterval;
+        controller.Paused = paused;
+
+        return controller;
+    }
+
 
     /// <summary>
     /// Saves the current container configuration to file

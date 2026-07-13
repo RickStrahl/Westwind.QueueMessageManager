@@ -29,8 +29,7 @@ public class qmmAppConfiguration : AppConfiguration
 
     public EmailConfiguration Email { get; set; } = new();
 
-    public SecurityConfiguration Security { get; set; } = new();
-      
+
     
     public SystemConfiguration System { get; set; } = new();
     
@@ -58,21 +57,11 @@ public class EmailConfiguration
     public bool SendEmails { get; set; }
 }
 
-public class SecurityConfiguration
-{
-    public bool ValidateEmailAddresses { get; set; } = true;
-    public string CookieEncryptionKey { get; set; } = "WestWind.Web.Template.Cookie.Key.2026";
-    public string SeedAdminEmail { get; set; } = "admin@localhost";
-    public string SeedAdminPassword { get; set; } = "P@ssword123";
-}
-
 public class SystemConfiguration
 {
     public bool RedirectToHttps { get; set; }
     public ErrorDisplayModes ErrorDisplayMode { get; set; } = ErrorDisplayModes.Application;
-    public int CookieTimeoutDays { get; set; } = 2;
-    public bool ShowConsoleDbCommands { get; set; }
-    
+    public int CookieTimeoutDays { get; set; } = 2;    
     public bool LiveReloadEnabled { get; set; }
 }
 

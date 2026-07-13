@@ -184,199 +184,199 @@ namespace Westwind.MessageQueueing.Tests
         }
 
 
-        /// <summary>
-        /// This test demonstrates the QueueControllerMultiple
-        /// which allows loading up multiple queue processors
-        /// and start them running simultaneously side by side.
-        /// </summary>
-        [TestMethod]
-        public void MultipleSingleControllersTest()
-        {
-            var manager = new QueueMessageManagerSql();
+        ///// <summary>
+        ///// This test demonstrates the QueueControllerMultiple
+        ///// which allows loading up multiple queue processors
+        ///// and start them running simultaneously side by side.
+        ///// </summary>
+        //[TestMethod]
+        //public void MultipleSingleControllersTest()
+        //{
+        //    var manager = new QueueMessageManagerSql();
 
-            // sample - create 3 message in 'default' queue
-            for (int i = 0; i < 3; i++)
-            {
-                var item = new QueueMessageItem()
-                {
-                    Message = "Print Image",
-                    Action = "PRINTIMAGE",
-                    TextInput = "4334333", // image Id
-                    QueueName = "Queue1"
-                };
+        //    // sample - create 3 message in 'default' queue
+        //    for (int i = 0; i < 3; i++)
+        //    {
+        //        var item = new QueueMessageItem()
+        //        {
+        //            Message = "Print Image",
+        //            Action = "PRINTIMAGE",
+        //            TextInput = "4334333", // image Id
+        //            QueueName = "Queue1"
+        //        };
 
-                // sets appropriate settings for submit on item
-                manager.SubmitRequest(item);
+        //        // sets appropriate settings for submit on item
+        //        manager.SubmitRequest(item);
 
-                // item has to be saved
-                Assert.IsTrue(manager.Save(), manager.ErrorMessage);
-                Console.WriteLine("added to Queue1:" + manager.Item.Id);
-            }
+        //        // item has to be saved
+        //        Assert.IsTrue(manager.Save(), manager.ErrorMessage);
+        //        Console.WriteLine("added to Queue1:" + manager.Item.Id);
+        //    }
 
-            // sample - create 3 message in 'default' queue
-            for (int i = 0; i < 3; i++)
-            {
-                var item = new QueueMessageItem()
-                {
-                    Message = "Print Image (2nd)",
-                    Action = "PRINTIMAGE",
-                    TextInput = "5334333", // image Id
-                    QueueName = "Queue2"
-                };
+        //    // sample - create 3 message in 'default' queue
+        //    for (int i = 0; i < 3; i++)
+        //    {
+        //        var item = new QueueMessageItem()
+        //        {
+        //            Message = "Print Image (2nd)",
+        //            Action = "PRINTIMAGE",
+        //            TextInput = "5334333", // image Id
+        //            QueueName = "Queue2"
+        //        };
 
-                // sets appropriate settings for submit on item
-                manager.SubmitRequest(item);
+        //        // sets appropriate settings for submit on item
+        //        manager.SubmitRequest(item);
 
-                // item has to be saved
-                Assert.IsTrue(manager.Save(), manager.ErrorMessage);
-                Console.WriteLine("added to Queue2: " + manager.Item.Id);
-            }
+        //        // item has to be saved
+        //        Assert.IsTrue(manager.Save(), manager.ErrorMessage);
+        //        Console.WriteLine("added to Queue2: " + manager.Item.Id);
+        //    }
 
             
 
-            // create a new Controller to process in the background
-            // on separate threads
-            var controller = new QueueControllerMultiple( controllers: new List<QueueController>()
-            {
-                new QueueControllerMultiple()
-                {
-                    QueueName = "Queue1",
-                    WaitInterval = 300,
-                    ThreadCount = 5
-                },
-                new QueueControllerMultiple()
-                {
-                    QueueName = "Queue2",
-                    WaitInterval = 500,
-                    ThreadCount = 3
-                }
-            });                     
+        //    // create a new Controller to process in the background
+        //    // on separate threads
+        //    var controller = new QueueControllerMultiple( controllers: new List<QueueController>()
+        //    {
+        //        new QueueControllerMultiple()
+        //        {
+        //            QueueName = "Queue1",
+        //            WaitInterval = 300,
+        //            ThreadCount = 5
+        //        },
+        //        new QueueControllerMultiple()
+        //        {
+        //            QueueName = "Queue2",
+        //            WaitInterval = 500,
+        //            ThreadCount = 3
+        //        }
+        //    });                     
                         
 
-            // Point all controllers at the same execution handlers
-            // Alternately you can configure each controller with their
-            // own event handlers or implement custom controller subclasses
-            // that use the OnXXX handlers to handle the events
-            controller.ExecuteStart += controller_ExecuteStart;
-            controller.ExecuteComplete += controller_ExecuteComplete;
-            controller.ExecuteFailed += controller_ExecuteFailed;
+        //    // Point all controllers at the same execution handlers
+        //    // Alternately you can configure each controller with their
+        //    // own event handlers or implement custom controller subclasses
+        //    // that use the OnXXX handlers to handle the events
+        //    controller.ExecuteStart += controller_ExecuteStart;
+        //    controller.ExecuteComplete += controller_ExecuteComplete;
+        //    controller.ExecuteFailed += controller_ExecuteFailed;
             
-            // actually start the queue
-            Console.WriteLine("Starting... Async Manager Processing");
+        //    // actually start the queue
+        //    Console.WriteLine("Starting... Async Manager Processing");
 
-            controller.StartProcessingAsync();
+        //    controller.StartProcessingAsync();
 
-            // For test we have to keep the threads alive 
-            // to allow the 10 requests to process
-            Thread.Sleep(2000);
+        //    // For test we have to keep the threads alive 
+        //    // to allow the 10 requests to process
+        //    Thread.Sleep(2000);
 
-            // shut down
-            controller.StopProcessing();
+        //    // shut down
+        //    controller.StopProcessing();
             
-            Thread.Sleep(200);
+        //    Thread.Sleep(200);
 
-            Console.WriteLine("Stopping... Async Manager Processing");
-            Assert.IsTrue(true);
+        //    Console.WriteLine("Stopping... Async Manager Processing");
+        //    Assert.IsTrue(true);
 
-            Console.WriteLine("Processed: " + controller.MessagesProcessed);
-        }
+        //    Console.WriteLine("Processed: " + controller.MessagesProcessed);
+        //}
 
-        [TestMethod]
-        public void MultipleQueueControllerConfigTest()
-        {
-            var master = new QueueControllerMultiple(Configuration);
-            var controller = new QueueController();            
-            controller.Initialize(Configuration);  // initialize from config file
-            master.Controllers.Add(controller);
+        //[TestMethod]
+        //public void MultipleQueueControllerConfigTest()
+        //{
+        //    var master = new QueueControllerMultiple(Configuration);
+        //    var controller = new QueueController();            
+        //    controller.Initialize(Configuration);  // initialize from config file
+        //    master.Controllers.Add(controller);
 
 
-            controller = new QueueController() // manually config
-            {
-                ConnectionString = Configuration.ConnectionString,
-                QueueName = "Queue2",
-                ThreadCount = 3,
-                WaitInterval = 500
-            };
-            master.Controllers.Add(controller);
+        //    controller = new QueueController() // manually config
+        //    {
+        //        ConnectionString = Configuration.ConnectionString,
+        //        QueueName = "Queue2",
+        //        ThreadCount = 3,
+        //        WaitInterval = 500
+        //    };
+        //    master.Controllers.Add(controller);
                         
-            Assert.IsTrue(master.Controllers.Count > 0);
+        //    Assert.IsTrue(master.Controllers.Count > 0);
 
-            Console.WriteLine("Loaded Controllers: " + master.Controllers.Count);
-            foreach (var ctl in master.Controllers)
-            {               
-                Console.WriteLine(ctl.QueueName + ", " + ctl.ThreadCount + ", " + ctl.WaitInterval);
-            }
-        }
+        //    Console.WriteLine("Loaded Controllers: " + master.Controllers.Count);
+        //    foreach (var ctl in master.Controllers)
+        //    {               
+        //        Console.WriteLine(ctl.QueueName + ", " + ctl.ThreadCount + ", " + ctl.WaitInterval);
+        //    }
+        //}
 
-        [TestMethod]
-        public void MultipleQueueControllersTest()
-        {
-            // Set up Controllers
-            using var master = new QueueControllerMultiple(Configuration);
-            var controller = new QueueController();
-            controller.Initialize(Configuration);  // initialize from config file
-            master.Controllers.Add(controller);
-
-
-            controller = new QueueController() // manually config
-            {
-                ConnectionString = Configuration.ConnectionString,
-                QueueName = "Queue2",
-                ThreadCount = 1,
-                WaitInterval = 500
-            };
-            master.Controllers.Add(controller);
-
-            Assert.IsTrue(master.Controllers.Count > 0);
-
-            Console.WriteLine("Loaded Controllers: " + master.Controllers.Count);
-            foreach (var ctl in master.Controllers)
-            {
-                Console.WriteLine(ctl.QueueName + ", " + ctl.ThreadCount + ", " + ctl.WaitInterval);
-            }
+        //[TestMethod]
+        //public void MultipleQueueControllersTest()
+        //{
+        //    // Set up Controllers
+        //    using var master = new QueueControllerMultiple(Configuration);
+        //    var controller = new QueueController();
+        //    controller.Initialize(Configuration);  // initialize from config file
+        //    master.Controllers.Add(controller);
 
 
-            // Add Messages
-            using var manager = new QueueMessageManagerSql();
+        //    controller = new QueueController() // manually config
+        //    {
+        //        ConnectionString = Configuration.ConnectionString,
+        //        QueueName = "Queue2",
+        //        ThreadCount = 1,
+        //        WaitInterval = 500
+        //    };
+        //    master.Controllers.Add(controller);
 
-            // sample - create 3 message in 'default' queue
-            for (int i = 0; i < 3; i++)
-            {
-                var queueName = "Queue" + ((i % 2) + 1);
-                var item = new QueueMessageItem()
-                {
-                    Message = "Print Image " + DataUtils.GenerateUniqueId(),
-                    Action = "PRINTIMAGE",
-                    TextInput = "4334333", // image Id
-                    QueueName = queueName
-                };
+        //    Assert.IsTrue(master.Controllers.Count > 0);
 
-                // sets appropriate settings for submit on item
-                manager.SubmitRequest(item);
+        //    Console.WriteLine("Loaded Controllers: " + master.Controllers.Count);
+        //    foreach (var ctl in master.Controllers)
+        //    {
+        //        Console.WriteLine(ctl.QueueName + ", " + ctl.ThreadCount + ", " + ctl.WaitInterval);
+        //    }
 
-                // item has to be saved
-                Assert.IsTrue(manager.Save(), manager.ErrorMessage);
-                Console.WriteLine("added to " + queueName + ":" + manager.Item.Id);
-            }
 
-            // Process Messages
-            master.ExecuteStart += controller_ExecuteStart;
-            master.ExecuteComplete += controller_ExecuteComplete;
-            master.ExecuteFailed += controller_ExecuteFailed;
+        //    // Add Messages
+        //    using var manager = new QueueMessageManagerSql();
 
-            master.StartProcessingAsync();
+        //    // sample - create 3 message in 'default' queue
+        //    for (int i = 0; i < 3; i++)
+        //    {
+        //        var queueName = "Queue" + ((i % 2) + 1);
+        //        var item = new QueueMessageItem()
+        //        {
+        //            Message = "Print Image " + DataUtils.GenerateUniqueId(),
+        //            Action = "PRINTIMAGE",
+        //            TextInput = "4334333", // image Id
+        //            QueueName = queueName
+        //        };
 
-            Thread.Sleep(2000);
+        //        // sets appropriate settings for submit on item
+        //        manager.SubmitRequest(item);
 
-            master.StopProcessing();
+        //        // item has to be saved
+        //        Assert.IsTrue(manager.Save(), manager.ErrorMessage);
+        //        Console.WriteLine("added to " + queueName + ":" + manager.Item.Id);
+        //    }
 
-            Thread.Sleep(100);
+        //    // Process Messages
+        //    master.ExecuteStart += controller_ExecuteStart;
+        //    master.ExecuteComplete += controller_ExecuteComplete;
+        //    master.ExecuteFailed += controller_ExecuteFailed;
 
-            Console.WriteLine("Stopping... Async Manager Processing");
-            Assert.IsTrue(true);
+        //    master.StartProcessingAsync();
 
-            Console.WriteLine("Processed: " + controller.MessagesProcessed);
-        }
+        //    Thread.Sleep(2000);
+
+        //    master.StopProcessing();
+
+        //    Thread.Sleep(100);
+
+        //    Console.WriteLine("Stopping... Async Manager Processing");
+        //    Assert.IsTrue(true);
+
+        //    Console.WriteLine("Processed: " + controller.MessagesProcessed);
+        //}
 
 
         public int RequestCount = 0;

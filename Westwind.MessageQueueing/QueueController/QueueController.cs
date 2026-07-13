@@ -39,30 +39,30 @@ namespace Westwind.MessageQueueing
             LogManager = logger;
         }
 
-        /// <summary>
-        /// Initializes the top level QueueController from the 
-        /// Queue Configuration Settings
-        /// </summary>
-        /// <param name="configuration"></param>
-        /// <param name="queueManagerType"></param>
-        public void Initialize(QueueMessageManagerConfiguration configuration = null,  string connectionString = null, Type queueManagerType = null)
-        {                        
-            if (queueManagerType != null)
-                QueueManagerType = queueManagerType;
-            if (QueueManagerType == null)
-                QueueManagerType = typeof(QueueMessageManagerSql);
+        ///// <summary>
+        ///// Initializes the top level QueueController from the 
+        ///// Queue Configuration Settings
+        ///// </summary>
+        ///// <param name="configuration"></param>
+        ///// <param name="queueManagerType"></param>
+        //public void Initialize(QueueMessageManagerConfiguration configuration = null,  string connectionString = null, Type queueManagerType = null)
+        //{                        
+        //    if (queueManagerType != null)
+        //        QueueManagerType = queueManagerType;
+        //    if (QueueManagerType == null)
+        //        QueueManagerType = typeof(QueueMessageManagerSql);
 
-            if (configuration == null)
-                configuration = QueueMessageManagerConfiguration.Current;
+        //    if (configuration == null)
+        //        configuration = QueueMessageManagerConfiguration.Current;
 
-            if (configuration == null)
-                return;
+        //    if (configuration == null)
+        //        return;
                     
-            ConnectionString = connectionString ?? configuration.ConnectionString;
-            ThreadCount = configuration.ControllerThreads;
-            QueueName = configuration.DefaultControllerQueueName ?? string.Empty;
-            WaitInterval = configuration.WaitInterval;            
-        }
+        //    ConnectionString = connectionString ?? configuration.ConnectionString;
+        //    ThreadCount = configuration.DefaultThreadCount;
+        //    QueueName = configuration.DefaultControllerQueueName ?? string.Empty;
+        //    WaitInterval = configuration.WaitInterval;            
+        //}
 
 
         /// <summary>
@@ -137,24 +137,32 @@ namespace Westwind.MessageQueueing
         public int MaxRetries { get; set; } = 0;
 
         /// <summary>
-        /// Returns a full .NET class name that can be used 
-        /// create an instance at runtime.
+        /// The Queue Controller Type to create an instance from.
+        /// Used in the configuration to determine which type
+        /// to instantiate
         /// </summary>
         public string QueueControllerType
         {
             get
             {
-                var type = GetType();
-                return type.FullName;
+                if (string.IsNullOrEmpty(field))
+                {
+                    var type = GetType();
+                    return type.FullName;
+                }
+                return field;
             }
+            set;
         }
 
         /// <summary>
         /// Optional function you can hook to handle creation of the QueueManager
         /// instance. Use this to create and configure the QUeueManager instance
         /// </summary>
+        [JsonIgnore]
         public Func<QueueMessageManager> OnCreateQueueManager { get; set; }
 
+        [JsonIgnore]
         public ILogger LogManager { get; }
 
         /// <summary>
@@ -478,6 +486,29 @@ namespace Westwind.MessageQueueing
         public override string ToString()
         {
             return $"{QueueName} [ {ThreadCount} thread(s), {WaitInterval} ms, paused: {Paused} ]";
+        }
+
+        /// <summary>
+        /// Creates a new controller instance from the ControllerType stored 
+        /// on this class. Used internally to create a new controller instance
+        /// when starting up from configuration.
+        /// </summary>
+        /// <param name="typeName"></param>
+        /// <returns></returns>
+        public QueueMessageManager CreateNewControllerInstance(string typeName = null)
+        {
+            if (string.IsNullOrEmpty(typeName))
+                typeName = this.QueueControllerType;
+
+            QueueMessageManager manager;
+            if (OnCreateQueueManager != null)
+                manager = OnCreateQueueManager.Invoke();
+            else
+                manager = Activator.CreateInstance(QueueManagerType, [ConnectionString ?? string.Empty]) as QueueMessageManager;
+
+
+            return manager;
+
         }
     }
 }

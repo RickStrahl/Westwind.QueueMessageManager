@@ -1,0 +1,36 @@
+{
+  "ConnectionString": "server=.;database=QueueMessageManager;integrated security=yes;encrypt=false;trustservercertificate=true;",
+  "AutoCreateTables": true,
+  "JwtIssuer": "Westwind.Web.Template",
+  "JwtAudience": "Westwind.Web.Template.Client",
+  "JwtSigningKey": "Westwind.Web.Template.Jwt.Signing.Key.Change.Me.2026",
+  "DefaultCulture": "en-US",
+  "ApplicationName": "Queue Message Manager",
+  "ApplicationShortName": "QMM",
+  "Theme": "Light",
+  "Email": {
+    "MailServer": "localhost",
+    "MailServerUsername": "",
+    "MailServerPassword": "",
+    "SenderEmail": "no-reply@localhost",
+    "SenderName": "West Wind Web Template",
+    "UseTls": false,
+    "CcList": "",
+    "AdminCcList": "",
+    "SendAdminEmails": false,
+    "SendEmails": false
+  },
+  "Security": {
+    "ValidateEmailAddresses": true,
+    "CookieEncryptionKey": "WestWind.Web.Template.Cookie.Key.2026",
+    "SeedAdminEmail": "admin@localhost",
+    "SeedAdminPassword": "P@ssword123"
+  },
+  "System": {
+    "RedirectToHttps": false,
+    "ErrorDisplayMode": "Application",
+    "CookieTimeoutDays": 2,
+    "ShowConsoleDbCommands": false,
+    "LiveReloadEnabled": true
+  }
+}

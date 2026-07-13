@@ -5,9 +5,9 @@ Accept-Encoding: gzip, deflate, br
 WebSurge-Request-CaptureAndSetAuthorizationBearerTokenFromJson: token
 Websurge-Request-Name: Authenticate
 
-{ 
-   username: "test@test.com",
-   password: "test"
+{
+  "username": "test@test.com",
+  "password": "test"
 }
 
 ------------------------------------------------------------------
@@ -105,7 +105,7 @@ Websurge-Request-Name: Get Message Item by Id (change as needed)
   "ReplaceQueryStringValuePairs": null,
   "ReplaceCookieValue": null,
   "TrackPerSessionCookies": true,
-  "ReplaceAuthorization": "Bearer dbc9h2tkaiuggsf",
+  "ReplaceAuthorization": "Bearer ksv1afk8eto7o7a",
   "Username": null,
   "Password": null,
   "UsernamePasswordType": "Negotiate",

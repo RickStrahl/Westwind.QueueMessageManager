@@ -1,6 +1,6 @@
 {
   "ConnectionString": "Server=.;Database=QueueMessageManager;integrated security=true;Enlist=True;MultipleActiveResultSets=True;Encrypt=False",
-  "AutoCreateTables": true,
+  "AutoCreateTables": false,
   "WaitInterval": 1000,
   "DefaultQueueName": null,
   "DefaultControllerQueueName": "",

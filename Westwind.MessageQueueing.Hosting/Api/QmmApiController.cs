@@ -2,10 +2,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
 using Westwind.AspNetCore;
 using Westwind.AspNetCore.Errors;
+using Westwind.AspNetCore.Extensions;
 using Westwind.QueueManager.Hosting;
 using Westwind.Utilities;
 using Westwind.Utilities.Data.Security;
@@ -93,8 +96,8 @@ public abstract class QmmApiController : BaseApiController
     }
 
 
-   
 
+    #region Html Page Requests
 
     [Route("/qmm/queuemonitor")]
     public IActionResult QueueMonitor()
@@ -102,11 +105,106 @@ public abstract class QmmApiController : BaseApiController
         return View("~/views/qmmapi/queuemonitor.cshtml");
     }
 
+
+    [HttpGet]
+    [Route("/qmm/configuration")]
+    public ActionResult ShowConfiguration()
+    {
+        var model = CreateViewModel<AdminViewModel>();
+        model.ConfigurationJson = JsonSerializationUtils.Serialize(qmmApp.Configuration, false, true, false);
+        model.ContainerConfigurationJson = JsonSerializationUtils.Serialize(QueueContainer.Current, false, true, false);
+
+       
+       return View("~/views/qmmapi/QmmContainerConfiguration.cshtml", model);
+    }
+
+
+    [HttpPost]
+    [Route("/qmm/configuration")]
+    public ActionResult UpdateConfiguration(AdminViewModel model, [FromServices] IHostApplicationLifetime appLifetime)
+    {
+        InitializeViewModel(model);
+
+        if (Request.IsFormVar("btnRestartApplication"))
+        {
+            // touch web.config - pending permissions
+            var webconfig = Path.Combine(qmmApp.Constants.StartupFolder, "web.config");
+
+            try
+            {
+                appLifetime.StopApplication();
+                // var fi = new FileInfo(webconfig);
+                // fi.LastWriteTime = DateTime.Now;
+                ErrorDisplay.ShowSuccess("IIS Application Pool has been reloaded.");
+                Response.AddMetaRefreshTagHeader("/admin", 2);
+            }
+            catch (Exception ex)
+            {
+                ErrorDisplay.ShowError(ex.Message, "IIS App reloading failed or not running on IIS.");
+            }
+        }
+        else if(Request.IsFormVar("btnWriteContainerConfiguration"))
+        {
+            // update from current configuration that was just entered
+            var containerConfig = QueueContainer.CreateFromConfigurationString(model.ContainerConfigurationJson);
+                //JsonSerializationUtils.Deserialize(model.ContainerConfigurationJson, typeof(QueueContainer)) as QueueContainer;
+
+            if (containerConfig != null)
+            {
+                QueueContainer.Current.StopProcessing();                
+                QueueContainer.Current.Dispose();
+                QueueContainer.Current = null;                
+
+                QueueContainer.Current = containerConfig;                               
+                QueueContainer.Current.StartProcessingAsync();
+               
+                // write it back out
+                JsonSerializationUtils.SerializeToFile(containerConfig, Path.Combine(qmmApp.Constants.StartupFolder, "_qmm-container-config.json"), false, true);
+
+                model.ErrorDisplay.ShowInfo("Container configuration has been updated.");
+            }
+            else
+            {
+                model.ErrorDisplay.ShowError("Container Configuration could not be updated - invalid JSON.");
+            }
+
+            // see actual current values
+            //ModelState.Clear();
+            model.ContainerConfigurationJson = JsonSerializationUtils.Serialize(QueueContainer.Current, false, true, false);
+        }
+        else if (Request.IsFormVar("btnWriteConfiguration"))
+        {
+            var config =
+                JsonSerializationUtils.Deserialize(model.ConfigurationJson, typeof(qmmAppConfiguration)) as qmmAppConfiguration;
+
+            if (config != null)
+            {
+                qmmApp.Configuration = config;
+                qmmApp.Configuration.Write();
+
+                model.ErrorDisplay.ShowInfo("Container configuration has been updated.");
+            }
+            else
+            {
+                model.ErrorDisplay.ShowError("Container Configuration could not be updated - invalid JSON.");
+            }
+        }
+
+        
+
+        return View("~/views/qmmapi/QmmContainerConfiguration.cshtml", model);
+    }
+
+
+
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
+
+    #endregion
+
 
 
     /// <summary>
@@ -273,3 +371,19 @@ public class ErrorViewModel
     public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 }
 
+public class AdminViewModel : BaseViewModel
+{
+    public string Message { get; set; }
+
+    public string ApplicationVersion { get; } = typeof(qmmApp).Assembly.GetName().Version.ToString();
+
+
+    public string ApplicationDate { get; } =
+        TimeUtils.FriendlyDateString(new FileInfo(typeof(qmmApp).Assembly.Location).LastWriteTime);
+
+    public string RuntimeVersion { get; } = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
+
+    public string ConfigurationJson { get; set; }
+
+    public string ContainerConfigurationJson { get; set; }
+}

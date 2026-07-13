@@ -37,6 +37,7 @@ public static class qmmApp
         Configuration.Initialize();
     }
 
+    
     public static string NewId()
     {
         return DataUtils.GenerateUniqueId(10);

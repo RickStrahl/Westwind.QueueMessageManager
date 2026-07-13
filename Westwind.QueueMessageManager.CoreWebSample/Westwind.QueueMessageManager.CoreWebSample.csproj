@@ -27,8 +27,4 @@
     <ProjectReference Include="..\Westwind.MessageQueueing.Hosting\Westwind.MessageQueueing.Hosting.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="_Code\" />
-  </ItemGroup>
-
 </Project>

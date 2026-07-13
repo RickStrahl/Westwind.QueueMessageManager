@@ -34,24 +34,23 @@ public class SampleAppQmmApiController : QmmApiController
     //    return Ok(new { token = token, expiresIn = tokenManager.TokenTimeoutSeconds, overridden = true });
     //}
 
-    [HttpGet("/api/qmm/get-message2/{id}")]
-    public async Task<IActionResult> GetMessage2([FromRoute] string id)
-    {
-        if (string.IsNullOrWhiteSpace(id))
-            throw new ApiException("Message Id is required.", 404);
+    //[HttpGet("/api/qmm/get-message2/{id}")]
+    //public async Task<IActionResult> GetMessage2([FromRoute] string id)
+    //{
+    //    if (string.IsNullOrWhiteSpace(id))
+    //        throw new ApiException("Message Id is required.", 404);
 
-        using var manager = new QueueMessageManagerSql(qmmApp.ConnectionString);
-        QueueMessageItem item;
-        if (id != "-1")
-            item = manager.Load(id);
-        else
-            item = manager.GetCompleteQueueMessages("Test1", 1).FirstOrDefault();
+    //    using var manager = new QueueMessageManagerSql(qmmApp.ConnectionString);
+    //    QueueMessageItem item;
+    //    if (id != "-1")
+    //        item = manager.Load(id);
+    //    else
+    //        item = manager.GetCompleteQueueMessages("Test1", 1).FirstOrDefault();
 
-        if (item == null)
-            throw new ApiException("Message not found.", 404);
+    //    if (item == null)
+    //        throw new ApiException("Message not found.", 404);
 
-        return Json(item);
-    }
-
+    //    return Json(item);
+    //}
 
 }

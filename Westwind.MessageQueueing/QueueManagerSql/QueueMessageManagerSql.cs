@@ -358,25 +358,73 @@ namespace Westwind.MessageQueueing
         /// </summary>
         /// <param name="maxCount"></param>
         /// <returns></returns>
-        public override IEnumerable<QueueMessageItem> GetTimedOutQueueMessages(string queueName = null, int maxCount = 0)
+        public override IEnumerable<QueueMessageItem> GetTimedOutQueueMessages(string queueName = null)
         {
             if (queueName == null)
                 queueName = string.Empty;
-            if (maxCount == 0)
-                maxCount = INT_maxCount;
-
+            
             DateTime dt = DateTime.UtcNow.Subtract(MessageTimeout);
 
             IEnumerable<QueueMessageItem> items;
-            items = Db.Query<QueueMessageItem>("select TOP " + maxCount + " * from QueueMessageItems " +
+            items = Db.Query<QueueMessageItem>("select * from QueueMessageItems " +
                     "WHERE queueName=@0 AND iscomplete = 0 AND started < @1 " +
                     "ORDER BY started DESC", queueName, dt);
             if (items == null)
                 SetError(Db.ErrorMessage);
 
             return items;
-
         }
+
+        public override bool UpdateTimedOutQueueMessages(string queueName = null, TimeoutActions timeoutAction = TimeoutActions.Timeout)
+        {
+            if (queueName == null)
+                queueName = string.Empty;
+
+            DateTime dt = DateTime.UtcNow.Subtract(MessageTimeout);
+
+            IEnumerable<QueueMessageItem> items;            
+            items = Db.Query<QueueMessageItem>("select * from QueueMessageItems " +
+                                               "WHERE queueName=@0 AND iscomplete = 0 AND started < @1 " +
+                                               "ORDER BY started DESC", queueName, dt);
+            if (items == null)
+            {
+                SetError(Db.ErrorMessage);
+                return false;
+            }
+
+            foreach(var qitem in items)
+            {
+
+                if (timeoutAction == TimeoutActions.Timeout)
+                {
+                    FailRequest(qitem);
+                    qitem.Status = "TimedOut";                    
+                }
+                else if (timeoutAction == TimeoutActions.Delete)
+                {
+                    DeleteMessage(qitem.Id);
+                    continue;   // done here
+                }
+                else if (timeoutAction == TimeoutActions.Reset)
+                {
+                    ResubmitRequest(qitem);                    
+                }
+                else if(timeoutAction == TimeoutActions.Fail)
+                {
+                    qitem.Fail("Message timed out");                    
+                }
+                else if (timeoutAction == TimeoutActions.Cancel)
+                {
+                    qitem.Cancel();
+                    qitem.Message = "Message timed out and cancelled";                    
+                }
+
+                Save(qitem);
+            }
+
+            return true;
+        }
+
 
         /// <summary>
         /// Returns all messages in a queue that are cancelled
