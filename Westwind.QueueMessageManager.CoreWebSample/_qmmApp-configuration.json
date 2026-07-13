@@ -20,17 +20,10 @@
     "SendAdminEmails": false,
     "SendEmails": false
   },
-  "Security": {
-    "ValidateEmailAddresses": true,
-    "CookieEncryptionKey": "WestWind.Web.Template.Cookie.Key.2026",
-    "SeedAdminEmail": "admin@localhost",
-    "SeedAdminPassword": "P@ssword123"
-  },
   "System": {
     "RedirectToHttps": false,
     "ErrorDisplayMode": "Application",
     "CookieTimeoutDays": 2,
-    "ShowConsoleDbCommands": false,
     "LiveReloadEnabled": true
   }
 }
