@@ -1,3 +1,7 @@
+_*.json
+_qmmApp-configuration.json
+
+
 Thumbs.db
 *.obj
 *.exe

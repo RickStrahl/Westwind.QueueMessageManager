@@ -11,7 +11,9 @@
     <File Path=".nuget/NuGet.targets" />
   </Folder>
   <Folder Name="/Documents/">
+    <File Path=".gitignore" />
     <File Path="Changelog.md" />
+    <File Path="Directory.Build.props" />
     <File Path="global.json" />
     <File Path="Readme.md" />
   </Folder>

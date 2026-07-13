@@ -1,30 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <RootNamespace>Westwind.MessageQueueing</RootNamespace>
-    <AssemblyName>Westwind.MessageQueueing</AssemblyName>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>$(FrameworkVersion)</TargetFramework>
+		<Version>$(qmmVersion)</Version>
 
-  <ItemGroup> 
-    <!--<PackageReference Include="Westwind.Utilities.Data" Version="5.*" />-->
-  </ItemGroup>
+		<Product>Westwind QueueMessaging</Product>
+		<FileDescription>Westwind QueueMessaging - Core Queue Messaging Engine</FileDescription>
+		<Authors>Rick Strahl, West Wind Technologies</Authors>
+		<Company>West Wind Technologies</Company>
+		<PublisherName>West Wind Technologies</PublisherName>
+		<Copyright>West Wind Technologies, 2005-2026</Copyright>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\Westwind.Utilities\Westwind.Utilities.Data\Westwind.Utilities.Data.csproj" />
-    <ProjectReference Include="..\..\..\Westwind.Utilities\Westwind.Utilities\Westwind.Utilities.csproj" />
-  </ItemGroup>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <Compile Update="Properties\Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
+	<ItemGroup>
+		<!--<PackageReference Include="Westwind.Utilities.Data" Version="5.*" />-->
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\..\Westwind.Utilities\Westwind.Utilities.Data\Westwind.Utilities.Data.csproj" />
+		<ProjectReference Include="..\..\..\Westwind.Utilities\Westwind.Utilities\Westwind.Utilities.csproj" />
+	</ItemGroup>
 </Project>

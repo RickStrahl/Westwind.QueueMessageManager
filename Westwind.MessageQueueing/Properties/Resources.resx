@@ -99,27 +99,21 @@
   </resheader>
   <data name="NoQueueMessagesPending" xml:space="preserve">
     <value>No queue messages pending.</value>
-    <comment>NoQueueMessagesPending description</comment>
   </data>
   <data name="NoEntityAvailable" xml:space="preserve">
     <value>No entity available.</value>
-    <comment>NoItemAvailable description</comment>
   </data>
   <data name="SerializationFailed" xml:space="preserve">
     <value>Serialization failed: </value>
-    <comment>SerializationFailed description</comment>
   </data>
   <data name="NoEntityIsLoaded" xml:space="preserve">
     <value>No entity is loaded.</value>
-    <comment>NoItemIsLoaded description</comment>
   </data>
   <data name="DeserializationFailed" xml:space="preserve">
     <value>Deserialization failed: </value>
-    <comment>DeserializationFailed description</comment>
   </data>
   <data name="NoEntityPassed" xml:space="preserve">
     <value>No entity passed.</value>
-    <comment>NoItemPassed description</comment>
   </data>
   <data name="CouldntConnectToDatabase" xml:space="preserve">
     <value>Couldn't connect to the database.</value>
