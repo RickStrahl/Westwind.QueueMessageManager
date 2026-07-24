@@ -1,6 +1,6 @@
 _*.json
 _qmmApp-configuration.json
-
+_qmm-container-config.json
 
 Thumbs.db
 *.obj
@@ -38,3 +38,4 @@ $tf*/
 
 .vs/
 .nuget/
+/Westwind.QueueMessageManager.CoreWebSample/_qmm-container-config.json
