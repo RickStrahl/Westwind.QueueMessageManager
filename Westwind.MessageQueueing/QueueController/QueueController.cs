@@ -155,12 +155,6 @@ namespace Westwind.MessageQueueing
             set;
         }
 
-        /// <summary>
-        /// Optional function you can hook to handle creation of the QueueManager
-        /// instance. Use this to create and configure the QUeueManager instance
-        /// </summary>
-        [JsonIgnore]
-        public Func<QueueMessageManager> OnCreateQueueManager { get; set; }
 
         [JsonIgnore]
         public ILogger LogManager { get; }
@@ -223,12 +217,12 @@ namespace Westwind.MessageQueueing
                     Thread.Sleep(WaitInterval);
                     continue;
                 }
-                
-                QueueMessageManager manager;
-                if (OnCreateQueueManager != null)
-                    manager = OnCreateQueueManager.Invoke();
-                else
-                    manager = Activator.CreateInstance(QueueManagerType, [ ConnectionString ?? string.Empty ]) as QueueMessageManager;
+
+
+                QueueMessageManager manager = null;
+                manager = OnCreateQueueManager();
+                if (manager == null)
+                    manager = Activator.CreateInstance(QueueManagerType ?? typeof(QueueMessageManagerSql), [ ConnectionString ?? string.Empty ]) as QueueMessageManager;
                 
 
                 var config = QueueMessageManagerConfiguration.Current;
@@ -455,6 +449,15 @@ namespace Westwind.MessageQueueing
 
 
         /// <summary>
+        /// Optional function you can hook to handle creation of the QueueManager
+        /// instance. Use this to create and configure the QueueManager instance                
+        /// </summary>        
+        protected virtual QueueMessageManager OnCreateQueueManager()
+        {
+            return null;
+        }
+
+        /// <summary>
         /// Method that is called just before the controller stops
         /// processing requests. Use to send messages.
         /// If you return false from this method the queue is not stoped.
@@ -495,20 +498,13 @@ namespace Westwind.MessageQueueing
         /// </summary>
         /// <param name="typeName"></param>
         /// <returns></returns>
-        public virtual QueueMessageManager CreateNewControllerInstance(string typeName = null)
+        public virtual QueueMessageManager CreateNewControllerInstance(string typeName = null, ILogger logger = null)
         {
             if (string.IsNullOrEmpty(typeName))
                 typeName = this.GetType().FullName;
 
-            QueueMessageManager manager;
-            if (OnCreateQueueManager != null)
-                manager = OnCreateQueueManager.Invoke();
-            else
-                manager = Activator.CreateInstance(QueueManagerType, [ConnectionString ?? string.Empty]) as QueueMessageManager;
-
-
-            return manager;
-
+            var controller = Activator.CreateInstance(QueueManagerType, [ConnectionString ?? string.Empty, logger]) as QueueMessageManager;
+            return controller;
         }
     }
 

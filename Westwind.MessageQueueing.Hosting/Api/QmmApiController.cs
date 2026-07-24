@@ -102,6 +102,10 @@ public abstract class QmmApiController : BaseApiController
     [Route("/qmm/queuemonitor")]
     public IActionResult QueueMonitor()
     {
+        if (qmmApp.Configuration.DisableQueueMonitor)
+        {
+            return NotFound("Queue Monitor is disabled.");
+        }
         return View("~/views/qmmapi/queuemonitor.cshtml");
     }
 
@@ -110,6 +114,10 @@ public abstract class QmmApiController : BaseApiController
     [Route("/qmm/configuration")]
     public ActionResult ShowConfiguration()
     {
+        if (qmmApp.Configuration.DisableQueueMonitor)
+        {
+            return NotFound("Queue  Configuration is disabled.");
+        }
         var model = CreateViewModel<AdminViewModel>();
         model.ConfigurationJson = JsonSerializationUtils.Serialize(qmmApp.Configuration, false, true, false);
         model.ContainerConfigurationJson = JsonSerializationUtils.Serialize(QueueContainer.Current, false, true, false);

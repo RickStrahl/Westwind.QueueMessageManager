@@ -18,7 +18,6 @@ public class QueueContainer : IDisposable
     /// <summary>
     /// A global instance of the QueueContainer that can be used across the application.    
     /// </summary>
-
     public static QueueContainer Current { get; set; }
 
 
@@ -54,11 +53,7 @@ public class QueueContainer : IDisposable
     public List<QueueController> Controllers { get; set; } = [];
  
 
-    public QueueContainer()
-    {
-        if (Current == null)
-            Current = this;
-    }
+   
 
 
     /// <summary>

@@ -253,6 +253,9 @@ namespace Westwind.MessageQueueing.Hosting
         /// <returns></returns>
         public static async Task GetWaitingQueueMessageCountInternal(string queueName = null)
         {
+            if (HubContext == null)
+                return;
+
             if (string.IsNullOrEmpty(queueName))
                 queueName = null; // force all
 

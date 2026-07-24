@@ -12,6 +12,12 @@ public class qmmAppConfiguration : AppConfiguration
 
     public bool AutoCreateTables { get; set; } = false;
 
+    /// <summary>
+    /// Disables the Queue Monitor by preventing the SignalR hub from starting and 
+    /// QMM endpoints to work.
+    /// </summary>
+    public bool DisableQueueMonitor { get; set; } = false;
+
     public string ApplicationName { get; set; } = "Queue Message Manager";
 
     public string ApplicationShortName { get; set; } = "QMM";

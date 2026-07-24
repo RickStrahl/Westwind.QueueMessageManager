@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Westwind.QueueManager.Hosting;
 
 namespace Westwind.MessageQueueing.Hosting;
 
@@ -30,26 +31,19 @@ public static class QmmMiddlewareExtensions
 
 
         // Authorization builder related
-        services.AddSingleton<
-            IAuthorizationHandler,
-            QueueMonitorAccessHandler>();
+        //services.AddSingleton<
+        //    IAuthorizationHandler,
+        //    QueueMonitorAccessHandler>();
 
-        services.AddAuthorization(options =>
-        {
-            // Register [QueueMonitorAuthorize] attribute
-            options.AddPolicy("QueueMonitorAccess", policy =>
-            {
-                policy.RequireAuthenticatedUser();
-                policy.AddRequirements(new QueueMonitorAccessRequirement());
-            });
-        });
-
-
-        //var inheritedRouteConvention = new InheritedControllerRouteConvention
+        //services.AddAuthorization(options =>
         //{
-        //    //ChildControllerTypes = [typeof(SampleAppQmmApiController)]
-        //};
-        //services.AddSingleton<IActionDescriptorProvider>(inheritedRouteConvention);
+        //    // Register [QueueMonitorAuthorize] attribute
+        //    options.AddPolicy("QueueMonitorAccess", policy =>
+        //    {
+        //        policy.RequireAuthenticatedUser();
+        //        policy.AddRequirements(new QueueMonitorAccessRequirement());
+        //    });
+        //});
 
         var mvcBuilder = services.AddControllersWithViews()
             // have to let MVC know we have a dynamically loaded controller
@@ -61,7 +55,12 @@ public static class QmmMiddlewareExtensions
                     opt.SerializerSettings.Formatting = Formatting.Indented;
             });
 
-        services.AddSignalR();
+        // Queue Monitor
+        if(!qmmApp.Configuration.DisableQueueMonitor)
+            services.AddSignalR();
+
+        // Shutdown processing
+        services.AddHostedService<QmmHostedService>();
 
         return services;
     }
@@ -95,13 +94,21 @@ public class QmmMiddlewareConfiguration
 
 
     /// <summary>
+    /// By default the QueueMonitor is enabled and runs. Use this option
+    /// to explicitly disable the QueueMonitor and SignalR processing.
+    /// </summary>
+    public bool DisableQueueMonitor { get; set; } = true;
+
+
+
+    /// <summary>
     /// Creates a global QueueContainer instance in QueueContainer.Current 
     /// from a configuration file. 
     /// </summary>
     /// <param name="filename">Path to the configuration file - default: "_qmm-container-config.json"</param>
     /// <exception cref="ArgumentException"></exception>
     /// <exception cref="InvalidCastException"></exception>
-    public void LoadContainerFromFile(string filename)
+    public void LoadContainerFromFile(string filename = "_qmm-container-config.json")
     {
         if (string.IsNullOrEmpty(filename) || !System.IO.File.Exists(filename))
             throw new ArgumentException("Invalid filename or file does not exist.", nameof(filename));
