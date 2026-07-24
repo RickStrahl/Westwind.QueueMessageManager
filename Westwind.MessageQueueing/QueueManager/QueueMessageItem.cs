@@ -135,22 +135,68 @@ namespace Westwind.MessageQueueing
 
 
         public int Expire { get; set; }
+
+
+        /// <summary>
+        /// Message that describes the current state of the message or results/error information on completion
+        /// </summary>
         public string Message { get; set; }
 
+        /// <summary>
+        /// User defined text input that can be used to pass information into the queue message
+        /// </summary>
         public string TextInput { get; set; }
-        
+
+        /// <summary>
+        /// User defined text result that can be used to pass information out of the queue message
+        /// </summary>
         public string TextResult { get; set; }
+
+        
+        /// <summary>
+        /// User defined number result that can be used to pass information out of the queue message
+        /// </summary>
         public decimal NumberResult { get; set; }
 
+        /// <summary>
+        /// Any type of string data
+        /// </summary>
         public string Data { get; set; }
+
+        /// <summary>
+        /// XML Data that can be used to pass information into the queue message. This is a legacy property and Json is preferred.
+        /// </summary>
         public string Xml { get; set; }
+
+        /// <summary>
+        /// JSON Data that can be used to pass information into the queue message. This is the preferred property for passing data into the queue message.
+        /// </summary>
         public string Json { get; set;  }
+
+        /// <summary>
+        /// Binary data that can be used to pass information into the queue message. This is a legacy property and Json is preferred.
+        /// </summary>
         public byte[] BinData { get; set; }
 
+        /// <summary>
+        /// Optional - Percent complete of the operation. This is a user defined property that can be used to track progress of the operation.
+        /// </summary>
         public int PercentComplete { get; set; }
 
+
+        /// <summary>
+        /// A property container in XML format that is used for storing arbitrary
+        /// single level data. 
+        /// 
+        /// 
+        /// Accessible from the QueueManager via Get/SetProperty() or an object based
+        /// assignment and retrieval mechanism. 
+        /// </summary>
         public string XmlProperties { get; set; }
 
+        /// <summary>
+        /// Determines if this is a new item that has not been added to the queue
+        /// </summary>
         [JsonIgnore]
         public bool __IsNew = true;
 

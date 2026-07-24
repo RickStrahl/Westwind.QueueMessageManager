@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Westwind.Utilities;
@@ -51,7 +52,7 @@ public class QueueContainer : IDisposable
     /// The list of controllers that are part of this container.
     /// </summary>      
     public List<QueueController> Controllers { get; set; } = [];
-
+ 
 
     public QueueContainer()
     {
@@ -168,59 +169,70 @@ public class QueueContainer : IDisposable
         if (container == null)
             return null;
 
-        dynamic jobj = JObject.Parse(json);
-
-        // We'll clear out the deserialized controllers
-        // that are potentially not of the correct subclass or type
-        // and replace with explicitly created instances of the correct type.
-        container.Controllers.Clear();
-
-        dynamic jcontrollers = jobj.Controllers;
-
-        foreach (var jctrl in jcontrollers)
+        for (int i = 0; i < container.Controllers.Count ; i++)
         {
-            var typename = jctrl.QueueControllerType?.ToString();
-            if (string.IsNullOrEmpty(typename))
-                continue;
+            var controller = container.Controllers[i];
+            var typename = controller.QueueControllerTypeName;
 
-            var controller = ReflectionUtils.CreateInstanceFromString(typename);
+            var typedController = ReflectionUtils.CreateInstanceFromString(typename);
             if (controller == null)
                 throw new InvalidCastException("Unable to create QueueController of type " + typename);
 
-            string connectionString = jctrl.ConnectionString?.ToString();
-            if (string.IsNullOrEmpty(connectionString))
-                connectionString = container.DefaultConnectionString;
-            string queueName = jctrl.QueueName?.ToString();
-            int threadCount = jctrl.ThreadCount?.Value is long ? (int)jctrl.ThreadCount.Value : container.DefaultThreadCount;
-            int waitInterval = jctrl.WaitInterval?.Value is long ? (int)jctrl.WaitInterval.Value : container.DefaultWaitInterval;
-            bool paused = jctrl.Paused?.Value is bool ? jctrl.Paused.Value : false;
+            DataUtils.CopyObjectData(controller, typedController);
 
-
-            if (!string.IsNullOrEmpty(connectionString))
-                controller.ConnectionString = connectionString;
-            if (!string.IsNullOrEmpty(queueName))
-                controller.QueueName = queueName;
-            controller.ThreadCount = threadCount;
-            controller.WaitInterval = waitInterval;
-            controller.Paused = paused;
-
-            container.AddController(controller);
+            container.Controllers[i] = typedController as QueueController;
         }
+
+
+        //dynamic jobj = JObject.Parse(json);
+
+        
+        //dynamic jcontrollers = jobj.Controllers;
+
+        //foreach (var jctrl in jcontrollers)
+        //{
+        //    var typename = jctrl.QueueControllerType?.ToString();
+        //    if (string.IsNullOrEmpty(typename))
+        //        continue;
+
+        //    var controller = ReflectionUtils.CreateInstanceFromString(typename);
+        //    if (controller == null)
+        //        throw new InvalidCastException("Unable to create QueueController of type " + typename);
+
+        //    string connectionString = jctrl.ConnectionString?.ToString();
+        //    if (string.IsNullOrEmpty(connectionString))
+        //        connectionString = container.DefaultConnectionString;
+        //    string queueName = jctrl.QueueName?.ToString();
+        //    int threadCount = jctrl.ThreadCount?.Value is long ? (int)jctrl.ThreadCount.Value : container.DefaultThreadCount;
+        //    int waitInterval = jctrl.WaitInterval?.Value is long ? (int)jctrl.WaitInterval.Value : container.DefaultWaitInterval;
+        //    bool paused = jctrl.Paused?.Value is bool ? jctrl.Paused.Value : false;
+
+
+        //    if (!string.IsNullOrEmpty(connectionString))
+        //        controller.ConnectionString = connectionString;
+        //    if (!string.IsNullOrEmpty(queueName))
+        //        controller.QueueName = queueName;
+        //    controller.ThreadCount = threadCount;
+        //    controller.WaitInterval = waitInterval;
+        //    controller.Paused = paused;
+
+        //    container.AddController(controller);
+        //}
 
         return container;
     }
-
+    
     /// <summary>
     /// Creates a controller instance from controller 'configuration' value by 
     /// creating a new instance of the Controller Type. 
     /// </summary>
-    /// <param name="jctrl"></param>
+    /// <param name="controllerConfig"></param>
     /// <param name="container"></param>
     /// <returns></returns>
     /// <exception cref="InvalidCastException"></exception>
-    public QueueController CreateController(QueueController jctrl, QueueContainer container)
+    public QueueController CreateController(QueueController controllerConfig, QueueContainer container)
     {
-        var typename = jctrl.QueueControllerType?.ToString();
+        var typename = controllerConfig.QueueControllerTypeName?.ToString();
         if (string.IsNullOrEmpty(typename))
             return null;
 
@@ -228,13 +240,13 @@ public class QueueContainer : IDisposable
         if (controller == null)
             throw new InvalidCastException("Unable to create QueueController of type " + typename);
 
-        string connectionString = jctrl.ConnectionString?.ToString();
+        string connectionString = controllerConfig.ConnectionString?.ToString();
         if (string.IsNullOrEmpty(connectionString))
             connectionString = container.DefaultConnectionString;
-        string queueName = jctrl.QueueName;
-        int threadCount = jctrl.ThreadCount;
-        int waitInterval = jctrl.WaitInterval;
-        bool paused = jctrl.Paused;
+        string queueName = controllerConfig.QueueName;
+        int threadCount = controllerConfig.ThreadCount;
+        int waitInterval = controllerConfig.WaitInterval;
+        bool paused = controllerConfig.Paused;
 
 
         if (!string.IsNullOrEmpty(connectionString))

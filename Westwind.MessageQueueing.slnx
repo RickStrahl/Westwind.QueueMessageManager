@@ -49,10 +49,6 @@
     <BuildType Solution="Deploy|*" Project="Debug" />
     <BuildType Solution="SandBox|*" Project="Release" />
   </Project>
-  <Project Path="Westwind.MessageQueueing.WebHostSample/Westwind.MessageQueueing.WebHostSample.csproj">
-    <BuildType Solution="Deploy|*" Project="Debug" />
-    <BuildType Solution="SandBox|*" Project="Release" />
-  </Project>
   <Project Path="Westwind.MessageQueueing/Westwind.MessageQueueing.csproj">
     <BuildType Solution="Deploy|*" Project="Debug" />
     <BuildType Solution="SandBox|*" Project="Release" />

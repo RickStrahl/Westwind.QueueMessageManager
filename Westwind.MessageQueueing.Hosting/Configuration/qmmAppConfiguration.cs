@@ -12,14 +12,6 @@ public class qmmAppConfiguration : AppConfiguration
 
     public bool AutoCreateTables { get; set; } = false;
 
-    public string JwtIssuer { get; set; } = "Westwind.Web.Template";
-
-    public string JwtAudience { get; set; } = "Westwind.Web.Template.Client";
-
-    public string JwtSigningKey { get; set; } = "Westwind.Web.Template.Jwt.Signing.Key.Change.Me.2026";
-
-    public string DefaultCulture { get; set; } = "en-US";
-
     public string ApplicationName { get; set; } = "Queue Message Manager";
 
     public string ApplicationShortName { get; set; } = "QMM";
@@ -29,8 +21,7 @@ public class qmmAppConfiguration : AppConfiguration
 
     public EmailConfiguration Email { get; set; } = new();
 
-
-    
+        
     public SystemConfiguration System { get; set; } = new();
     
 
@@ -38,7 +29,7 @@ public class qmmAppConfiguration : AppConfiguration
     {
         return new JsonFileConfigurationProvider<qmmAppConfiguration>
         {
-            JsonConfigurationFile = "_qmmApp-configuration.json"
+            JsonConfigurationFile = "_qmm-app-config.json"
         };
     }
 }

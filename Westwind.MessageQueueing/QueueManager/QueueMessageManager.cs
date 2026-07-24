@@ -180,12 +180,16 @@ namespace Westwind.MessageQueueing
 
             item.PercentComplete = 0;
             item.Status = "Submitted";
+            
             item.Submitted = DateTime.UtcNow;
             item.Started = null;
             item.Completed = null;
+
             item.IsComplete = false;
             item.IsCancelled = false;
-
+            item.IsFailed = false;
+            
+            
             if (item.QueueName == null)
                 item.QueueName = DefaultQueue;
 
@@ -215,8 +219,34 @@ namespace Westwind.MessageQueueing
                 item = CreateItem();
             item.Started = DateTime.UtcNow;
             item.Status = "Started";
+
             if (!string.IsNullOrEmpty(messageText))
                 item.Message = messageText;
+            Item = item;
+            if (autoSave)
+                return Save();
+            return true;
+        }
+
+
+        /// <summary>
+        /// Allows easy updating of a started request with a message and percentage.
+        /// </summary>
+        /// <param name="item">Optional item - otheriwse manager.Item is used</param>
+        /// <param name="messageText">Optional message text</param>
+        /// <param name="percentComplete">Optional completion percentage</param>
+        /// <param name="autoSave">If true Save() is called automatically other wise the item data is updated only</param>
+        /// <returns>true or false. False typically only if Save() fails</returns>
+        public bool ProgressRequest(QueueMessageItem item = null, string messageText = null, int percentComplete = -1, bool autoSave = false)
+        {
+            if (item == null)
+                item = Item;
+            if (item == null)
+                item = CreateItem();
+            if (!string.IsNullOrEmpty(messageText))
+                item.Message = messageText;
+            if (percentComplete > -1)
+                item.PercentComplete = percentComplete;
             Item = item;
             if (autoSave)
                 return Save();
@@ -238,8 +268,10 @@ namespace Westwind.MessageQueueing
 
             item.PercentComplete = 100;
             item.Status = "Completed";
+            
             item.Completed = DateTime.UtcNow;
             item.IsComplete = true;
+
             if (item.Started == null)
                 item.Started = DateTime.UtcNow.AddMilliseconds(-1);
             item.IsCancelled = false;
@@ -301,6 +333,7 @@ namespace Westwind.MessageQueueing
             item.Completed = DateTime.UtcNow;
             if (item.Started == null)
                 item.Started = DateTime.UtcNow.AddMilliseconds(-1);
+            
             item.IsComplete = true;
             item.IsFailed = true;
 
@@ -525,7 +558,7 @@ namespace Westwind.MessageQueueing
         private PropertyBag _Properties = null;
 
         /// <summary>
-        /// Retrieves a value from the Properties collection safely.
+        /// Retrieves a value from the XmlProperties collection safely.
         /// If the value doesn't exist null is returned.
         /// </summary>
         /// <param name="key"></param>
@@ -539,6 +572,18 @@ namespace Westwind.MessageQueueing
             Properties.TryGetValue(key, out value);
 
             return value;
+        }
+
+
+        /// <summary>
+        /// Sets a value in the XmlProperties collection. If the key doesn't exist it is created
+        /// if it exists it's overwritten.
+        /// </summary>
+        /// <param name="key">Property key</param>
+        /// <param name="value">Value to set to - should be Xml Serializable value</param>
+        public void SetProperty(string key, object value)
+        {
+            Properties[key] = value;
         }
 
         /// <summary>

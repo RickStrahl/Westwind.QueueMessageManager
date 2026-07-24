@@ -126,7 +126,7 @@ namespace Westwind.MessageQueueing
 
         
         /// <summary>
-        /// The specific type of the message manager class
+        /// The specific type instance of the message manager class
         /// </summary>        
         [JsonIgnore]
         public Type QueueManagerType { get; set; }        
@@ -141,7 +141,7 @@ namespace Westwind.MessageQueueing
         /// Used in the configuration to determine which type
         /// to instantiate
         /// </summary>
-        public string QueueControllerType
+        public string QueueControllerTypeName
         {
             get
             {
@@ -495,10 +495,10 @@ namespace Westwind.MessageQueueing
         /// </summary>
         /// <param name="typeName"></param>
         /// <returns></returns>
-        public QueueMessageManager CreateNewControllerInstance(string typeName = null)
+        public virtual QueueMessageManager CreateNewControllerInstance(string typeName = null)
         {
             if (string.IsNullOrEmpty(typeName))
-                typeName = this.QueueControllerType;
+                typeName = this.GetType().FullName;
 
             QueueMessageManager manager;
             if (OnCreateQueueManager != null)
@@ -511,4 +511,63 @@ namespace Westwind.MessageQueueing
 
         }
     }
+
+
+    //public class QueueControllerConfiguration
+    //{
+
+    //    /// <summary>
+    //    /// Sets the types of messages that this controller is looking for
+    //    /// </summary>
+    //    public string QueueName { get; set; }
+
+
+    //    /// <summary>
+    //    /// Connection String for the database
+    //    /// </summary>
+    //    public string ConnectionString { get; set; }
+
+    //    /// <summary>
+    //    /// Determines whether the controller is processing messages
+    //    /// </summary>
+    //    protected virtual bool Active { get; set; }
+
+
+    //    /// <summary>
+    //    /// determines if the service is paused
+    //    /// </summary>        
+    //    public virtual bool Paused { get; set; }
+
+
+    //    /// <summary>
+    //    /// Determines how often the control checks for new messages
+    //    /// Set in milliseconds.
+    //    /// </summary>
+    //    public virtual int WaitInterval { get; set; } = -1;
+
+    //    /// <summary>
+    //    /// Number of threads processing the queue
+    //    /// </summary>
+    //    public virtual int ThreadCount { get; set; }
+
+
+    //    /// <summary>
+    //    /// The Queue Controller Type to create an instance from.
+    //    /// Used in the configuration to determine which type
+    //    /// to instantiate
+    //    /// </summary>
+    //    public string QueueControllerType
+    //    {
+    //        get
+    //        {
+    //            if (string.IsNullOrEmpty(field))
+    //            {
+    //                var type = GetType();
+    //                return type.FullName;
+    //            }
+    //            return field;
+    //        }
+    //        set;
+    //    }
+    //}
 }

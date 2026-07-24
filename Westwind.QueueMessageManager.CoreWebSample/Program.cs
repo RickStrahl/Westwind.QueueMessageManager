@@ -1,18 +1,11 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Abstractions;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.FileProviders;
-using Newtonsoft.Json;
 using Serilog;
 using System.Runtime.InteropServices;
-using Westwind.AspNetCore;
 using Westwind.AspNetCore.Errors;
 using Westwind.AspNetCore.LiveReload;
-using Westwind.MessageQueueing;
 using Westwind.MessageQueueing.Hosting;
 using Westwind.QueueManager.Hosting;
-using Westwind.QueueMessageManager.CoreWebSample;
 using Westwind.Utilities;
 
 var builder = WebApplication.CreateBuilder(args);
