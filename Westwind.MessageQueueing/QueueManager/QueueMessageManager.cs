@@ -83,7 +83,7 @@ namespace Westwind.MessageQueueing
 
         public QueueMessageManager()
         {
-            DefaultQueue = QueueMessageManagerConfiguration.Current?.DefaultQueueName ?? string.Empty;
+            DefaultQueue = QueueMessageManagerConfiguration.Current?.DefaultQueueName;
 
             // 2 hours
             MessageTimeout = new TimeSpan(2, 0, 0);

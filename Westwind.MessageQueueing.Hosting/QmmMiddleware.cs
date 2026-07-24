@@ -70,15 +70,12 @@ public static class QmmMiddlewareExtensions
     {
         var config = builder.ApplicationServices.GetRequiredService<QmmMiddlewareConfiguration>();
 
-        if (config.Container != null)
-        {
-            QueueContainer.Current = config.Container;
+        if (QueueContainer.Current != null)
+        {            
             QueueContainer.Current.StartProcessingAsync();
         }
         else
             throw new ApplicationException("QMM QueueContainer is not configured. Please configure the QueueContainer before starting the application.");
-
-
 
         return builder;
     }
@@ -87,11 +84,23 @@ public static class QmmMiddlewareExtensions
 
 public class QmmMiddlewareConfiguration
 {
+
+    /// <summary>
+    /// Global instance of the middleware configuration so we have access to the
+    /// container uin
+    /// </summary>
     public static QmmMiddlewareConfiguration Current { get; set; }
 
-    public QueueContainer Container { get; set; }
+    //internal QueueContainer Container { get; set; }
 
 
+    /// <summary>
+    /// Creates a global QueueContainer instance in QueueContainer.Current 
+    /// from a configuration file. 
+    /// </summary>
+    /// <param name="filename">Path to the configuration file - default: "_qmm-container-config.json"</param>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="InvalidCastException"></exception>
     public void LoadContainerFromFile(string filename)
     {
         if (string.IsNullOrEmpty(filename) || !System.IO.File.Exists(filename))
@@ -99,7 +108,7 @@ public class QmmMiddlewareConfiguration
 
         try
         {
-            Container = QueueContainer.CreateFromConfigurationFile(filename);
+            var Container = QueueContainer.CreateFromConfigurationFile(filename);
             QueueContainer.Current = Container;
         }
         catch (Exception ex)
@@ -108,12 +117,30 @@ public class QmmMiddlewareConfiguration
         }
     }
 
+    /// <summary>
+    /// Configures the globally managed QueueContainer.Current instance 
+    /// from a manually configured QueueContainer.
+    /// </summary>
+    /// <param name="container"></param>
     public void SetContainer(QueueContainer container)
-    {
-        Container = container;
+    {        
+        QueueContainer.Current = container;
     }
 
 
+    /// <summary>
+    /// Creates a new QueueContainer instance based on provided
+    /// parameters.
+    /// 
+    /// Typically easier to just create a QueueContainer manually
+    /// and set properties on it but this is a quick way to create
+    /// an empty container.
+    /// </summary>
+    /// <param name="defaultConnectionString"></param>
+    /// <param name="defaultThreadCount"></param>
+    /// <param name="defaultWaitInterval"></param>
+    /// <param name="controllers"></param>
+    /// <exception cref="ArgumentException"></exception>
     public void CreateContainer(string defaultConnectionString,
         int defaultThreadCount,
         int defaultWaitInterval,
@@ -123,13 +150,14 @@ public class QmmMiddlewareConfiguration
         if (controllers == null)
             throw new ArgumentException("Controllers cannot be null when creating a new QueueContainer.", nameof(controllers));
 
-        Container = new QueueContainer
+        var container = new QueueContainer
         {
             DefaultConnectionString = defaultConnectionString,
             DefaultThreadCount = defaultThreadCount,
             DefaultWaitInterval = defaultWaitInterval,
             Controllers = controllers.ToList()
         };
+        QueueContainer.Current = container;
         
     }
 }

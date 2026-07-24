@@ -252,7 +252,7 @@ namespace Westwind.MessageQueueing
                 }
 
                 // let CPU breathe
-                Thread.Sleep(1);
+                Thread.Yield();
             }
         }
 

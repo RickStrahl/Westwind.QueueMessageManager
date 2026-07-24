@@ -352,7 +352,8 @@ namespace Westwind.MessageQueueing.Hosting
                 elapsed,
                 waiting,
                 queueItem.QueueName,
-                queueItem.Action, new { name = "Rick", company = "West Wind" });
+                queueItem.Action,
+                queueItem.PercentComplete);
         }
 
         /// <summary>
@@ -365,7 +366,7 @@ namespace Westwind.MessageQueueing.Hosting
         public static async Task WriteMessageInternal(string message, 
             string id = null, string status = "Submitted",
             DateTime? time = null, string queueName = null, 
-            int elapsed = 0, string action = null)
+            int elapsed = 0, string action = null, int percentComplete = 0)
         {
             if (HubContext == null)
                 return;
