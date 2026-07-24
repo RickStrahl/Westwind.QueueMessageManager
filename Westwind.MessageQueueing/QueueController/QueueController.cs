@@ -159,6 +159,7 @@ namespace Westwind.MessageQueueing
         [JsonIgnore]
         public ILogger LogManager { get; }
 
+
         /// <summary>
         /// Starts queue processing in the background and returns immediately.
         /// 
@@ -175,15 +176,12 @@ namespace Westwind.MessageQueueing
             if (!OnStartProcessing())
                 return;
 
-            // threads are marked as 0 - don't start any threads
-            if (threads < 1 && ThreadCount < 1)
-                return;
-
             if (threads < 0)
                 threads = ThreadCount;
 
+            // threads are marked as 0 - don't start any threads
             if (threads < 1)
-                threads = 1;
+                return;
 
             ThreadCount = threads;
 
