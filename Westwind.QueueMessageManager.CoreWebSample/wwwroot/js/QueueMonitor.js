@@ -71,8 +71,8 @@
                     .configureLogging(signalR.LogLevel.Warning)
                     .build();
 
-                this.hubConnection.on("writeMessage", (message, status, time, id, elapsed, waiting, queueName, action, obj) => {
-                    this.onWriteMessage(message, status, time, id, elapsed, waiting, queueName, action, obj);
+                this.hubConnection.on("writeMessage", (message, status, time, id, elapsed, waiting, queueName, action, percentComplete) => {                    
+                    this.onWriteMessage(message, status, time, id, elapsed, waiting, queueName, action, percentComplete);
                 });
 
                 this.hubConnection.on("statusMessage", (message,statusType) => {
@@ -219,7 +219,7 @@
             clearMessages() {
                 this.messages = [];
             },
-            onWriteMessage(message, status, time, id, elapsed, waiting, queueName, action) {
+            onWriteMessage(message, status, time, id, elapsed, waiting, queueName, action, percentComplete) {
 
                 // find the item and remove it if exists
                 if (id) {
@@ -241,7 +241,8 @@
                     elapsed: elapsed || "",
                     queueName: queueName || "",
                     action: action || "",
-                    message: safeMessage.trim()
+                    message: safeMessage.trim(),
+                    percentComplete: percentComplete || 0   
                 });
 
                 if (this.messages.length > 60) {

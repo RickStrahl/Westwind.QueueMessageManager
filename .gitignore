@@ -1,6 +1,7 @@
 _*.json
 _qmmApp-configuration.json
 _qmm-container-config.json
+nupkg/
 
 Thumbs.db
 *.obj

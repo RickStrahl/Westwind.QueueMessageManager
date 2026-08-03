@@ -127,6 +127,7 @@ public abstract class QmmApiController : BaseApiController
     }
 
 
+
     [HttpPost]
     [Route("/qmm/configuration")]
     public ActionResult UpdateConfiguration(AdminViewModel model, [FromServices] IHostApplicationLifetime appLifetime)

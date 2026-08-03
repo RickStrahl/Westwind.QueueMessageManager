@@ -9,19 +9,43 @@
 		<Authors>Rick Strahl, West Wind Technologies</Authors>
 		<Company>West Wind Technologies</Company>
 		<PublisherName>West Wind Technologies</PublisherName>
-		<Copyright>West Wind Technologies, 2005-2026</Copyright>
-	</PropertyGroup>	
+		<Copyright>West Wind Technologies, 2004-2026</Copyright>
+	
+		<PackageCopyright>Rick Strahl, West Wind Technologies 2004-2026</PackageCopyright>
+		<PackageTags>queue messaging async-processing</PackageTags>
+		<PackageProjectUrl>http://github.com/rickstrahl/westwind.queuemessagemanager</PackageProjectUrl>
+
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageLicenseFile>LICENSE.MD</PackageLicenseFile>
+		
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<Copyright>Rick Strahl, West Wind Technologies, 2004-2026</Copyright>
+		<Company>West Wind Technologies</Company>	
+	</PropertyGroup>
+
+
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+		<DebugType>embedded</DebugType>
+		<NoWarn>$(NoWarn);CS1591;CS1572;CS1573</NoWarn>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<PackageOutputPath>./nupkg</PackageOutputPath>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	</PropertyGroup>
+	
 	<ItemGroup>
 		<ProjectReference Include="..\Westwind.MessageQueueing\Westwind.MessageQueueing.csproj" />		
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.8" />
 		
-		<!--<PackageReference Include="Westwind.AspNetCore" Version="4.*" />-->
-		<PackageReference Include="Westwind.Utilities" Version="5.3.1.2" />
+		<PackageReference Include="Westwind.AspNetCore" Version="4.*" />		
 
-		<ProjectReference Include="..\..\..\Westwind.AspNetCore\Westwind.AspNetCore\Westwind.AspNetCore.csproj" />
+		<!--<ProjectReference Include="..\..\..\Westwind.AspNetCore\Westwind.AspNetCore\Westwind.AspNetCore.csproj" />-->
 	</ItemGroup>	
+	
 	<ItemGroup>
-	  <Folder Include="Properties\" />
+		<None Include="../icon.png" Pack="true" PackagePath="icon.png" />
+		<None Include="../LICENSE.MD" Pack="true" PackagePath="LICENSE.MD" />
 	</ItemGroup>
 </Project>

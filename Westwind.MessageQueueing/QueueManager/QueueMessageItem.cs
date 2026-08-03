@@ -137,6 +137,9 @@ namespace Westwind.MessageQueueing
         public int Expire { get; set; }
 
 
+        public int RetryCount { get; set;  }
+
+
         /// <summary>
         /// Message that describes the current state of the message or results/error information on completion
         /// </summary>

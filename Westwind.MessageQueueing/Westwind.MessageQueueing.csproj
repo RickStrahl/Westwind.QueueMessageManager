@@ -8,17 +8,42 @@
 		<Authors>Rick Strahl, West Wind Technologies</Authors>
 		<Company>West Wind Technologies</Company>
 		<PublisherName>West Wind Technologies</PublisherName>
-		<Copyright>West Wind Technologies, 2005-2026</Copyright>
+		<Copyright>West Wind Technologies, 2004-2026</Copyright>
+		
+		<PackageCopyright>Rick Strahl, West Wind Technologies 2004-2026</PackageCopyright>
+		<PackageTags>queue messaging async-processing</PackageTags>
+		<PackageProjectUrl>http://github.com/rickstrahl/westwind.queuemessagemanager</PackageProjectUrl>
 
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageLicenseFile>LICENSE.MD</PackageLicenseFile>
+		
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<Copyright>Rick Strahl, West Wind Technologies, 2004-2026</Copyright>
+		<Company>West Wind Technologies</Company>		
+	</PropertyGroup>
+
+
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+		<DebugType>embedded</DebugType>
+		<NoWarn>$(NoWarn);CS1591;CS1572;CS1573</NoWarn>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<PackageOutputPath>./nupkg</PackageOutputPath>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	</PropertyGroup>
 
-	<ItemGroup>
-		<!--<PackageReference Include="Westwind.Utilities.Data" Version="5.*" />-->
+	<ItemGroup>		
+		<PackageReference Include="Westwind.Utilities.Data" Version="5.3.2" />
+		
+		<!--
+		<ProjectReference Include="..\..\..\Westwind.Utilities\Westwind.Utilities.Data\Westwind.Utilities.Data.csproj" />
+		<ProjectReference Include="..\..\..\Westwind.Utilities\Westwind.Utilities\Westwind.Utilities.csproj" />
+		-->
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\..\Westwind.Utilities\Westwind.Utilities.Data\Westwind.Utilities.Data.csproj" />
-		<ProjectReference Include="..\..\..\Westwind.Utilities\Westwind.Utilities\Westwind.Utilities.csproj" />
+		<None Include="../icon.png" Pack="true" PackagePath="icon.png" />
+		<None Include="../LICENSE.MD" Pack="true" PackagePath="LICENSE.MD" />
 	</ItemGroup>
 </Project>

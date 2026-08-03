@@ -261,7 +261,7 @@ public class QueueContainer : IDisposable
     /// </summary>
     /// <param name="filename">File name to save to</param>
     /// <returns>success or failure</returns>
-    public bool SaveToConfigurationFile(string filename)
+    public bool SaveToConfigurationFile(string filename = "_qmm-container-config.json")
     {
         return JsonSerializationUtils.SerializeToFile(this, filename, false, true, false);
     }

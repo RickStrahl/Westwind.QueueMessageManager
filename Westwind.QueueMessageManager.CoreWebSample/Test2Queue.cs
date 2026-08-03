@@ -5,7 +5,7 @@ using Westwind.Utilities;
 
 namespace Westwind.QueueMessageManager.CoreWebSample;
 
-public class Test2Queue : QmmWebHostController
+public class Test2Queue : WebHostQueueController
 {
     public Test2Queue()
     {

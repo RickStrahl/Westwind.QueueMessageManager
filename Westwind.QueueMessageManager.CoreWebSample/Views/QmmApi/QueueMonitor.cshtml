@@ -1,16 +1,42 @@
 @using Westwind.QueueManager.Hosting
 @{
-    ViewData["Title"] = "Queue Monitor";
+    ViewData["Title"] = "Queue Monitor x";
 }
 @section Headers {
     
 	<link href="~/css/QueueMonitor.css" rel="stylesheet" />
+	<style>
+		.percentage-bar {
+            position: relative;
+			display: block;     
+            width: 100%;
+            max-width: 200px;
+			height: 6px;
+			background-color: #ccc;
+			border-color: #999;
+			border-width: 0.5px; 
+            border-radius: 4px;
+		}
+		.percentage-fill {
+			position: absolute;
+			top: 0px;
+			left: 0px;
+			height: 100%;
+			font-size: 0.8em;
+            font-weight: 500;
+            vertical-align: middle;
+			background-color: steelblue;
+			color: #222!important;	
+            padding: 1px 0 0 5px;
+			border-radius: 4px;
+		} 
+	</style>
 
 }
 <div id="queueMonitorApp">
 <div class="monitor-page">
     <header class="monitor-header">
-        <div>
+        <div>          
             <h1 style="margin: 0; border: none; padding: 0">Queue Monitor  <span style="font-size: 0.55em; font-weight: normal">v@(qmmApp.Version)</span></h1>            
         </div>
 
@@ -67,13 +93,19 @@
         </div>
     </section>
 
+
+
     <section class="message-list">
         <article class="message-item" v-for="item in visibleMessages" :key="item.key"  :class="rowClass(item.status)">
             <div class="message-top-row">
                 <div class="status-chip" :class="rowClass(item.status)">{{ item.status || "Info" }}</div>     
                 <div>
                      <b>{{ item.queueName || "" }}</b>
-                     &bull; <b class="text-info">{{ item.action }}</b>
+                     &bull; <b class="text-info">{{ item.action }}</b>                                       
+                     
+                     <div class="percentage-bar" v-if="item.percentComplete && item.percentComplete < 100 ">                         
+	                     <div class="percentage-fill" :style="{ width: item.percentComplete + '%'}"></div>	                                	                     
+                     </div>                 
                 </div>
                 <div class="message-id">                    
                     <b class="text-info">{{ item.time?.toLowerCase() || "" }}</b> &bull;
@@ -88,6 +120,7 @@
         </article>
         <div v-if="visibleMessages.length === 0" class="empty-message">No messages yet for the selected queue.</div>
     </section>
+
 
     <div class="modal-mask" v-if="selectedMessage" @@click.self="selectedMessage = null">
         <section class="modal-panel">

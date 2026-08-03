@@ -19,7 +19,7 @@ namespace Westwind.MessageQueueing
     /// 
     /// Great for long running tasks or even light workflow scenarios.
     /// </summary>    
-    public abstract  class QueueMessageManager : IDisposable
+    public abstract class QueueMessageManager : IDisposable
     {
         protected const int INT_maxCount = 99_999;
         protected bool _IsNew = false;

@@ -56,23 +56,7 @@ builder.Services.AddSerilog();
 
 
 
-//var inheritedRouteConvention = new InheritedControllerRouteConvention
-//{
-//    //ChildControllerTypes = [typeof(SampleAppQmmApiController)]
-//};
-//services.AddSingleton<IActionDescriptorProvider>(inheritedRouteConvention);
-
-//var mvcBuilder = services.AddControllersWithViews()
-//    // have to let MVC know we have a dynamically loaded controller
-//    .AddApplicationPart(typeof(QmmApiController).Assembly)
-//    .AddNewtonsoftJson(opt =>
-//    {
-//        if (builder.Environment.IsDevelopment())
-//            opt.SerializerSettings.Formatting = Formatting.Indented;
-//    });
-// services.AddSignalR();
-
-
+// Code Configuration
 services.AddQmm(options =>
 {
     options.LoadContainerFromFile("_qmm-container-config.json");    
@@ -99,58 +83,11 @@ if (appConfig.System.LiveReloadEnabled)
 }
 
 
-//});
-
-//QueueContainer queueContainer = null;
-//bool readFromConfig = true;
-//if (readFromConfig)
-//{
-//    // Load From File Config
-//    queueContainer = QueueContainer.CreateFromConfigurationFile("qmm-container-config.json");
-//}
-//else
-//{
-//    // Explicitly load from Code
-//    queueContainer = new Westwind.MessageQueueing.QueueContainer
-//    {
-//        DefaultConnectionString = qmmApp.Configuration.ConnectionString,
-//        DefaultThreadCount = 1,
-//        DefaultWaitInterval = 300,
-//        Controllers = [
-//            new Test1Queue() { ConnectionString = qmmApp.Configuration.ConnectionString, ThreadCount = 2 },
-//            new Test2Queue() { ConnectionString = qmmApp.Configuration.ConnectionString, ThreadCount = 3, WaitInterval = 200 },
-//            new Test2Queue() { ConnectionString = qmmApp.Configuration.ConnectionString, ThreadCount = 2, WaitInterval = 400 }
-//        ]
-//    };
-//}
-//queueContainer.StartProcessingAsync();
-
-//queueContainer.SaveToConfigurationFile("qmm-container-config.json");
-
-
-
 //builder.Services.AddQueueHubAuthorization();
 
 
 var app = builder.Build();
 
-
-//var adProvider = app.Services.GetRequiredService<IActionDescriptorCollectionProvider>();
-//foreach (var a in adProvider.ActionDescriptors.Items)
-//{
-//    var route = a.AttributeRouteInfo?.Template ?? "(conventional)";
-//    Console.WriteLine($"{a.DisplayName} => {route}");
-//}
-
-//var endpointSource = app.Services.GetRequiredService<EndpointDataSource>();
-//foreach (var endpoint in endpointSource.Endpoints.OfType<RouteEndpoint>())
-//{
-//    var methods = endpoint.Metadata
-//        .OfType<HttpMethodMetadata>()
-//        .FirstOrDefault()?.HttpMethods ?? new[] { "ANY" };
-
-//    Console.WriteLine($"{string.Join(",", methods),-10} {endpoint.RoutePattern.RawText,-40} {endpoint.DisplayName}");
-//}
 
 
 // Configure the HTTP request pipeline.

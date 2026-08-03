@@ -10,6 +10,8 @@ public class qmmAppConfiguration : AppConfiguration
     public string ConnectionString { get; set; } =
         "server=.;database=QueueMessageManager;integrated security=yes;encrypt=false;trustservercertificate=true;";
 
+    public bool UseTaskManager { get; set; }
+
     public bool AutoCreateTables { get; set; } = false;
 
     /// <summary>
@@ -30,6 +32,7 @@ public class qmmAppConfiguration : AppConfiguration
         
     public SystemConfiguration System { get; set; } = new();
     
+
 
     protected override IConfigurationProvider OnCreateDefaultProvider(string sectionName, object configData)
     {

@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Westwind.MessageQueueing.QueueController">
+    <Position X="1.75" Y="1.75" Width="2.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="Westwind.MessageQueueing.Hosting.WebHostQueueController" Collapsed="true">
+    <Position X="1.75" Y="0.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>CACAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAAAAgAAAA=</HashCode>
+      <FileName>WebHostQueueController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Westwind.MessageQueueing.QueueMessageItem">
+    <Position X="9.25" Y="0.5" Width="3" />
+    <Members>
+      <Field Name="__IsNew" Hidden="true" />
+    </Members>
+    <TypeIdentifier />
+  </Class>
+  <Class Name="Westwind.MessageQueueing.QueueMessageManager">
+    <Position X="5.75" Y="0.5" Width="3" />
+    <Members>
+      <Field Name="_IsNew" Hidden="true" />
+      <Field Name="INT_maxCount" Hidden="true" />
+    </Members>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier />
+  </Class>
+  <Class Name="Westwind.MessageQueueing.QueueMessageManagerSql">
+    <Position X="5.75" Y="9.25" Width="3" />
+    <TypeIdentifier />
+  </Class>
+  <Font Name="Tahoma" Size="8.25" />
+</ClassDiagram>

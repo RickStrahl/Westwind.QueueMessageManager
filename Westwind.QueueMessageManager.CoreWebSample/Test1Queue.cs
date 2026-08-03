@@ -1,15 +1,11 @@
 //#define USE_ASYNC
 
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Westwind.MessageQueueing;
 using Westwind.MessageQueueing.Hosting;
-using Westwind.Utilities;
-
 
 
 namespace Westwind.QueueMessageManager.CoreWebSample;
 
-public class Test1Queue : QmmWebHostController
+public class Test1Queue :  WebHostQueueController
 {
 
     public Test1Queue() 
