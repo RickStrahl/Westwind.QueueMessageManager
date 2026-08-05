@@ -4,6 +4,7 @@ using Serilog;
 using System.Runtime.InteropServices;
 using Westwind.AspNetCore.Errors;
 using Westwind.AspNetCore.LiveReload;
+using Westwind.MessageQueueing;
 using Westwind.MessageQueueing.Hosting;
 using Westwind.QueueManager.Hosting;
 using Westwind.Utilities;
@@ -17,7 +18,7 @@ qmmApp.EnvironmentName = builder.Environment.EnvironmentName;
 qmmApp.Constants.StartupFolder = Environment.CurrentDirectory;
 qmmApp.Constants.WebRootFolder = Path.Combine(qmmApp.Constants.StartupFolder, "wwwroot");
 
-var configFile = "_qmmApp-configuration.json";
+var configFile = "_qmm-app-config.json";
 var configExists = File.Exists(configFile);
 
 
@@ -25,13 +26,31 @@ var appConfig = qmmApp.Configuration;
 builder.Configuration.GetSection("qmmApp").Bind(appConfig);
 services.AddSingleton(appConfig);
 
-if (!configExists)
+if (true) //!configExists)
 {
-    appConfig.Write();
+    appConfig.Write();    
+    Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine($"Configuration file '{configFile}' was created. Review it, and set default values, and restart the application.");
+    Console.ResetColor();
     return;
 }
-
+if (Environment.CommandLine.Contains("-createdb", StringComparison.OrdinalIgnoreCase))
+{
+    var manager = new QueueMessageManagerSql(appConfig.ConnectionString);
+    if (manager.CreateDatastore())
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Database has been created successfully (or it exists already).");
+        Console.ResetColor();
+    }
+    else
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine("Failed to create the database.");
+        Console.ResetColor();
+    }
+    return;
+}
 
 builder.Logging.ClearProviders();
 

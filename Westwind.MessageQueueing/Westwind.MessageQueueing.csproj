@@ -34,7 +34,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>		
-		<PackageReference Include="Westwind.Utilities.Data" Version="5.3.2" />
+		<PackageReference Include="Westwind.Utilities.Data" Version="5.3.4" />
 		
 		<!--
 		<ProjectReference Include="..\..\..\Westwind.Utilities\Westwind.Utilities.Data\Westwind.Utilities.Data.csproj" />
