@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.Text;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,7 +7,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using System.Transactions;
 using Westwind.Utilities;
-using System.Security.Cryptography;
 
 namespace Westwind.MessageQueueing.Tests
 {

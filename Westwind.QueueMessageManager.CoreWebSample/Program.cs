@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.FileProviders;
-using Serilog;
+
 using System.Runtime.InteropServices;
 using Westwind.AspNetCore.Errors;
 using Westwind.AspNetCore.LiveReload;
@@ -26,7 +26,7 @@ var appConfig = qmmApp.Configuration;
 builder.Configuration.GetSection("qmmApp").Bind(appConfig);
 services.AddSingleton(appConfig);
 
-if (true) //!configExists)
+if (!configExists)
 {
     appConfig.Write();    
     Console.ForegroundColor = ConsoleColor.Green;
@@ -51,29 +51,6 @@ if (Environment.CommandLine.Contains("-createdb", StringComparison.OrdinalIgnore
     }
     return;
 }
-
-builder.Logging.ClearProviders();
-
-// logging
-var logConfig = new LoggerConfiguration()
-    .MinimumLevel.Warning()
-    .Enrich.FromLogContext()
-    .WriteTo.Console()
-    //outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}---{NewLine}")
-    .WriteTo.File(
-        Path.Combine(qmmApp.Constants.WebRootFolder, "admin", "applicationlog.txt"),
-        fileSizeLimitBytes: 3_000_000,
-        retainedFileCountLimit: 5,
-        rollOnFileSizeLimit: true,
-        shared: true,
-        outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}---{NewLine}",
-        flushToDiskInterval: TimeSpan.FromSeconds(20));
-
-Log.Logger = logConfig.CreateLogger();
-Log.Information("Application Started.");
-builder.Services.AddSerilog();
-
-
 
 // Code Configuration
 services.AddQmm(options =>
