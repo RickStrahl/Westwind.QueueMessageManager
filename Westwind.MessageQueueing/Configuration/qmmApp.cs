@@ -1,7 +1,7 @@
 using System.Reflection;
 using Westwind.Utilities;
 
-namespace Westwind.QueueManager.Hosting;
+namespace Westwind.MessageQueueing;
 
 public static class qmmApp
 {
@@ -14,7 +14,6 @@ public static class qmmApp
     /// Shortcut to the Configured Connection String
     /// </summary>
     public static string ConnectionString => Configuration?.ConnectionString;
-
 
     public static bool IsDevelopment { get; set; }
 

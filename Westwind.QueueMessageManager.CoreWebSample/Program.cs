@@ -6,7 +6,7 @@ using Westwind.AspNetCore.Errors;
 using Westwind.AspNetCore.LiveReload;
 using Westwind.MessageQueueing;
 using Westwind.MessageQueueing.Hosting;
-using Westwind.QueueManager.Hosting;
+using Westwind.QueueMessageManager.CoreWebSample;
 using Westwind.Utilities;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,21 +22,12 @@ var configFile = "_qmm-app-config.json";
 var configExists = File.Exists(configFile);
 
 
-var appConfig = qmmApp.Configuration;
-builder.Configuration.GetSection("qmmApp").Bind(appConfig);
-services.AddSingleton(appConfig);
-
-if (!configExists)
-{
-    appConfig.Write();    
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine($"Configuration file '{configFile}' was created. Review it, and set default values, and restart the application.");
-    Console.ResetColor();
-    return;
-}
+var qmmConfig = qmmApp.Configuration;
+builder.Configuration.GetSection("qmmApp").Bind(qmmConfig);
+services.AddSingleton(qmmConfig);
 if (Environment.CommandLine.Contains("-createdb", StringComparison.OrdinalIgnoreCase))
 {
-    var manager = new QueueMessageManagerSql(appConfig.ConnectionString);
+    var manager = new QueueMessageManagerSql(qmmConfig.ConnectionString);
     if (manager.CreateDatastore())
     {
         Console.ForegroundColor = ConsoleColor.Green;
@@ -52,12 +43,53 @@ if (Environment.CommandLine.Contains("-createdb", StringComparison.OrdinalIgnore
     return;
 }
 
+var appConfig = SampleApp.Configuration;
+builder.Configuration.GetSection("sampleApp").Bind(appConfig);
+services.AddSingleton(appConfig);
+
 // Code Configuration
 services.AddQmm(options =>
 {
-    options.LoadContainerFromFile("_qmm-container-config.json");    
+    if(configExists)
+        options.LoadContainerFromFile("_qmm-app-config.json");
+    else
+    {
+        options.SetContainer(new QueueContainer
+        {
+            DefaultConnectionString = qmmApp.Constants.DefaultConnectionString, 
+            DefaultThreadCount =1, 
+            DefaultWaitInterval = 300,
+            Controllers = [
+                    new QueueController {
+                        ConnectionString = qmmApp.Constants.DefaultConnectionString,
+                        QueueName = "Test1", 
+                        ThreadCount = 1,
+                        WaitInterval = 200,
+                        QueueControllerTypeName =  "Westwind.QueueMessageManager.CoreWebSample.Test1Queue"
+                    },
+                    new QueueController {
+                        QueueName = "Test2",                        
+                        QueueControllerTypeName =  "Westwind.QueueMessageManager.CoreWebSample.Test2Queue"
+                    },
+                    new QueueController {
+                        QueueName = "Test1",                       
+                        QueueControllerTypeName =  "Westwind.QueueMessageManager.CoreWebSample.Test1Queue"
+                    },
+                ]
+        });
+    }
 });
 
+// write out config file if it doesn't exist
+// write after 
+if (!configExists)
+{
+    qmmConfig.Write();
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine($"Configuration file '{configFile}' was created. Review it, and set default values, and restart the application.");
+    Console.ResetColor();
+    return;
+}
 
 
 if (appConfig.System.LiveReloadEnabled)
@@ -67,7 +99,7 @@ if (appConfig.System.LiveReloadEnabled)
 
     services.AddLiveReload(config =>
     {
-        config.LiveReloadEnabled = qmmApp.Configuration.System.LiveReloadEnabled;
+        config.LiveReloadEnabled = appConfig.System.LiveReloadEnabled;
         config.RefreshInclusionFilter = path =>
         {
             if (path.Contains("/LocalizationAdmin", StringComparison.OrdinalIgnoreCase))
@@ -92,7 +124,7 @@ var app = builder.Build();
 //    app.UseExceptionHandler("/Home/Error");
 //}
 
-if (qmmApp.Configuration.System.LiveReloadEnabled)
+if (appConfig.System.LiveReloadEnabled)
     app.UseLiveReload();
 
 app.UseStaticFiles(new StaticFileOptions
@@ -107,7 +139,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-if (qmmApp.Configuration.System.ErrorDisplayMode == ErrorDisplayModes.Developer)
+if (appConfig.System.ErrorDisplayMode == ErrorDisplayModes.Developer)
 {
     app.UseDeveloperExceptionPage();
     ApiExceptionFilterAttribute.ShowExceptionDetail = true;

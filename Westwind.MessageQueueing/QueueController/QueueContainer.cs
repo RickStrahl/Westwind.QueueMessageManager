@@ -1,11 +1,9 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
-using System.Text.Json.Serialization;
+using System.Text.Json.Nodes;
 using System.Threading;
-using System.Threading.Tasks;
 using Westwind.Utilities;
 
 namespace Westwind.MessageQueueing;
@@ -139,7 +137,7 @@ public class QueueContainer : IDisposable
             return null;
 
         try
-        {
+        {            
             var json = File.ReadAllText(filename);
             return CreateFromConfigurationString(json);
         }
@@ -159,11 +157,22 @@ public class QueueContainer : IDisposable
     {
         if(string.IsNullOrEmpty(json))
             return null;
-        
-        var container = JsonSerializationUtils.Deserialize(json, typeof(QueueContainer)) as QueueContainer;
-        if (container == null)
-            return null;
 
+        // Read the configuration values from the config file's
+        // Container instance of the config object
+        QueueContainer container;
+        try
+        {
+            JObject jobj = JObject.Parse(json);
+            var jContainer = jobj["Container"];
+            container = jContainer.ToObject<QueueContainer>();
+        }
+        catch
+        {
+            return null;
+        }
+
+        // Create the physical Controller instances from the type name in the config
         for (int i = 0; i < container.Controllers.Count ; i++)
         {
             var controller = container.Controllers[i];
@@ -177,42 +186,6 @@ public class QueueContainer : IDisposable
 
             container.Controllers[i] = typedController as QueueController;
         }
-
-
-        //dynamic jobj = JObject.Parse(json);
-
-        
-        //dynamic jcontrollers = jobj.Controllers;
-
-        //foreach (var jctrl in jcontrollers)
-        //{
-        //    var typename = jctrl.QueueControllerType?.ToString();
-        //    if (string.IsNullOrEmpty(typename))
-        //        continue;
-
-        //    var controller = ReflectionUtils.CreateInstanceFromString(typename);
-        //    if (controller == null)
-        //        throw new InvalidCastException("Unable to create QueueController of type " + typename);
-
-        //    string connectionString = jctrl.ConnectionString?.ToString();
-        //    if (string.IsNullOrEmpty(connectionString))
-        //        connectionString = container.DefaultConnectionString;
-        //    string queueName = jctrl.QueueName?.ToString();
-        //    int threadCount = jctrl.ThreadCount?.Value is long ? (int)jctrl.ThreadCount.Value : container.DefaultThreadCount;
-        //    int waitInterval = jctrl.WaitInterval?.Value is long ? (int)jctrl.WaitInterval.Value : container.DefaultWaitInterval;
-        //    bool paused = jctrl.Paused?.Value is bool ? jctrl.Paused.Value : false;
-
-
-        //    if (!string.IsNullOrEmpty(connectionString))
-        //        controller.ConnectionString = connectionString;
-        //    if (!string.IsNullOrEmpty(queueName))
-        //        controller.QueueName = queueName;
-        //    controller.ThreadCount = threadCount;
-        //    controller.WaitInterval = waitInterval;
-        //    controller.Paused = paused;
-
-        //    container.AddController(controller);
-        //}
 
         return container;
     }

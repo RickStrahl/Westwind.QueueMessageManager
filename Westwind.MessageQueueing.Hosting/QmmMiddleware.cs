@@ -1,15 +1,10 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Westwind.QueueManager.Hosting;
 
 namespace Westwind.MessageQueueing.Hosting;
 
@@ -108,7 +103,7 @@ public class QmmMiddlewareConfiguration
     /// <param name="filename">Path to the configuration file - default: "_qmm-container-config.json"</param>
     /// <exception cref="ArgumentException"></exception>
     /// <exception cref="InvalidCastException"></exception>
-    public void LoadContainerFromFile(string filename = "_qmm-container-config.json")
+    public void LoadContainerFromFile(string filename = "_qmm-app-config.json")
     {
         if (string.IsNullOrEmpty(filename) || !System.IO.File.Exists(filename))
             throw new ArgumentException("Invalid filename or file does not exist.", nameof(filename));

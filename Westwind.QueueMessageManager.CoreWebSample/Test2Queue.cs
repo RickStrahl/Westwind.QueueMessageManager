@@ -1,7 +1,5 @@
 using Westwind.MessageQueueing;
 using Westwind.MessageQueueing.Hosting;
-using Westwind.QueueManager.Hosting;
-using Westwind.Utilities;
 
 namespace Westwind.QueueMessageManager.CoreWebSample;
 
@@ -24,7 +22,6 @@ public class Test2Queue : WebHostQueueController
 
         // Testing only brief delay so we can see transition from Submitted to Started
         Thread.Sleep(1000);
-
 
 
         switch (item.Action)

@@ -3,7 +3,6 @@ using Westwind.AspNetCore;
 using Westwind.AspNetCore.Errors;
 using Westwind.MessageQueueing;
 using Westwind.MessageQueueing.Hosting;
-using Westwind.QueueManager.Hosting;
 
 namespace Westwind.QueueMessageManager.CoreWebSample;
 

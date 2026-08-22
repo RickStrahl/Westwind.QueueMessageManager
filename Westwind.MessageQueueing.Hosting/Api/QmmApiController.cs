@@ -9,7 +9,6 @@ using Microsoft.Extensions.Hosting;
 using Westwind.AspNetCore;
 using Westwind.AspNetCore.Errors;
 using Westwind.AspNetCore.Extensions;
-using Westwind.QueueManager.Hosting;
 using Westwind.Utilities;
 using Westwind.Utilities.Data.Security;
 

@@ -94,6 +94,7 @@ namespace Westwind.MessageQueueing.Hosting
                     time = msg.Started.Value;
                 }
 
+         
                 WriteMessageInternal(msg, elapsed, -1, time).FireAndForget();
             }
         }
@@ -345,8 +346,11 @@ namespace Westwind.MessageQueueing.Hosting
             var msg = HtmlUtils.DisplayMemo(queueItem.Message);
 
             if (time == null)
-                time = DateTime.UtcNow;
-            
+                time = DateTime.Now; //.UtcNow;
+
+            queueItem.Started = queueItem.Started?.ToLocalTime();
+            queueItem.Completed = queueItem.Completed?.ToLocalTime();
+
             // Write out message to SignalR clients            
             await HubContext.Clients.All.SendAsync("writeMessage", msg,
                 queueItem.Status,
