@@ -118,10 +118,8 @@ public abstract class QmmApiController : BaseApiController
             return NotFound("Queue  Configuration is disabled.");
         }
         var model = CreateViewModel<AdminViewModel>();
-        model.ConfigurationJson = JsonSerializationUtils.Serialize(qmmApp.Configuration, false, true, false);
-        model.ContainerConfigurationJson = JsonSerializationUtils.Serialize(QueueContainer.Current, false, true, false);
-
-       
+        model.ContainerConfigurationJson = JsonSerializationUtils.Serialize(qmmApp.Configuration, false, true, false);
+        
        return View("~/views/qmmapi/QmmContainerConfiguration.cshtml", model);
     }
 
@@ -165,9 +163,9 @@ public abstract class QmmApiController : BaseApiController
 
                 QueueContainer.Current = containerConfig;                               
                 QueueContainer.Current.StartProcessingAsync();
-               
+
                 // write it back out
-                JsonSerializationUtils.SerializeToFile(containerConfig, Path.Combine(qmmApp.Constants.StartupFolder, "_qmm-container-config.json"), false, true);
+                qmmApp.Configuration.Write();
 
                 model.ErrorDisplay.ShowInfo("Container configuration has been updated.");
             }
@@ -179,24 +177,7 @@ public abstract class QmmApiController : BaseApiController
             // see actual current values
             //ModelState.Clear();
             model.ContainerConfigurationJson = JsonSerializationUtils.Serialize(QueueContainer.Current, false, true, false);
-        }
-        else if (Request.IsFormVar("btnWriteConfiguration"))
-        {
-            var config =
-                JsonSerializationUtils.Deserialize(model.ConfigurationJson, typeof(qmmAppConfiguration)) as qmmAppConfiguration;
-
-            if (config != null)
-            {
-                qmmApp.Configuration = config;
-                qmmApp.Configuration.Write();
-
-                model.ErrorDisplay.ShowInfo("Container configuration has been updated.");
-            }
-            else
-            {
-                model.ErrorDisplay.ShowError("Container Configuration could not be updated - invalid JSON.");
-            }
-        }
+        }        
 
         
 
