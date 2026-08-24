@@ -94,7 +94,6 @@ namespace Westwind.MessageQueueing.Hosting
                     time = msg.Started.Value;
                 }
 
-         
                 WriteMessageInternal(msg, elapsed, -1, time).FireAndForget();
             }
         }
@@ -105,13 +104,13 @@ namespace Westwind.MessageQueueing.Hosting
                 queueName = null;
 
             var queue = new QueueMessageManagerSql();
-            List<QueueMessageItem> msgs = queue.GetRecentQueueItems(queueName, this.DisplayMessageCount).Reverse().ToList();
+            List<QueueMessageItem> msgs = queue.GetRecentQueueItems(queueName, DisplayMessageCount).Reverse().ToList();
 
             if (msgs.Count < 1)
             {
                 return [];
             }
-
+          
             return msgs;
         }
 
@@ -348,8 +347,7 @@ namespace Westwind.MessageQueueing.Hosting
             if (time == null)
                 time = DateTime.Now; //.UtcNow;
 
-            queueItem.Started = queueItem.Started?.ToLocalTime();
-            queueItem.Completed = queueItem.Completed?.ToLocalTime();
+            time = time.Value.ToLocalTime();                       
 
             // Write out message to SignalR clients            
             await HubContext.Clients.All.SendAsync("writeMessage", msg,
@@ -361,6 +359,7 @@ namespace Westwind.MessageQueueing.Hosting
                 queueItem.QueueName,
                 queueItem.Action,
                 queueItem.PercentComplete);
+
         }
 
         /// <summary>
