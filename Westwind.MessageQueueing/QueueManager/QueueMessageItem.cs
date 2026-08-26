@@ -222,8 +222,7 @@ namespace Westwind.MessageQueueing
         public static string GenerateId()
         {
             // generate a semi sequential id based on ticks at beginning of string
-            return (DateTime.UtcNow - baseDate).Ticks + "_" +
-                 DataUtils.GenerateUniqueId(8);
+            return DataUtils.GenerateUniqueId(12);
         }
         
         /// <summary>

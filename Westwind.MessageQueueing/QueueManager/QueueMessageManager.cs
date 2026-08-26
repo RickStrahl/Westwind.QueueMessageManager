@@ -83,13 +83,11 @@ namespace Westwind.MessageQueueing
 
         public QueueMessageManager()
         {
-            DefaultQueue = QueueMessageManagerConfiguration.Current?.DefaultQueueName;
-
             // 2 hours
             MessageTimeout = new TimeSpan(2, 0, 0);
 
             Serialization = new QueueMessageManagerSerializationHelper(this);
-            ConnectionString = QueueMessageManagerConfiguration.Current.ConnectionString;
+            ConnectionString = qmmApp.Configuration?.ConnectionString;
         }
 
         public QueueMessageManager(string connectionString) : this()
@@ -474,7 +472,7 @@ namespace Westwind.MessageQueueing
         /// Removes messages that have been started but not completed in the
         /// specified timeout period.
         /// </summary>
-        public abstract bool ClearMessages(TimeSpan? messageTimeout = null);
+        public abstract bool ClearTimedoutMessages(TimeSpan? messageTimeout = null);
 
 
         /// <summary>

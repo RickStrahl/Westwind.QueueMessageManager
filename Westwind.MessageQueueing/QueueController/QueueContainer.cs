@@ -169,7 +169,7 @@ public class QueueContainer : IDisposable
         }
         catch
         {
-            return null;
+            throw new InvalidCastException("Unable to deserialize QueueContainer from configuration file.");
         }
 
         // Create the physical Controller instances from the type name in the config
@@ -180,7 +180,7 @@ public class QueueContainer : IDisposable
 
             var typedController = ReflectionUtils.CreateInstanceFromString(typename);
             if (controller == null)
-                throw new InvalidCastException("Unable to create QueueController of type " + typename);
+                throw new InvalidCastException("Unable to create QueueController of type [" + typename + "]");
 
             DataUtils.CopyObjectData(controller, typedController);
 

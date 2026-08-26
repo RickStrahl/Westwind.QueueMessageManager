@@ -94,7 +94,7 @@ namespace Westwind.MessageQueueing.Hosting
                     time = msg.Started.Value;
                 }
 
-                WriteMessageInternal(msg, elapsed, -1, time).FireAndForget();
+                WriteMessage(msg, elapsed, -1, time).FireAndForget();
             }
         }
 
@@ -109,8 +109,16 @@ namespace Westwind.MessageQueueing.Hosting
             if (msgs.Count < 1)
             {
                 return [];
-            }
+            }            
           
+            foreach(var msg in msgs)
+            {                
+                msg.Submitted = msg.Submitted.ToLocalTime();
+                if (msg.Started != null)
+                    msg.Started = msg.Started.Value.ToLocalTime();
+                if (msg.Completed != null)
+                    msg.Completed = msg.Completed.Value.ToLocalTime();                
+            }
             return msgs;
         }
 
@@ -285,7 +293,7 @@ namespace Westwind.MessageQueueing.Hosting
             var item = manager.Load(id);
             manager.ResubmitRequest(item);
             
-            QueueMonitorServiceHub.WriteMessageInternal(item).FireAndForget();
+            QueueMonitorServiceHub.WriteMessage(item).FireAndForget();
             
             return item;
         }
@@ -293,7 +301,7 @@ namespace Westwind.MessageQueueing.Hosting
 
         public async Task Notify(QueueMessageItem queueItem, int elapsed = 0, int waiting = 0)
         {
-            await WriteMessageInternal(queueItem, elapsed, waiting);
+            await WriteMessage(queueItem, elapsed, waiting);
         }
 
 
@@ -334,7 +342,7 @@ namespace Westwind.MessageQueueing.Hosting
         /// <param name="elapsed">Elapsed time in milliseconds</param>
         /// <param name="waiting">Number of waiting items in the queue</param>
         /// <param name="time">Timestamp for the message - submitted or completed</param>
-        public static async Task WriteMessageInternal(QueueMessageItem queueItem,
+        public static async Task WriteMessage(QueueMessageItem queueItem,
             int elapsed = 0,
             int waiting = -1,
             DateTime? time = null)
@@ -343,6 +351,11 @@ namespace Westwind.MessageQueueing.Hosting
                 return;
 
             var msg = HtmlUtils.DisplayMemo(queueItem.Message);
+
+            if (elapsed == 0 && queueItem.Completed.HasValue && queueItem.Started.HasValue)
+            {
+                elapsed = (int)(queueItem.Completed.Value - queueItem.Started.Value).TotalMilliseconds;
+            }
 
             if (time == null)
                 time = DateTime.Now; //.UtcNow;
@@ -369,7 +382,7 @@ namespace Westwind.MessageQueueing.Hosting
         /// than the required message.
         /// </summary>
         /// <param name="message"></param>
-        public static async Task WriteMessageInternal(string message, 
+        public static async Task WriteMessage(string message, 
             string id = null, string status = "Submitted",
             DateTime? time = null, string queueName = null, 
             int elapsed = 0, string action = null, int percentComplete = 0)
@@ -382,6 +395,7 @@ namespace Westwind.MessageQueueing.Hosting
 
             if (time == null)
                 time = DateTime.UtcNow;
+
             
             // Write out message to SignalR clients  
             await HubContext.Clients.All.SendAsync("writeMessage", message,

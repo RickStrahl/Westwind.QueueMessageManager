@@ -502,13 +502,13 @@ namespace Westwind.MessageQueueing
         /// Removes messages that have been started but not completed in the
         /// specified timeout period.
         /// </summary>
-        public override bool ClearMessages(TimeSpan? messageTimeout = null)
+        public override bool ClearTimedoutMessages(TimeSpan? messageTimeout = null)
         {
             if (messageTimeout == null)
                 messageTimeout = MessageTimeout;
 
             int result = Db.ExecuteNonQuery("delete from QueueMessageItems where Started<@0 and Started > @1", 
-                                            DateTime.UtcNow.Subtract(messageTimeout.Value), 
+                                            DateTime.UtcNow.Subtract(messageTimeout.Value).AddMinutes(-1),
                                             new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc));
             if (result == -1)
             {

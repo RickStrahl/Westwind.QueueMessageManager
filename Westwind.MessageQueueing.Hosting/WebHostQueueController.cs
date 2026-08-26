@@ -77,12 +77,12 @@ public class WebHostQueueController : QueueController
     /// </summary>
     /// <param name="item"></param>
     /// <param name="messageText"></param>
-    protected virtual void WriteMessageHub(QueueMessageItem item, string messageText = null)
+    public virtual void WriteMessageHub(QueueMessageItem item, string messageText = null)
     {
         if (!string.IsNullOrEmpty(messageText))
             item.Message = messageText;
 
-        QueueMonitorServiceHub.WriteMessageInternal(item).FireAndForget();
+        QueueMonitorServiceHub.WriteMessage(item).FireAndForget();
     }
 
     /// <summary>
@@ -90,7 +90,7 @@ public class WebHostQueueController : QueueController
     /// </summary>
     /// <param name="item"></param>
     /// <param name="messageText"></param>
-    protected virtual void StatusMessageHub(string messageText = null)
+    public virtual void StatusMessageHub(string messageText = null)
     {
         QueueMonitorServiceHub.StatusMessage(messageText).FireAndForget();
     }

@@ -120,10 +120,8 @@ public abstract class QmmApiController : BaseApiController
         var model = CreateViewModel<AdminViewModel>();
         model.ContainerConfigurationJson = JsonSerializationUtils.Serialize(qmmApp.Configuration, false, true, false);
         
-       return View("~/views/qmmapi/QmmContainerConfiguration.cshtml", model);
+        return View("~/views/qmmapi/QmmContainerConfiguration.cshtml", model);
     }
-
-
 
     [HttpPost]
     [Route("/qmm/configuration")]
@@ -151,6 +149,7 @@ public abstract class QmmApiController : BaseApiController
         }
         else if(Request.IsFormVar("btnWriteContainerConfiguration"))
         {
+
             // update from current configuration that was just entered
             var containerConfig = QueueContainer.CreateFromConfigurationString(model.ContainerConfigurationJson);
                 //JsonSerializationUtils.Deserialize(model.ContainerConfigurationJson, typeof(QueueContainer)) as QueueContainer;
@@ -247,7 +246,7 @@ public abstract class QmmApiController : BaseApiController
         if (string.IsNullOrWhiteSpace(item?.Message))
             return BadRequest(new { error = "Message is required." });
 
-        await QueueMonitorServiceHub.WriteMessageInternal(item);
+        await QueueMonitorServiceHub.WriteMessage(item);
 
         return Ok(new { success = true, sentAt = DateTime.UtcNow });
     }
@@ -260,13 +259,13 @@ public abstract class QmmApiController : BaseApiController
 
         using var manager = new QueueMessageManagerSql(qmmApp.ConnectionString);
 
-        item.Id = qmmApp.NewId();
+        item.Id = QueueMessageItem.GenerateId();
         if (!manager.SubmitRequest(item, autoSave: true))
         {
             throw new ApiException("Failed to submit item to queue: " + manager.ErrorMessage);
         }
 
-        await QueueMonitorServiceHub.WriteMessageInternal(item);
+        await QueueMonitorServiceHub.WriteMessage(item);
         
         return Ok(new { success = true, sentAt = DateTime.UtcNow });
     }
@@ -289,7 +288,7 @@ public abstract class QmmApiController : BaseApiController
 
         manager.UpdateQueueMessageStatus(loadedItem, item.Status, item.Message);
 
-        await QueueMonitorServiceHub.WriteMessageInternal(loadedItem);
+        await QueueMonitorServiceHub.WriteMessage(loadedItem);
         
         return Ok(new { success = true, sentAt = DateTime.UtcNow });
     }

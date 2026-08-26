@@ -5,6 +5,11 @@ namespace Westwind.MessageQueueing;
 public class qmmAppConfiguration : AppConfiguration
 {
    
+    /// <summary>
+    /// Configured instance
+    /// </summary>
+    public static qmmAppConfiguration Current => qmmApp.Configuration;
+
     public string ConnectionString { get; set; } =
         "server=.;database=QueueMessageManager;integrated security=yes;encrypt=false;trustservercertificate=true;";
 
@@ -23,14 +28,14 @@ public class qmmAppConfiguration : AppConfiguration
     public string Theme { get; set; } = "Light";
 
     /// <summary>
-    /// Queue Configuration
+    /// Queue Configuration        
     /// </summary>
     public QueueContainer Container { 
         get => QueueContainer.Current;
         set => QueueContainer.Current = value;
-    } 
-    
-    
+    }
+
+   
 
     protected override IConfigurationProvider OnCreateDefaultProvider(string sectionName, object configData)
     {

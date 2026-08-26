@@ -37,7 +37,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Westwind.MessageQueueing\Westwind.MessageQueueing.csproj" />		
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.11" />
 		
 		<PackageReference Include="Westwind.AspNetCore" Version="4.*" />		
 
