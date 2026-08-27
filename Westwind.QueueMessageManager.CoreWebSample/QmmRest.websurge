@@ -18,7 +18,7 @@ Accept: text/json
 Accept-Encoding: gzip, deflate, br
 WebSurge-Request-InjectJsonBearerToken: token
 Authorization: Bearer
-Websurge-Request-Name: Submit a new Item
+Websurge-Request-Name: PRINT - Submit a new Item 
 
 {
   "QueueName": "Test1",
@@ -34,12 +34,29 @@ Content-Type: application/json
 Accept: text/json
 Accept-Encoding: gzip, deflate, br
 Authorization: Bearer
-Websurge-Request-Name: Submit a new Item Test2 Queue
+Websurge-Request-Name: PRINTEST2 - Submit a new Item Test2 Queue
 
 {
   "QueueName": "Test2",
   "Message": "Test Submission",
   "Action": "PRINTTEST2",
+  "Xml": "<doc><value>Hello</value></doc>"
+}
+
+------------------------------------------------------------------
+
+POST /api/qmm/submit-item HTTP/2.0
+Content-Type: application/json
+Accept: text/json
+Accept-Encoding: gzip, deflate, br
+WebSurge-Request-InjectJsonBearerToken: token
+Authorization: Bearer
+Websurge-Request-Name: PRINTASYNC - Submit a new Item  NEW
+
+{
+  "QueueName": "Test1",
+  "Message": "Test Submission",
+  "Action": "PRINTASYNC",
   "Xml": "<doc><value>Hello</value></doc>"
 }
 

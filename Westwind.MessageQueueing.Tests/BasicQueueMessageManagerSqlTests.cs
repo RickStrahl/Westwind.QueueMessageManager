@@ -18,12 +18,12 @@ namespace Westwind.MessageQueueing.Tests
     {
         string ConnectionString;
 
-        QueueMessageManagerConfiguration Configuration { get; }
+        qmmAppConfiguration Configuration { get; }
 
         public BasicQueueMessageManagerSqlTests()
         {
-            Configuration = QueueMessageManagerConfiguration.Current;
-            ConnectionString = QueueMessageManagerConfiguration.Current.ConnectionString;               
+            Configuration = qmmApp.Configuration;
+            ConnectionString = Configuration.ConnectionString ?? qmmApp.Constants.DefaultConnectionString;               
         }
 
         /// <summary>
@@ -93,9 +93,9 @@ namespace Westwind.MessageQueueing.Tests
 
             var msg = new QueueMessageItem()
             {
-                QueueName = "MPWF",
+                QueueName = "Test1",
                 Message = "Json Message  @ " + DateTime.Now.ToString("t"),
-                Action = "NEWJSONMESSAGE",   // Some Application specific Action Id                  
+                Action = "PRINT",   // Some Application specific Action Id                  
             };
             // assign data as object Data to Json property
             msg.SetJson(data, formatted: true);
@@ -111,7 +111,6 @@ namespace Westwind.MessageQueueing.Tests
             using var manager = new QueueMessageManagerSql() { AutoCreateTables = true };
             int queueCount = 10;
 
-            bool res = true;
             for (int i = 0; i < queueCount; i++)
             {
                 var msg = new QueueMessageItem()
@@ -430,7 +429,7 @@ namespace Westwind.MessageQueueing.Tests
         public void ClearTimedoutMessages()
         {
             var manager = new QueueMessageManagerSql();
-            Assert.IsTrue(manager.ClearMessages(), manager.ErrorMessage);            
+            Assert.IsTrue(manager.ClearTimedoutMessages(), manager.ErrorMessage);            
         }
 
         [TestMethod]
@@ -463,9 +462,7 @@ namespace Westwind.MessageQueueing.Tests
             sw.Start();
 
             for (int i = 0; i < 100; i++)
-            {
-                string imageId = "10";
-
+            {        
                 // Create a message object
                 // item contains many properties for pushing
                 // values back and forth as well as a  few message fields
@@ -494,8 +491,6 @@ namespace Westwind.MessageQueueing.Tests
             {
                 if (CancelProcessing)
                     break;
-
-                string imageId = "10";
 
                 // Create a message object
                 // item contains many properties for pushing

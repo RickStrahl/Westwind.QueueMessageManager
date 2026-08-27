@@ -13,11 +13,11 @@ namespace Westwind.MessageQueueing.Tests
 
         string ConnectionString;
 
-        QueueMessageManagerConfiguration Configuration { get; }
+        qmmAppConfiguration Configuration { get; }
         public QueueControllerTests()
         {             
-            Configuration = QueueMessageManagerConfiguration.Current;
-            ConnectionString = QueueMessageManagerConfiguration.Current.ConnectionString;
+            Configuration = qmmApp.Configuration;
+            ConnectionString = Configuration.ConnectionString;
         }
 
         [TestMethod]
@@ -78,8 +78,7 @@ namespace Westwind.MessageQueueing.Tests
 
             Thread.Sleep(200);  
 
-            Console.WriteLine("Stopping... Async Manager Processing");
-            Assert.IsTrue(true);
+            Console.WriteLine("Stopping... Async Manager Processing");            
         }
 
 
@@ -148,9 +147,8 @@ namespace Westwind.MessageQueueing.Tests
             controller.StartProcessingAsync();
 
             // second configuration for second queue
-            var config = QueueMessageManagerConfiguration.CreateConfiguration();
-            config.DefaultControllerQueueName = "Queue2";
-
+            var config = qmmApp.Configuration;
+            
             var controller2 = new QueueController()
             {
                 ConnectionString = "QueueMessageManager",
@@ -179,8 +177,7 @@ namespace Westwind.MessageQueueing.Tests
 
             Thread.Sleep(200);
 
-            Console.WriteLine("Stopping... Async Manager Processing");
-            Assert.IsTrue(true);
+            Console.WriteLine("Stopping... Async Manager Processing");        
         }
 
 

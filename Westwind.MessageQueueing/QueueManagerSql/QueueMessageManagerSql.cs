@@ -633,13 +633,15 @@ GO
         /// <summary>
         /// Clear data access component
         /// </summary>
-        public void Dispose()
-        {
+        public override void Dispose()
+        {            
             if (Db != null)
             {
                 Db.Dispose();
                 Db = null;
             }
+            
+            base.Dispose();
         }
     }
 

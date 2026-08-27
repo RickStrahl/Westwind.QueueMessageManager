@@ -218,10 +218,10 @@ namespace Westwind.MessageQueueing.Hosting
             controller.StopProcessing();
             controller.StartProcessingAsync();
 
-            StatusMessage("Service Status settings updated.", true);
-
             // update all clients with the status information
             await Clients.All.SendAsync("updateControllerStatusCallback", status);
+
+            StatusMessage("Service Status settings updated.", true).FireAndForget();
         }
 
         /// <summary>
@@ -250,8 +250,6 @@ namespace Westwind.MessageQueueing.Hosting
                 Debug.WriteLine("Waiting queue items: " + count);
                 return count;
             }
-
-            return -1;
         }
 
         /// <summary>
@@ -270,7 +268,6 @@ namespace Westwind.MessageQueueing.Hosting
             using (var manager = new QueueMessageManagerSql())
             {
                 int count = manager.GetWaitingQueueMessageCount(queueName);
-                Debug.WriteLine("Queue count: " + count + "  Queue: " + queueName);
                 if (count > -1)
                 {
                     // broadcast to all clients

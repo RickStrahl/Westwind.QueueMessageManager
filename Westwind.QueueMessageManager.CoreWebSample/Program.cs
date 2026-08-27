@@ -86,11 +86,11 @@ if (!configExists)
 {
     qmmConfig.Write();
     Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine($"Configuration file '{configFile}' was created. Review it, and set default values, and restart the application.");
+    Console.WriteLine($"Default Configuration file '{configFile}' was created. Review it, and set default values, and restart the application.");
     Console.ResetColor();
     return;
 }
-
+// qmmConfig.Write();
 
 if (appConfig.System.LiveReloadEnabled)
 {

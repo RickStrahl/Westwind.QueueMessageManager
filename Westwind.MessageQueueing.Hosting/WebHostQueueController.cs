@@ -30,12 +30,20 @@ public class WebHostQueueController : QueueController
 
             // Hook up start processing
 
+            // The following two methods are always overridden to typically handle
+            //     queue processing based on the QueueMessageItem.Action property.
+            //     Both sync and async methods are called - async fires multiple
+            //     simultaneous requests and immediately returns. Sync uses the
+            //     the fixed thread count to limit the number of operations that
+            //     can process simultaneously.
+
             // Async logic
             await OnExecuteStartAsync(manager);
 
-            // Sync logic
-            OnExecuteStart(manager);
-
+            // Sync logic         
+            if (manager.Item.IsRunning)
+                OnExecuteStart(manager);
+            
             // Hookup end processing
             OnExecuteComplete(manager);
         }
@@ -54,8 +62,9 @@ public class WebHostQueueController : QueueController
         {
             manager.CompleteRequest();
             manager.Save();
-
             WriteMessageHub(manager.Item);
+
+            manager.MessageHandled = true;  // don't fire again
         }
     }
 
@@ -67,6 +76,8 @@ public class WebHostQueueController : QueueController
             manager.Save();
 
             WriteMessageHub(manager.Item);
+
+            manager.MessageHandled = true;
         }
     }
 

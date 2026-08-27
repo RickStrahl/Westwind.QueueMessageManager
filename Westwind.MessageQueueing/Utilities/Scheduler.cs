@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Net;
 using System.Collections.Generic;
+using Westwind.Utilities;
 
 namespace Westwind.MessageQueueing
 {
@@ -231,20 +232,12 @@ namespace Westwind.MessageQueueing
         /// </summary>
         public void PingServer()
         {
-            string Url = WebServerPingUrl;
-
-            //if (Url.StartsWith("~") && HttpContext.Current != null)
-            //    Url = wwUtils.ResolveUrl(Url);
-            
+            string Url = WebServerPingUrl;            
             try
             {
-                WebClient http = new WebClient();
-                string Result = http.DownloadString(Url);
+                HttpClientUtils.DownloadBytesAsync(WebServerPingUrl).FireAndForget();
             }
-            catch (Exception ex)
-            {
-                string Message = ex.Message;
-            }
+            catch { }            
         }
 
 
@@ -254,7 +247,6 @@ namespace Westwind.MessageQueueing
         {
             Stop();
         }
-
         #endregion
     }
 

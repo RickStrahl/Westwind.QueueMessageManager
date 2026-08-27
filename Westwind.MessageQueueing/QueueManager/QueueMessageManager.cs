@@ -538,10 +538,11 @@ namespace Westwind.MessageQueueing
 
         #region GenericPropertyStorage
 
+
         /// <summary>
-        // Dictionary of arbitrary property values that can be attached
-        // to the current object. You can use GetProperties, SetProperties
-        // to load the properties to and from a text field.
+        /// Dictionary of arbitrary property values that can be attached
+        /// to the current object. You can use GetProperties, SetProperties
+        /// to load the properties to and from a text field.
         /// </summary>
         public PropertyBag Properties
         {
@@ -632,7 +633,7 @@ namespace Westwind.MessageQueueing
         /// <summary>
         /// Clear data access component
         /// </summary>
-        public void Dispose()
+        public virtual void Dispose()
         {
         }
 

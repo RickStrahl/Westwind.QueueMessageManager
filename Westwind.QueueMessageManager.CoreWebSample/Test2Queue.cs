@@ -1,8 +1,13 @@
+//#define USE_ASYNC
+
 using Westwind.MessageQueueing;
 using Westwind.MessageQueueing.Hosting;
 
 namespace Westwind.QueueMessageManager.CoreWebSample;
 
+/// <summary>
+/// Sample Web Queue Controller 
+/// </summary>
 public class Test2Queue : WebHostQueueController
 {
     public Test2Queue()
@@ -12,7 +17,8 @@ public class Test2Queue : WebHostQueueController
         ConnectionString = qmmApp.ConnectionString;
     }
 
-
+// You can use either sync or async versions of OnExecuteStart/Async or
+// you can use both (with different actions).
     protected override void OnExecuteStart(MessageQueueing.QueueMessageManager manager)
     {
         var item = manager.Item;
@@ -28,16 +34,33 @@ public class Test2Queue : WebHostQueueController
         {
             case "PRINTTEST2":
                 item.Message = "Started on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;
-                manager.StartRequest();
+                item.PercentComplete = 10;
+                
+                // manager.StartRequest();     // item is already started by the Web Host QueueController
+                manager.Save();
+                WriteMessageHub(manager.Item);
+
+                Thread.Sleep(1200);                
+                manager.ProgressRequest(percentComplete: 30, messageText: "Processing PrintTest2... (30%)");
                 manager.Save();
                 WriteMessageHub(manager.Item);
 
 
-                Thread.Sleep(3000);
-                
-                manager.CompleteRequest(messageText: "Completed on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId);
-                //manager.Save();
-                //WriteMessageHub(manager.Item);
+                Thread.Sleep(1200);
+                manager.ProgressRequest(percentComplete: 60, messageText: "Processing PrintTest2... (60%)");
+                manager.Save();
+                WriteMessageHub(manager.Item);
+
+                Thread.Sleep(1200);
+                // explicit assignment
+                item.Message = "Processing PrintTest2...";
+                item.PercentComplete = 90;
+                manager.Save();
+                WriteMessageHub(manager.Item);
+
+                Thread.Sleep(1000);            
+                manager.CompleteRequest(messageText: "Completed on: " + DateTime.Now + " - Processing complete - Thread: " + Thread.CurrentThread.ManagedThreadId);                                            
+
                 // manager.MessageHandled = true;
 
                 break;
@@ -47,42 +70,5 @@ public class Test2Queue : WebHostQueueController
 
     }
 
-
-    protected override async Task OnExecuteStartAsync(MessageQueueing.QueueMessageManager manager)
-    {
-        return; // no async
-
-        var item = manager.Item;
-
-        if (item == null)
-            return;
-
-        // Testing only brief delay so we can see transition from Submitted to Started
-        await Task.Delay(1000);
-
-        try
-        {
-            if (item.Action == "PRINT")
-            {
-
-                item.Message = "Started on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;
-                manager.StartRequest();
-                manager.Save();
-
-
-                await Task.Delay(3000);
-                item.Message = "Completed on: " + DateTime.Now + " - " + item.Message + " - Thread: " + Thread.CurrentThread.ManagedThreadId;
-                manager.CompleteRequest();
-                manager.Save();
-            }
-        }
-        catch (Exception ex)
-        {
-            manager.FailRequest(messageText: $"Request failed: {ex.Message}\nOriginal message:\n{item.Message}");
-            manager.Save();
-        }
-    }
-
-   
 
 }
