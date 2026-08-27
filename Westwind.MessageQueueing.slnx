@@ -17,12 +17,6 @@
     <File Path="global.json" />
     <File Path="Readme.md" />
   </Folder>
-  <Folder Name="/SupportProjects/">
-    <Project Path="../../Westwind.AspNetCore/Westwind.AspNetCore/Westwind.AspNetCore.csproj">
-      <BuildType Solution="Deploy|*" Project="Release" />
-      <BuildType Solution="SandBox|*" Project="Release" />
-    </Project>
-  </Folder>
   <Project Path="Westwind.MessageQueueing.Hosting/Westwind.MessageQueueing.Hosting.csproj">
     <BuildType Solution="Deploy|*" Project="Debug" />
     <BuildType Solution="SandBox|*" Project="Release" />
