@@ -449,8 +449,11 @@ public class QueueController : IDisposable
 
 
     /// <summary>
-    /// Optional function you can hook to handle creation of the QueueManager
-    /// instance. Use this to create and configure the QueueManager instance                
+    /// Creates a new instance of the QueueMessageManager. Default implementation
+    /// uses teh QueueManagerType for instantiation or the default QueueMessageManagerSql 
+    /// if not set.
+    /// 
+    /// Override this message in your custom controllers to avoid Reflection overhead.
     /// </summary>        
     public virtual QueueMessageManager CreateQueueMessageManager()
     {
@@ -463,9 +466,13 @@ public class QueueController : IDisposable
     /// when starting up from configuration but can also be used externally
     /// to create a custom instance from a string name.
     /// </summary>
-    /// <param name="typeName"></param>
+    /// <param name="typeName">
+    /// Full type name. 
+    /// 
+    /// Make sure the type's assembly has previously been referenced in code so the type can resolve
+    /// </param>
     /// <returns></returns>
-    public virtual QueueMessageManager CreateQueueManagerInstanceFromTypename(string typeName = null)
+    public virtual QueueMessageManager CreateQueueMessageManager(string typeName)
     {
         Type queueManagerType = QueueManagerType ?? typeof(QueueMessageManagerSql);
 
