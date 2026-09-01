@@ -110,8 +110,23 @@ public class QmmMiddlewareConfiguration
 
         try
         {
-            var Container = QueueContainer.CreateFromConfigurationFile(filename);
-            QueueContainer.Current = Container;
+            var container = QueueContainer.CreateFromConfigurationFile(filename);
+            QueueContainer.Current = container;
+            var controller = container.Controllers.FirstOrDefault();
+
+            var managers = new HashSet<QueueMessageManager>();            
+            if (controller != null)
+            {                
+                var manager = controller.CreateQueueMessageManager();                
+                if (!managers.Contains(manager))                
+                {                    
+                    manager.EnsureDataStoreExists();
+                    managers.Add(manager);                    
+                }
+            }
+            foreach (var man in managers)
+                man.Dispose();
+            managers.Clear();
         }
         catch (Exception ex)
         {

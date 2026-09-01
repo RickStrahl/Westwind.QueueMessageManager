@@ -436,7 +436,7 @@ namespace Westwind.MessageQueueing.Tests
         public void CreateTable()
         {
             var manager = new QueueMessageManagerSql();
-            Assert.IsTrue(manager.CreateDatastore(), manager.ErrorMessage);
+            Assert.IsTrue(manager.EnsureDataStoreExists(), manager.ErrorMessage);
 
         }
 
@@ -448,7 +448,7 @@ namespace Westwind.MessageQueueing.Tests
         public void CreateDataBaseTest()
         {
             var manager = new QueueMessageManagerSql();            
-            Assert.IsTrue(manager.CreateDatastore(),manager.ErrorMessage);            
+            Assert.IsTrue(manager.EnsureDataStoreExists(),manager.ErrorMessage);            
         }
 
         [TestMethod]

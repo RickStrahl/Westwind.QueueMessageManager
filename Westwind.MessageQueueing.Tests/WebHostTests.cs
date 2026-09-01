@@ -18,7 +18,7 @@ namespace QueueStarter.Tests
 
             Assert.IsNotNull(qm);
 
-            Assert.IsTrue(qm.CreateDatastore(), qm.ErrorMessage);
+            Assert.IsTrue(qm.EnsureDataStoreExists(), qm.ErrorMessage);
         }
 
         [TestMethod]

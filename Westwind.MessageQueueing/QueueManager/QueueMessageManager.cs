@@ -481,7 +481,7 @@ namespace Westwind.MessageQueueing
         /// that is used for the main application.
         /// </summary>
         /// <returns></returns>
-        public abstract bool CreateDatastore();
+        public abstract bool EnsureDataStoreExists();
 
         #region ErrorHandling
 
@@ -638,6 +638,7 @@ namespace Westwind.MessageQueueing
         }
 
         public abstract bool DeleteMessage(string id);
+        
     }
 
 

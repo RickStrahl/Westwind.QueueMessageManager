@@ -28,7 +28,7 @@ services.AddSingleton(qmmConfig);
 if (Environment.CommandLine.Contains("-createdb", StringComparison.OrdinalIgnoreCase))
 {
     var manager = new QueueMessageManagerSql(qmmConfig.ConnectionString);
-    if (manager.CreateDatastore())
+    if (manager.EnsureDataStoreExists())
     {
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("Database has been created successfully (or it exists already).");

@@ -2,6 +2,6 @@
   <PropertyGroup>
     <FrameworkVersion>net10.0</FrameworkVersion>
     <!--<RollForwardType>LatestMinor</RollForwardType>-->    
-    <qmmVersion>2.0.0.10</qmmVersion>
+    <qmmVersion>2.0.0.14</qmmVersion>
   </PropertyGroup>
 </Project>

@@ -1,0 +1,43 @@
+{
+  "ConnectionString": "server=.;database=QueueMessageManager;integrated security=yes;encrypt=false;trustservercertificate=true;",
+  "AutoCreateTables": true,
+  "DisableQueueMonitor": false,
+  "ApplicationName": "Queue Message Manager (config)",
+  "ApplicationShortName": "QMM",
+  "Theme": "Light",
+  "Container": {
+    "DefaultConnectionString": "server=.;database=QueueMessageManager;integrated security=yes;encrypt=false;trustservercertificate=true;",
+    "DefaultWaitInterval": 300,
+    "DefaultThreadCount": 1,
+    "AutoCreateTables": false,
+    "Controllers": [
+      {
+        "QueueName": "Test1",
+        "ConnectionString": "server=.;database=QueueMessageManager;integrated security=yes;encrypt=false;trustservercertificate=true;",
+        "Paused": false,
+        "WaitInterval": 300,
+        "ThreadCount": 3,
+        "MaxRetries": 0,
+        "QueueControllerTypeName": "Westwind.QueueMessageManager.CoreWebSample.Test1Queue"
+      },
+      {
+        "QueueName": "Test2",
+        "ConnectionString": "server=.;database=QueueMessageManager;integrated security=yes;encrypt=false;trustservercertificate=true;",
+        "Paused": false,
+        "WaitInterval": 500,
+        "ThreadCount": 2,
+        "MaxRetries": 0,
+        "QueueControllerTypeName": "Westwind.QueueMessageManager.CoreWebSample.Test2Queue"
+      },
+      {
+        "QueueName": "Test3",
+        "ConnectionString": "server=.;database=QueueMessageManager;integrated security=yes;encrypt=false;trustservercertificate=true;",
+        "Paused": false,
+        "WaitInterval": 400,
+        "ThreadCount": 2,
+        "MaxRetries": 0,
+        "QueueControllerTypeName": "Westwind.QueueMessageManager.CoreWebSample.Test1Queue"
+      }   
+    ]
+  }
+}

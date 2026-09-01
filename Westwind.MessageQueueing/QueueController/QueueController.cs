@@ -199,10 +199,7 @@ public class QueueController : IDisposable
 
 
             QueueMessageManager manager = null;
-            manager = OnCreateQueueManager();
-            if (manager == null)
-                manager = Activator.CreateInstance(QueueManagerType ?? typeof(QueueMessageManagerSql), [ ConnectionString ?? string.Empty ]) as QueueMessageManager;
-
+            manager = CreateQueueMessageManager();
 
             var config = qmmApp.Configuration;
             if(config.AutoCreateTables)
@@ -428,15 +425,6 @@ public class QueueController : IDisposable
 
 
     /// <summary>
-    /// Optional function you can hook to handle creation of the QueueManager
-    /// instance. Use this to create and configure the QueueManager instance                
-    /// </summary>        
-    protected virtual QueueMessageManager OnCreateQueueManager()
-    {
-        return null;
-    }
-
-    /// <summary>
     /// Method that is called just before the controller stops
     /// processing requests. Use to send messages.
     /// If you return false from this method the queue is not stoped.
@@ -460,6 +448,38 @@ public class QueueController : IDisposable
     }
 
 
+    /// <summary>
+    /// Optional function you can hook to handle creation of the QueueManager
+    /// instance. Use this to create and configure the QueueManager instance                
+    /// </summary>        
+    public virtual QueueMessageManager CreateQueueMessageManager()
+    {
+        return Activator.CreateInstance(QueueManagerType ?? typeof(QueueMessageManagerSql), [ConnectionString ?? string.Empty]) as QueueMessageManager;        
+    }
+
+    /// <summary>
+    /// Creates a new controller instance from the ControllerType string stored 
+    /// on this class. Used internally to create a new controller instance
+    /// when starting up from configuration but can also be used externally
+    /// to create a custom instance from a string name.
+    /// </summary>
+    /// <param name="typeName"></param>
+    /// <returns></returns>
+    public virtual QueueMessageManager CreateQueueManagerInstanceFromTypename(string typeName = null)
+    {
+        Type queueManagerType = QueueManagerType ?? typeof(QueueMessageManagerSql);
+
+        if (!string.IsNullOrEmpty(typeName))
+        {
+            queueManagerType = ReflectionUtils.GetTypeFromName(typeName);
+            if (queueManagerType == null)
+                throw new InvalidCastException(typeName);
+        }
+        
+        var controller = Activator.CreateInstance(queueManagerType, [ConnectionString ?? string.Empty]) as QueueMessageManager;
+        return controller;
+    }
+
     public virtual void Dispose()
     {
         StopProcessing();
@@ -468,22 +488,6 @@ public class QueueController : IDisposable
     public override string ToString()
     {
         return $"{QueueName} [ {ThreadCount} thread(s), {WaitInterval} ms, paused: {Paused} ]";
-    }
-
-    /// <summary>
-    /// Creates a new controller instance from the ControllerType stored 
-    /// on this class. Used internally to create a new controller instance
-    /// when starting up from configuration.
-    /// </summary>
-    /// <param name="typeName"></param>
-    /// <returns></returns>
-    public virtual QueueMessageManager CreateNewControllerInstance(string typeName = null, ILogger logger = null)
-    {
-        if (string.IsNullOrEmpty(typeName))
-            typeName = this.GetType().FullName;
-
-        var controller = Activator.CreateInstance(QueueManagerType, [ConnectionString ?? string.Empty, logger]) as QueueMessageManager;
-        return controller;
     }
 }
 

@@ -56,6 +56,7 @@ namespace Westwind.MessageQueueing
         }
 
 
+
         /// <summary>
         /// Loads a Queue Item by its associated id
         /// </summary>
@@ -481,7 +482,7 @@ namespace Westwind.MessageQueueing
                                 // hack - avoid recursion here because 
                                 // _Db is not set yet when in constructor
                                 _Db = db;
-                                if (!CreateDatastore())
+                                if (!EnsureDataStoreExists())
                                     throw new ArgumentException(Resources.CouldntAccessQueueDatabase + "\r\n" + ErrorMessage);
                             }
                             else if (db.ErrorNumber != 0)
@@ -529,7 +530,7 @@ namespace Westwind.MessageQueueing
         /// Make sure the database exists before running this routine.
         /// </remarks>
         /// <returns>true on success, ErrorMessage set on false</returns>        
-        public override bool CreateDatastore()
+        public override bool EnsureDataStoreExists()
         {
             SetError();
             

@@ -1,6 +1,5 @@
 _*.json
-_qmmApp-configuration.json
-_qmm-container-config.json
+!_templates/*/*.*
 nupkg/
 
 Thumbs.db
