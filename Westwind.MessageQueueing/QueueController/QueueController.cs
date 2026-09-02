@@ -462,30 +462,61 @@ public class QueueController : IDisposable
 
     /// <summary>
     /// Creates a new controller instance from the ControllerType string stored 
-    /// on this class. Used internally to create a new controller instance
-    /// when starting up from configuration but can also be used externally
-    /// to create a custom instance from a string name.
+    /// on this class. 
+    /// 
+    /// This method is used internally to create a new controller instance
+    /// when starting up from configuration, but can also be used externally
+    /// to create a custom instance from a string type name.
     /// </summary>
     /// <param name="typeName">
-    /// Full type name. 
+    /// Full type name 
     /// 
     /// Make sure the type's assembly has previously been referenced in code so the type can resolve
     /// </param>
+    /// <exception cref="InvalidCastException">If the type can't be resolved</exception>
     /// <returns></returns>
     public virtual QueueMessageManager CreateQueueMessageManager(string typeName)
-    {
-        Type queueManagerType = QueueManagerType ?? typeof(QueueMessageManagerSql);
-
+    {        
         if (!string.IsNullOrEmpty(typeName))
         {
-            queueManagerType = ReflectionUtils.GetTypeFromName(typeName);
-            if (queueManagerType == null)
+            var queueManager = ReflectionUtils.CreateInstanceFromString(typeName, [ConnectionString ?? qmmApp.ConnectionString]) as QueueMessageManager;
+            if (queueManager == null)
                 throw new InvalidCastException(typeName);
+        }        
+
+        return Activator.CreateInstance(QueueManagerType, [ConnectionString ?? qmmApp.ConnectionString]) as QueueMessageManager;        
+    }
+
+
+    /// <summary>
+    /// Creates an instance of the controller from QueueControllerTypename or the specified
+    /// type name.
+    /// </summary>
+    /// <param name="typename">
+    /// Full name of the type
+    /// 
+    /// Make sure the type's assembly has previously been referenced in code so the type can resolve.
+    /// </param>
+    /// <returns></returns>
+    /// <exception cref="InvalidCastException">If the type can't be resolved</exception>
+    public virtual QueueController CreateControllerInstanceFromString(string typename = null)
+    {
+        if (string.IsNullOrEmpty(typename))
+        {
+            typename = QueueControllerTypeName;           
         }
+        if (string.IsNullOrEmpty(typename))
+        {
+            throw new InvalidCastException("QueueControllerTypeName and typename  are not set - make sure to specify a typename in the _qmm-app-config.json Controllers section."); 
+        }
+
+            var controller = ReflectionUtils.CreateInstanceFromString(typename) as QueueController;
+        if (controller == null)
+            throw new InvalidCastException("Unable to create QueueController of type [" + typename + "]");
         
-        var controller = Activator.CreateInstance(queueManagerType, [ConnectionString ?? string.Empty]) as QueueMessageManager;
         return controller;
     }
+
 
     public virtual void Dispose()
     {

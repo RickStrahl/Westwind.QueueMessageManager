@@ -2,6 +2,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text.Json.Nodes;
 using System.Threading;
 using Westwind.Utilities;
@@ -176,15 +177,16 @@ public class QueueContainer : IDisposable
         for (int i = 0; i < container.Controllers.Count ; i++)
         {
             var controller = container.Controllers[i];
-            var typename = controller.QueueControllerTypeName;
+            var controllerTypename = controller.QueueControllerTypeName;
 
-            var typedController = ReflectionUtils.CreateInstanceFromString(typename);
-            if (controller == null)
-                throw new InvalidCastException("Unable to create QueueController of type [" + typename + "]");
+            var typedController = controller.CreateControllerInstanceFromString();
+            //ReflectionUtils.CreateInstanceFromString(controllerTypename);
+            if (typedController == null)
+                throw new InvalidCastException("Unable to create QueueController of type [" + controllerTypename + "]");
 
             DataUtils.CopyObjectData(controller, typedController);
 
-            container.Controllers[i] = typedController as QueueController;
+            container.Controllers[i] = typedController;
         }
 
         return container;

@@ -1,0 +1,96 @@
+POST https://localhost:5080/api/qmm/authenticate HTTP/2.0
+Content-Type: application/json
+Accept: text/json
+Accept-Encoding: gzip, deflate, br
+WebSurge-Request-CaptureAndSetAuthorizationBearerTokenFromJson: token
+Websurge-Request-Name: Authenticate
+
+{
+  "username": "test@test.com",
+  "password": "test"
+}
+
+###
+
+POST https://localhost:5080/api/qmm/submit-item HTTP/2.0
+Content-Type: application/json
+Accept: text/json
+Accept-Encoding: gzip, deflate, br
+WebSurge-Request-InjectJsonBearerToken: token
+Authorization: Bearer
+Websurge-Request-Name: PRINT - Submit a new Item
+
+{
+  "QueueName": "Test1",
+  "Message": "Test Submission",
+  "Action": "PRINT",
+  "Xml": "<doc><value>Hello</value></doc>"
+}
+
+###
+
+POST https://localhost:5080/api/qmm/submit-item HTTP/2.0
+Content-Type: application/json
+Accept: text/json
+Accept-Encoding: gzip, deflate, br
+Authorization: Bearer
+Websurge-Request-Name: PRINTEST2 - Submit a new Item Test2 Queue
+
+{
+  "QueueName": "Test2",
+  "Message": "Test Submission",
+  "Action": "PRINTTEST2",
+  "Xml": "<doc><value>Hello</value></doc>"
+}
+
+###
+
+POST https://localhost:5080/api/qmm/submit-item HTTP/2.0
+Content-Type: application/json
+Accept: text/json
+Accept-Encoding: gzip, deflate, br
+WebSurge-Request-InjectJsonBearerToken: token
+Authorization: Bearer
+Websurge-Request-Name: PRINTASYNC - Submit a new Item  NEW
+
+{
+  "QueueName": "Test1",
+  "Message": "Test Submission",
+  "Action": "PRINTASYNC",
+  "Xml": "<doc><value>Hello</value></doc>"
+}
+
+###
+
+POST https://localhost:5080/api/qmm/submit-item HTTP/2.0
+Content-Type: application/json
+Accept: text/json
+Accept-Encoding: gzip, deflate, br
+Authorization: Bearer
+Websurge-Request-Name: Submit Item with Bad Action
+
+{
+  "QueueName": "Test1",
+  "Message": "Test Submission",
+  "Action": "PRINTs",
+  "Xml": "<doc><value>Hello</value></doc>"
+}
+
+###
+
+GET https://localhost:5080/api/qmm/get-message/-1 HTTP/2.0
+Accept-Encoding: gzip,deflate
+Accept: application/json
+Authorization: Bearer
+Websurge-Request-Name: Get Last Completed Message
+
+###
+
+GET https://localhost:5080/api/qmm/get-message/xxxx HTTP/2.0
+Accept-Encoding: gzip,deflate
+Accept: application/json
+Authorization: Bearer
+Websurge-Request-Name: Get Message Item by Id (change as needed)
+
+###
+

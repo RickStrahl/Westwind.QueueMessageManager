@@ -114,24 +114,32 @@ public class QmmMiddlewareConfiguration
             QueueContainer.Current = container;
             var controller = container.Controllers.FirstOrDefault();
 
-            var managers = new HashSet<QueueMessageManager>();            
-            if (controller != null)
-            {                
-                var manager = controller.CreateQueueMessageManager();                
-                if (!managers.Contains(manager))                
-                {                    
-                    manager.EnsureDataStoreExists();
-                    managers.Add(manager);                    
-                }
-            }
-            foreach (var man in managers)
-                man.Dispose();
-            managers.Clear();
+            AutoCreateTables(controller);            
         }
         catch (Exception ex)
         {
             throw new InvalidCastException($"Error deserializing QueueContainer from file '{filename}': {ex.Message}", ex);
         }
+    }
+
+    private void AutoCreateTables(QueueController controller)
+    {
+        if (!qmmApp.Configuration.AutoCreateTables) return;
+
+        var managers = new HashSet<QueueMessageManager>();
+        if (controller != null)
+        {
+            var manager = controller.CreateQueueMessageManager();
+            if (!managers.Contains(manager))
+            {
+                manager.EnsureDataStoreExists();
+                managers.Add(manager);
+            }
+        }
+        foreach (var man in managers)
+            man.Dispose();
+
+        managers.Clear();
     }
 
     /// <summary>

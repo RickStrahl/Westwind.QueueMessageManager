@@ -47,11 +47,12 @@ var appConfig = SampleApp.Configuration;
 builder.Configuration.GetSection("sampleApp").Bind(appConfig);
 services.AddSingleton(appConfig);
 
-// Code Configuration
+
 services.AddQmm(options =>
 {
     if(configExists)
         options.LoadContainerFromFile("_qmm-app-config.json");
+    // Code Configuration
     else
     {
         options.SetContainer(new QueueContainer
