@@ -21,6 +21,10 @@
     <BuildType Solution="Deploy|*" Project="Debug" />
     <BuildType Solution="SandBox|*" Project="Release" />
   </Project>
+  <Project Path="Westwind.MessageQueueing.MongoDb/Westwind.MessageQueueing.MongoDb.csproj" Id="373f7f8b-dfe5-4cbf-910f-d71b6fc034ca">
+    <BuildType Solution="Deploy|*" Project="Release" />
+    <BuildType Solution="SandBox|*" Project="Release" />
+  </Project>
   <Project Path="Westwind.MessageQueueing.Tests/Westwind.MessageQueueing.Tests.csproj">
     <BuildType Solution="Deploy|*" Project="Debug" />
     <BuildType Solution="SandBox|*" Project="Release" />
