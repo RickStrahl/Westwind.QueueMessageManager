@@ -1,17 +1,54 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>$(FrameworkVersion)</TargetFramework>
+		<Version>$(qmmVersion)</Version>
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+		<Product>Westwind QueueMessaging</Product>
+		<FileDescription>Westwind QueueMessaging MongoDb - MongoDb DataStore Interface</FileDescription>
+		<Authors>Rick Strahl, West Wind Technologies</Authors>
+		<Company>West Wind Technologies</Company>
+		<PublisherName>West Wind Technologies</PublisherName>
+		<Copyright>West Wind Technologies, 2004-2026</Copyright>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Westwind.MessageQueueing\Westwind.MessageQueueing.csproj" />
-  </ItemGroup>
+		<PackageCopyright>Rick Strahl, West Wind Technologies 2004-2026</PackageCopyright>
+		<PackageTags>queue messaging async-processing</PackageTags>
+		<PackageProjectUrl>http://github.com/rickstrahl/westwind.queuemessagemanager</PackageProjectUrl>
 
-  <ItemGroup>
-    <PackageReference Include="MongoDB.Driver" Version="2.27.0" />
-  </ItemGroup>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageLicenseFile>LICENSE.MD</PackageLicenseFile>
+
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<Copyright>Rick Strahl, West Wind Technologies, 2004-2026</Copyright>
+		<Company>West Wind Technologies</Company>
+	</PropertyGroup>
+
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+		<DebugType>embedded</DebugType>
+		<NoWarn>$(NoWarn);CS1591;CS1572;CS1573</NoWarn>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<PackageOutputPath>./nupkg</PackageOutputPath>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Include="..\icon.png" Link="icon.png">
+	    <PackagePath>icon.png</PackagePath>
+	    <Pack>true</Pack>
+	  </None>
+	  <None Include="..\LICENSE.MD" Link="LICENSE.MD">
+	    <PackagePath>LICENSE.MD</PackagePath>
+	    <Pack>true</Pack>
+	  </None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Westwind.MessageQueueing\Westwind.MessageQueueing.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="MongoDB.Driver" Version="3.11.1" />
+	</ItemGroup>
 
 </Project>

@@ -2,8 +2,6 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.CompilerServices;
-using System.Text.Json.Nodes;
 using System.Threading;
 using Westwind.Utilities;
 
@@ -24,7 +22,7 @@ public class QueueContainer : IDisposable
     /// The default connection string for all controllers in the container **if**
     /// not specified explicitly by the controller.
     /// </summary>
-    public string DefaultConnectionString { get; set; }
+    public string DefaultConnectionString { get; set; } 
 
     /// <summary>
     /// The default wait interval for all controllers in the container **if** 
@@ -50,10 +48,7 @@ public class QueueContainer : IDisposable
     /// The list of controllers that are part of this container.
     /// </summary>      
     public List<QueueController> Controllers { get; set; } = [];
- 
-
-   
-
+    
 
     /// <summary>
     /// Adds a controller to the container. If the controller doesn't have 

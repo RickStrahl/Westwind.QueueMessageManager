@@ -57,14 +57,14 @@ services.AddQmm(options =>
     {
         options.SetContainer(new QueueContainer
         {
-            DefaultConnectionString = qmmApp.Constants.DefaultConnectionString, 
+            DefaultConnectionString = qmmApp.ConnectionString, 
             DefaultThreadCount =1, 
             DefaultWaitInterval = 300,
             Controllers = [
                     new QueueController {
-                        ConnectionString = qmmApp.Constants.DefaultConnectionString,
+                        ConnectionString = qmmApp.ConnectionString, // identical to DefaultConnectionString but you can have diff cns
                         QueueName = "Test1", 
-                        ThreadCount = 1,
+                        ThreadCount = 2,
                         WaitInterval = 200,
                         QueueControllerTypeName =  "Westwind.QueueMessageManager.CoreWebSample.Test1Queue"
                     },

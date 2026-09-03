@@ -16,7 +16,7 @@ public class Test1Queue :  WebHostQueueController
     {
         WaitInterval = 1000;
         QueueName = "Test1";
-
+        
         //QueueManagerType = typeof(QueueMessageManagerSql);
         QueueManagerType = typeof(QueueMessageManagerMongoDb);
     }
