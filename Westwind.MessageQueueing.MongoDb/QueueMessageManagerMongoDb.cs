@@ -58,7 +58,7 @@ public class QueueMessageManagerMongoDb : QueueMessageManager, IDisposable
 
             try
             {
-                var mongoUrl = MongoUrl.Create(ConnectionString ?? "mongodb://localhost:27017");
+                var mongoUrl = MongoUrl.Create(ConnectionString ?? qmmApp.ConnectionString); //  "mongodb://localhost:27017"
                 _mongoClient = new MongoClient(mongoUrl);
                 
                 var dbName = mongoUrl.DatabaseName ?? DefaultDbName;

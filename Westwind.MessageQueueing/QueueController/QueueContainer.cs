@@ -183,8 +183,8 @@ public class QueueContainer : IDisposable
             //ReflectionUtils.CreateInstanceFromString(controllerTypename);
             if (typedController == null)
                 throw new InvalidCastException("Unable to create QueueController of type [" + controllerTypename + "]");
-
-            DataUtils.CopyObjectData(controller, typedController);
+            
+            DataUtils.CopyObjectData(controller, typedController, excludedProperties: "QueueManagerType,LogManager");
 
             container.Controllers[i] = typedController;
         }

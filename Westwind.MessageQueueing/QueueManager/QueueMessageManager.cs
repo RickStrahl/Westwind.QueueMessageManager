@@ -176,6 +176,9 @@ namespace Westwind.MessageQueueing
             if (item == null)
                 item = CreateItem();            
 
+            if (string.IsNullOrEmpty(item.Id))
+                item.Id = QueueMessageItem.GenerateId();
+
             item.PercentComplete = 0;
             item.Status = "Submitted";
             
@@ -186,8 +189,7 @@ namespace Westwind.MessageQueueing
             item.IsComplete = false;
             item.IsCancelled = false;
             item.IsFailed = false;
-            
-            
+                        
             if (item.QueueName == null)
                 item.QueueName = DefaultQueue;
 
@@ -638,7 +640,36 @@ namespace Westwind.MessageQueueing
         }
 
         public abstract bool DeleteMessage(string id);
-        
+
+
+        /// <summary>
+        /// Tries to retrieve a QueueMessageManager instance for a given queue name. 
+        /// If no queue name is provided or the queue name is not found, it returns the first available manager 
+        /// or a default Sql manager.
+        /// </summary>
+        /// <param name="queueName"></param>
+        /// <returns></returns>
+        public static QueueMessageManager TryGetQueueMessageManager(string queueName)
+        {
+            QueueMessageManager manager = null;
+            var controllers = QueueContainer.Current.Controllers;
+
+            if (!string.IsNullOrEmpty(queueName))
+            {
+                var controller = controllers.FirstOrDefault(c => c.QueueName == queueName);
+                if (controller != null)
+                    manager = controller.CreateQueueMessageManager();
+            }
+            if (manager == null)
+            {
+                if (controllers.Count > 0)
+                    manager = controllers[0].CreateQueueMessageManager();
+                else
+                    manager = new QueueMessageManagerSql();
+            }
+
+            return manager;
+        }
     }
 
 

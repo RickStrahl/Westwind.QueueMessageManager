@@ -66,7 +66,7 @@ namespace Westwind.MessageQueueing.Hosting
             if (string.IsNullOrEmpty(queueName))
                 queueName = null;
 
-            var queue = new QueueMessageManagerSql();
+            using var queue = QueueMessageManager.TryGetQueueMessageManager(queueName);
             List<QueueMessageItem> msgs = queue.GetRecentQueueItems(queueName, DisplayMessageCount).Reverse().ToList();
 
             if (msgs.Count < 1)
@@ -103,9 +103,9 @@ namespace Westwind.MessageQueueing.Hosting
             if (string.IsNullOrEmpty(queueName))
                 queueName = null;
 
-            var queue = new QueueMessageManagerSql();
-            List<QueueMessageItem> msgs = queue.GetRecentQueueItems(queueName, DisplayMessageCount).Reverse().ToList();
+            using var manager = QueueMessageManager.TryGetQueueMessageManager(queueName);
 
+            List<QueueMessageItem> msgs = manager.GetRecentQueueItems(queueName, DisplayMessageCount).Reverse().ToList();
             if (msgs.Count < 1)
             {
                 return [];
@@ -122,6 +122,7 @@ namespace Westwind.MessageQueueing.Hosting
             return msgs;
         }
 
+
         public async Task getQueueNames()
         {
             var queues = new List<string>();
@@ -135,9 +136,24 @@ namespace Westwind.MessageQueueing.Hosting
 
         public async Task getQueueMessage(string id)
         {
-            var queue = new QueueMessageManagerSql();
-            var qitem = queue.Load(id);
-            await Clients.Caller.SendAsync("getQueueMessageCallback", qitem);
+            HashSet<string> queueNames = new();
+
+            // have to try all queues
+            foreach(var controller in QueueContainer.Current.Controllers)
+            {
+                // skip if we've already tried this queue
+                if (queueNames.Count > 0 && queueNames.Contains(controller.QueueName))
+                    continue;
+
+                using var manager = controller.CreateQueueMessageManager();
+                var qitem = manager.Load(id);
+                if (qitem != null)
+                {
+                    await Clients.Caller.SendAsync("getQueueMessageCallback", qitem);
+                    return;
+                }
+                queueNames.Add(controller.QueueName);
+            }            
         }
 
         public async Task GetServiceStatus(string queueName)
@@ -244,12 +260,11 @@ namespace Westwind.MessageQueueing.Hosting
             if (string.IsNullOrEmpty(queueName))
                 queueName = null; // force all
 
-            using (var manager = new QueueMessageManagerSql())
-            {
-                int count = manager.GetWaitingQueueMessageCount(queueName);
-                Debug.WriteLine("Waiting queue items: " + count);
-                return count;
-            }
+            using var manager = QueueMessageManager.TryGetQueueMessageManager(queueName);
+            int count = manager.GetWaitingQueueMessageCount(queueName);
+
+            Debug.WriteLine("Waiting queue items: " + count);
+            return count;
         }
 
         /// <summary>
@@ -419,6 +434,7 @@ namespace Westwind.MessageQueueing.Hosting
             await StatusMessage(message);
             throw new ApplicationException(message);
         }
+
     }
 
     public class QueueControllerStatus

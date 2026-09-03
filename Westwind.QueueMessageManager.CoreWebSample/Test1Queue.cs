@@ -1,5 +1,7 @@
 
+using Westwind.MessageQueueing;
 using Westwind.MessageQueueing.Hosting;
+using Westwind.MessageQueueing.MongoDb;
 
 
 namespace Westwind.QueueMessageManager.CoreWebSample;
@@ -13,13 +15,15 @@ public class Test1Queue :  WebHostQueueController
     public Test1Queue() 
     {
         WaitInterval = 1000;
-        QueueName = "Test1";        
+        QueueName = "Test1";
+
+        //QueueManagerType = typeof(QueueMessageManagerSql);
+        QueueManagerType = typeof(QueueMessageManagerMongoDb);
     }
 
 
     protected override void OnExecuteStart(MessageQueueing.QueueMessageManager manager)
     {
-
         var item = manager.Item;
 
         if (item == null)

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>		
 
 		<TargetFramework>$(FrameworkVersion)</TargetFramework>
@@ -22,7 +22,6 @@
 		<Copyright>Rick Strahl, West Wind Technologies, 2004-2026</Copyright>
 		<Company>West Wind Technologies</Company>	
 	</PropertyGroup>
-
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
 		<DebugType>embedded</DebugType>

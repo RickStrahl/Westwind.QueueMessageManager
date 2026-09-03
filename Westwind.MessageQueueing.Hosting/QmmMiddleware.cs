@@ -41,7 +41,7 @@ public static class QmmMiddlewareExtensions
         //});
 
         var mvcBuilder = services.AddControllersWithViews()
-            // have to let MVC know we have a dynamically loaded controller
+            // have to let MVC know we have a dynamically loaded controller with base handlers
             .AddApplicationPart(typeof(QmmApiController).Assembly)
             .AddNewtonsoftJson(opt =>
             {

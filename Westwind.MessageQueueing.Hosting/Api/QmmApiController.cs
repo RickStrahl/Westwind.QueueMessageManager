@@ -221,13 +221,13 @@ public abstract class QmmApiController : BaseApiController
 
 
 
-    [HttpGet("/api/qmm/get-message/{id}")]
-    public async Task<IActionResult> GetMessage([FromRoute] string id)
+    [HttpGet("/api/qmm/get-message/{id}/{queueName?}")]
+    public async Task<IActionResult> GetMessage([FromRoute] string id, [FromRoute] string queueName = null)
     {
         if (string.IsNullOrWhiteSpace(id))
-            throw new ApiException("Message Id is required.", 404);
+            throw new ApiException("Message Id is required.", 404);        
 
-        using var manager = new QueueMessageManagerSql(qmmApp.ConnectionString);
+        using var manager = QueueMessageManager.TryGetQueueMessageManager(queueName);
         QueueMessageItem item;
         if (id != "-1")
             item = manager.Load(id);
@@ -257,9 +257,10 @@ public abstract class QmmApiController : BaseApiController
         if (string.IsNullOrWhiteSpace(item?.Message))
             return BadRequest(new { error = "Message is required." });
 
-        using var manager = new QueueMessageManagerSql(qmmApp.ConnectionString);
+        using var manager = QueueMessageManager.TryGetQueueMessageManager(item.QueueName);
 
-        item.Id = QueueMessageItem.GenerateId();
+        //using var manager = new QueueMessageManagerSql(qmmApp.ConnectionString);
+        
         if (!manager.SubmitRequest(item, autoSave: true))
         {
             throw new ApiException("Failed to submit item to queue: " + manager.ErrorMessage);
@@ -276,8 +277,7 @@ public abstract class QmmApiController : BaseApiController
         if (string.IsNullOrWhiteSpace(item?.Id))
             return NotFound(new { error = "Existing Message Id is required." });
 
-
-        using var manager = new QueueMessageManagerSql(qmmApp.ConnectionString);
+        using var manager = QueueMessageManager.TryGetQueueMessageManager(item.QueueName);
 
         // Load the existing item and update it with some data from the incoming item.
         var loadedItem = manager.Load(item.Id);

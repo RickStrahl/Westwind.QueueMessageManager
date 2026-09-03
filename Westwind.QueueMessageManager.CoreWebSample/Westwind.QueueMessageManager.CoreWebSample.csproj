@@ -18,5 +18,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Westwind.MessageQueueing.Hosting\Westwind.MessageQueueing.Hosting.csproj" />
+		<ProjectReference Include="..\Westwind.MessageQueueing.MongoDb\Westwind.MessageQueueing.MongoDb.csproj" />
 	</ItemGroup>
 </Project>
